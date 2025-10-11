@@ -3,6 +3,7 @@
     "version": "1.1.36",
     "date": "2025-10-11",
     "changes": [
+      "Add a 4-day week calculator that totals leave allowances, pre-fills bank holidays, and converts the result to hours.",
       "Move the Bank Holidays refresh action below the explainer text for a clearer layout."
     ]
   },
