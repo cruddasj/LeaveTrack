@@ -147,6 +147,12 @@
             Welcome
           </span>
         </button>
+        <button class="nav-btn" data-target="four-day-week">
+          <span class="flex items-center">
+            <i class="fa-solid fa-calendar-check h-5 w-5 mr-3"></i>
+            4-day week
+          </span>
+        </button>
         <button class="nav-btn" data-target="bank-holidays">
           <span class="flex items-center">
             <i class="fa-solid fa-calendar-day h-5 w-5 mr-3"></i>
@@ -198,6 +204,163 @@
           <p class="text-gray-700 dark:text-gray-300">
             This simplified build focuses on the core PWA experience so you can install TimeTrack, manage its theme, and follow future progress through the built-in changelog.
           </p>
+        </div>
+      </div>
+
+      <div id="four-day-week" class="content-section">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          4-day week
+        </h2>
+        <div class="card" id="fourDayWeekCard">
+          <div class="space-y-6">
+            <div class="space-y-2">
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                Leave allowance planner
+              </h3>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Enter each allowance in days. TimeTrack will default the bank holiday field using GOV.UK data for the
+                financial year that matches your start date, then multiply the combined total by 7.4 to show the
+                allowance in hours.
+              </p>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2" data-four-day-week-inputs>
+              <div class="space-y-2">
+                <label for="fourDayWeekStartDate" class="form-label">Start date</label>
+                <input
+                  type="date"
+                  id="fourDayWeekStartDate"
+                  class="input-field"
+                  data-four-day-week-start
+                />
+              </div>
+              <div class="space-y-2">
+                <label for="fourDayWeekCore" class="form-label">Core annual leave allowance</label>
+                <input
+                  type="number"
+                  id="fourDayWeekCore"
+                  class="input-field"
+                  min="0"
+                  step="0.1"
+                  inputmode="decimal"
+                  data-four-day-week-core
+                />
+              </div>
+              <div class="space-y-2">
+                <label for="fourDayWeekLongService" class="form-label">Long service leave</label>
+                <input
+                  type="number"
+                  id="fourDayWeekLongService"
+                  class="input-field"
+                  min="0"
+                  step="0.1"
+                  inputmode="decimal"
+                  data-four-day-week-long-service
+                />
+              </div>
+              <div class="space-y-2">
+                <label for="fourDayWeekCarryOver" class="form-label">Carry over leave</label>
+                <input
+                  type="number"
+                  id="fourDayWeekCarryOver"
+                  class="input-field"
+                  min="0"
+                  step="0.1"
+                  inputmode="decimal"
+                  data-four-day-week-carry-over
+                />
+              </div>
+              <div class="space-y-2">
+                <label for="fourDayWeekPurchased" class="form-label">Purchased leave</label>
+                <input
+                  type="number"
+                  id="fourDayWeekPurchased"
+                  class="input-field"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  data-four-day-week-purchased
+                />
+              </div>
+              <div class="space-y-2">
+                <label for="fourDayWeekBankHolidays" class="form-label">Bank holidays</label>
+                <input
+                  type="number"
+                  id="fourDayWeekBankHolidays"
+                  class="input-field"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  data-four-day-week-bank-holidays
+                />
+              </div>
+            </div>
+            <p
+              class="text-sm text-gray-600 dark:text-gray-400"
+              data-four-day-week-bank-holiday-status
+            >
+              Select a start date to automatically calculate the remaining bank holidays for that financial year.
+            </p>
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Leave allowance summary
+                </h3>
+                <dl class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                  <div class="flex items-baseline justify-between gap-4">
+                    <dt>Core annual leave allowance</dt>
+                    <dd
+                      class="font-medium text-gray-900 dark:text-gray-100"
+                      data-summary-core
+                    >
+                      0 days
+                    </dd>
+                  </div>
+                  <div class="flex items-baseline justify-between gap-4">
+                    <dt>Long service leave</dt>
+                    <dd
+                      class="font-medium text-gray-900 dark:text-gray-100"
+                      data-summary-long-service
+                    >
+                      0 days
+                    </dd>
+                  </div>
+                  <div class="flex items-baseline justify-between gap-4">
+                    <dt>Carry over leave</dt>
+                    <dd
+                      class="font-medium text-gray-900 dark:text-gray-100"
+                      data-summary-carry-over
+                    >
+                      0 days
+                    </dd>
+                  </div>
+                  <div class="flex items-baseline justify-between gap-4">
+                    <dt>Purchased leave</dt>
+                    <dd
+                      class="font-medium text-gray-900 dark:text-gray-100"
+                      data-summary-purchased
+                    >
+                      0 days
+                    </dd>
+                  </div>
+                  <div class="flex items-baseline justify-between gap-4">
+                    <dt>Bank holidays</dt>
+                    <dd
+                      class="font-medium text-gray-900 dark:text-gray-100"
+                      data-summary-bank-holidays
+                    >
+                      0 days
+                    </dd>
+                  </div>
+                </dl>
+                <p class="text-sm text-gray-700 dark:text-gray-300" data-four-day-week-equation>
+                  Total leave days = 0 + 0 + 0 + 0 + 0 = 0 days.
+                </p>
+                <p class="text-base font-semibold text-gray-900 dark:text-gray-100" data-four-day-week-total-hours>
+                  Total leave allowance in hours = 0 × 7.4 = 0 hours.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

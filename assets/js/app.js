@@ -46,6 +46,14 @@
 
   let welcomeHiddenState = false;
 
+  const fourDayWeekState = {
+    elements: null,
+    manualBankHolidayOverride: false,
+    lastAutoValue: null,
+    settingProgrammaticValue: false,
+    lastComputedInfo: null,
+  };
+
   function applyDarkMode(enabled, { persist = true, withTransition = false } = {}) {
     const shouldEnable = !!enabled;
     if (withTransition) root.classList.add('theme-transition');
@@ -323,6 +331,364 @@
     });
   }
 
+  function parseISODateToUTC(value) {
+    if (typeof value !== 'string') return null;
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return null;
+    const year = Number.parseInt(match[1], 10);
+    const month = Number.parseInt(match[2], 10) - 1;
+    const day = Number.parseInt(match[3], 10);
+    if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) return null;
+    return new Date(Date.UTC(year, month, day));
+  }
+
+  function formatNumber(value, maximumFractionDigits = 2) {
+    const normalized = Number.isFinite(value) ? value : 0;
+    return normalized.toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits,
+    });
+  }
+
+  function formatDays(value, maximumFractionDigits = 2) {
+    const normalized = Number.isFinite(value) ? value : 0;
+    const formatted = formatNumber(normalized, maximumFractionDigits);
+    const isSingular = Math.abs(normalized - 1) < 1e-9;
+    return `${formatted} ${isSingular ? 'day' : 'days'}`;
+  }
+
+  function formatBankHolidayCount(value) {
+    const normalized = Number.isFinite(value) ? value : 0;
+    const fractionDigits = Math.abs(normalized % 1) < 1e-9 ? 0 : 2;
+    const formatted = formatNumber(normalized, fractionDigits);
+    const isSingular = Math.abs(normalized - 1) < 1e-9;
+    return `${formatted} bank holiday${isSingular ? '' : 's'}`;
+  }
+
+  function formatDateForDisplay(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  }
+
+  function formatFinancialYearLabel(startYear) {
+    if (!Number.isFinite(startYear)) return '';
+    const endYear = startYear + 1;
+    const endSuffix = String(endYear).slice(-2);
+    return `${startYear}/${endSuffix}`;
+  }
+
+  function getFinancialYearBounds(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
+    const startYear = month >= 3 ? year : year - 1;
+    const start = new Date(Date.UTC(startYear, 3, 1));
+    const endExclusive = new Date(Date.UTC(startYear + 1, 3, 1));
+    const end = new Date(Date.UTC(startYear + 1, 2, 31));
+    return {
+      start,
+      endExclusive,
+      end,
+      startYear,
+      endYear: startYear + 1,
+    };
+  }
+
+  function getFourDayWeekElements() {
+    if (fourDayWeekState.elements) return fourDayWeekState.elements;
+    const card = document.getElementById('fourDayWeekCard');
+    if (!card) return null;
+    const elements = {
+      card,
+      startDate: card.querySelector('[data-four-day-week-start]'),
+      core: card.querySelector('[data-four-day-week-core]'),
+      longService: card.querySelector('[data-four-day-week-long-service]'),
+      carryOver: card.querySelector('[data-four-day-week-carry-over]'),
+      purchased: card.querySelector('[data-four-day-week-purchased]'),
+      bankHolidays: card.querySelector('[data-four-day-week-bank-holidays]'),
+      status: card.querySelector('[data-four-day-week-bank-holiday-status]'),
+      summaryCore: card.querySelector('[data-summary-core]'),
+      summaryLongService: card.querySelector('[data-summary-long-service]'),
+      summaryCarryOver: card.querySelector('[data-summary-carry-over]'),
+      summaryPurchased: card.querySelector('[data-summary-purchased]'),
+      summaryBankHolidays: card.querySelector('[data-summary-bank-holidays]'),
+      equation: card.querySelector('[data-four-day-week-equation]'),
+      totalHours: card.querySelector('[data-four-day-week-total-hours]'),
+    };
+    fourDayWeekState.elements = elements;
+    return elements;
+  }
+
+  function readDecimalInput(input) {
+    if (!input) return 0;
+    const value = Number.parseFloat(input.value);
+    if (!Number.isFinite(value) || Number.isNaN(value)) return 0;
+    return value < 0 ? 0 : value;
+  }
+
+  function readIntegerInput(input) {
+    if (!input) return 0;
+    const value = Number.parseInt(input.value, 10);
+    if (Number.isNaN(value)) return 0;
+    return value < 0 ? 0 : value;
+  }
+
+  function updateFourDayWeekSummary() {
+    const elements = getFourDayWeekElements();
+    if (!elements) return;
+
+    const core = readDecimalInput(elements.core);
+    const longService = readDecimalInput(elements.longService);
+    const carryOver = readDecimalInput(elements.carryOver);
+    const purchased = readIntegerInput(elements.purchased);
+    const bankHolidays = readDecimalInput(elements.bankHolidays);
+
+    const totalDays = core + longService + carryOver + purchased + bankHolidays;
+    const totalHours = totalDays * 7.4;
+
+    const setText = (node, text) => {
+      if (node) node.textContent = text;
+    };
+
+    setText(elements.summaryCore, formatDays(core));
+    setText(elements.summaryLongService, formatDays(longService));
+    setText(elements.summaryCarryOver, formatDays(carryOver));
+    setText(elements.summaryPurchased, formatDays(purchased, 0));
+    setText(elements.summaryBankHolidays, formatDays(bankHolidays));
+
+    const equationParts = [core, longService, carryOver, purchased, bankHolidays].map((value) =>
+      formatNumber(value, 2)
+    );
+    const equationText = `Total leave days = ${equationParts.join(' + ')} = ${formatDays(
+      totalDays
+    )}.`;
+    setText(elements.equation, equationText);
+
+    const hoursText = `Total leave allowance in hours = ${formatNumber(
+      totalDays,
+      2
+    )} × 7.4 = ${formatNumber(totalHours, 2)} hours.`;
+    setText(elements.totalHours, hoursText);
+  }
+
+  function computeBankHolidayAllowanceForDate(startDate) {
+    if (!(startDate instanceof Date) || Number.isNaN(startDate.getTime())) return null;
+    if (!Array.isArray(bankHolidayState.events) || !bankHolidayState.events.length) return null;
+
+    const bounds = getFinancialYearBounds(startDate);
+    if (!bounds) return null;
+
+    const today = new Date();
+    const todayMs = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+    const startMs = Date.UTC(
+      startDate.getUTCFullYear(),
+      startDate.getUTCMonth(),
+      startDate.getUTCDate()
+    );
+    const fyStartMs = bounds.start.getTime();
+    const fyEndExclusiveMs = bounds.endExclusive.getTime();
+
+    const futureFy = fyStartMs > todayMs;
+    const currentFy = !futureFy && todayMs >= fyStartMs && todayMs < fyEndExclusiveMs;
+
+    let effectiveStartMs = Math.max(startMs, fyStartMs);
+    let reason = 'start-date';
+
+    if (futureFy) {
+      effectiveStartMs = fyStartMs;
+      reason = 'future-year';
+    } else if (currentFy) {
+      if (todayMs > effectiveStartMs) {
+        effectiveStartMs = Math.max(todayMs, fyStartMs);
+        reason = 'today';
+      }
+    } else if (effectiveStartMs === fyStartMs && startMs < fyStartMs) {
+      reason = 'financial-year-start';
+    }
+
+    if (effectiveStartMs === fyStartMs && reason === 'start-date' && startMs <= fyStartMs) {
+      reason = 'financial-year-start';
+    }
+
+    let totalInYear = 0;
+    let remaining = 0;
+
+    bankHolidayState.events.forEach((event) => {
+      const eventDate = parseISODateToUTC(event.date);
+      if (!eventDate) return;
+      const eventMs = eventDate.getTime();
+      if (eventMs >= fyStartMs && eventMs < fyEndExclusiveMs) {
+        totalInYear += 1;
+        if (eventMs >= effectiveStartMs) {
+          remaining += 1;
+        }
+      }
+    });
+
+    return {
+      totalInYear,
+      remaining,
+      bounds,
+      effectiveStartDate: new Date(effectiveStartMs),
+      reason,
+    };
+  }
+
+  function setBankHolidayInputValue(elements, value) {
+    if (!elements || !elements.bankHolidays) return;
+    fourDayWeekState.settingProgrammaticValue = true;
+    elements.bankHolidays.value = value;
+    fourDayWeekState.settingProgrammaticValue = false;
+  }
+
+  function updateFourDayWeekBankHolidayDefault({ force = false } = {}) {
+    const elements = getFourDayWeekElements();
+    if (!elements) return;
+
+    const setStatus = (message) => {
+      if (elements.status) elements.status.textContent = message;
+    };
+
+    const startValue = elements.startDate ? elements.startDate.value : '';
+
+    if (!startValue) {
+      if (!fourDayWeekState.manualBankHolidayOverride || force) {
+        setBankHolidayInputValue(elements, '');
+        fourDayWeekState.lastAutoValue = null;
+        if (force) fourDayWeekState.manualBankHolidayOverride = false;
+      }
+      setStatus(
+        'Select a start date to automatically calculate the remaining bank holidays for that financial year.'
+      );
+      updateFourDayWeekSummary();
+      return;
+    }
+
+    const startDate = parseISODateToUTC(startValue);
+    if (!startDate) {
+      setStatus('Enter a valid start date to calculate the bank holiday allowance automatically.');
+      updateFourDayWeekSummary();
+      return;
+    }
+
+    const result = computeBankHolidayAllowanceForDate(startDate);
+    fourDayWeekState.lastComputedInfo = result;
+
+    if (!result) {
+      if (!fourDayWeekState.manualBankHolidayOverride || force) {
+        setBankHolidayInputValue(elements, '');
+        fourDayWeekState.lastAutoValue = null;
+        if (force) fourDayWeekState.manualBankHolidayOverride = false;
+      }
+      setStatus(
+        'Bank holiday data is still loading. Refresh the Bank Holidays page to update this default.'
+      );
+      updateFourDayWeekSummary();
+      return;
+    }
+
+    const { remaining, totalInYear, bounds, effectiveStartDate, reason } = result;
+    const label = formatFinancialYearLabel(bounds.startYear);
+    const startLabel = formatDateForDisplay(bounds.start);
+    const endLabel = formatDateForDisplay(bounds.end);
+    const effectiveLabel = formatDateForDisplay(effectiveStartDate);
+    const remainingCount = formatBankHolidayCount(remaining);
+    const totalCount = formatBankHolidayCount(totalInYear);
+
+    let referenceMessage = '';
+    if (totalInYear === 0) {
+      referenceMessage = `GOV.UK does not list any bank holidays for financial year ${label}.`;
+    } else if (reason === 'future-year') {
+      referenceMessage = `${totalCount} fall between ${startLabel} and ${endLabel}, and all of them remain because that year has not started yet.`;
+    } else if (reason === 'today') {
+      referenceMessage = `${totalCount} fall between ${startLabel} and ${endLabel}; ${remainingCount} remain from ${effectiveLabel} onward after accounting for today's date.`;
+    } else if (reason === 'financial-year-start') {
+      referenceMessage = `${totalCount} fall between ${startLabel} and ${endLabel}.`;
+    } else {
+      referenceMessage = `${totalCount} fall between ${startLabel} and ${endLabel}; ${remainingCount} remain from ${effectiveLabel} onward based on your selected start date.`;
+    }
+
+    if (fourDayWeekState.manualBankHolidayOverride && !force) {
+      const manualCount = formatBankHolidayCount(readDecimalInput(elements.bankHolidays));
+      const manualMessage =
+        totalInYear === 0
+          ? `Manual value in use (${manualCount}). ${referenceMessage}`
+          : `Manual value in use (${manualCount}). ${referenceMessage}`;
+      setStatus(manualMessage);
+      updateFourDayWeekSummary();
+      return;
+    }
+
+    const autoMessage =
+      totalInYear === 0
+        ? referenceMessage
+        : `Defaulted to ${remainingCount} using GOV.UK data for financial year ${label}. ${referenceMessage}`;
+
+    setBankHolidayInputValue(elements, String(remaining));
+    fourDayWeekState.lastAutoValue = remaining;
+    fourDayWeekState.manualBankHolidayOverride = false;
+    setStatus(autoMessage);
+    updateFourDayWeekSummary();
+  }
+
+  function initializeFourDayWeekCalculator() {
+    const elements = getFourDayWeekElements();
+    if (!elements) return;
+
+    if (elements.startDate) {
+      elements.startDate.addEventListener('input', () => {
+        fourDayWeekState.manualBankHolidayOverride = false;
+        updateFourDayWeekBankHolidayDefault({ force: true });
+      });
+    }
+
+    if (elements.core) {
+      elements.core.addEventListener('input', () => {
+        updateFourDayWeekSummary();
+      });
+    }
+
+    if (elements.longService) {
+      elements.longService.addEventListener('input', () => {
+        updateFourDayWeekSummary();
+      });
+    }
+
+    if (elements.carryOver) {
+      elements.carryOver.addEventListener('input', () => {
+        updateFourDayWeekSummary();
+      });
+    }
+
+    if (elements.purchased) {
+      elements.purchased.addEventListener('input', () => {
+        updateFourDayWeekSummary();
+      });
+      elements.purchased.addEventListener('blur', () => {
+        const value = Number.parseInt(elements.purchased.value, 10);
+        if (Number.isNaN(value) || value < 0) return;
+        elements.purchased.value = String(value);
+      });
+    }
+
+    if (elements.bankHolidays) {
+      elements.bankHolidays.addEventListener('input', () => {
+        if (!fourDayWeekState.settingProgrammaticValue) {
+          fourDayWeekState.manualBankHolidayOverride = true;
+        }
+        updateFourDayWeekSummary();
+        updateFourDayWeekBankHolidayDefault();
+      });
+    }
+
+    updateFourDayWeekSummary();
+    updateFourDayWeekBankHolidayDefault();
+  }
+
   function setBankHolidaysLoading(loading) {
     const elements = getBankHolidayElements();
     if (!elements) return;
@@ -442,6 +808,7 @@
       bankHolidayState.fetchedAt = new Date().toISOString();
       storeBankHolidays(bankHolidayState);
       renderBankHolidays({ updateYears: true });
+      updateFourDayWeekBankHolidayDefault();
     } catch (error) {
       console.error('Unable to refresh bank holidays', error);
       if (elements.error) elements.error.classList.remove('hidden');
@@ -460,11 +827,13 @@
       bankHolidayState.events = stored.events.slice();
       bankHolidayState.fetchedAt = stored.fetchedAt || null;
       renderBankHolidays({ updateYears: true });
+      updateFourDayWeekBankHolidayDefault();
       if (!bankHolidayState.events.length) {
         void refreshBankHolidays();
       }
     } else {
       renderBankHolidays({ updateYears: true });
+      updateFourDayWeekBankHolidayDefault();
       void refreshBankHolidays();
     }
 
@@ -1020,6 +1389,7 @@
       });
     });
 
+    initializeFourDayWeekCalculator();
     initializeBankHolidays();
 
     const storedView = safeGet(LS_KEYS.view);

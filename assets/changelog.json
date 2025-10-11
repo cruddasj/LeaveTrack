@@ -3,7 +3,8 @@
     "version": "1.1.36",
     "date": "2025-10-11",
     "changes": [
-      "Move the Bank Holidays refresh action below the explainer text for a clearer layout."
+      "Move the Bank Holidays refresh action below the explainer text for a clearer layout.",
+      "Add a 4-day week planner that auto-fills bank holidays from GOV.UK data and converts the combined allowance into hours."
     ]
   },
   {

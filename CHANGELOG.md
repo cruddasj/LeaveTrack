@@ -4,6 +4,7 @@ All notable changes to TimeTrack will be documented in this file. This project a
 
 ## [1.1.36] - 2025-10-11
 - Move the Bank Holidays refresh action below the explainer text for a clearer layout.
+- Introduce a 4-day week planner that totals leave in days, defaults bank holidays from GOV.UK data, and converts the result to hours.
 
 ## [1.1.35] - 2025-10-11
 - Rename the app to TimeTrack across the interface and documentation.
