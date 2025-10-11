@@ -1,8 +1,8 @@
-const APP_VERSION = "1.1.34";
+const APP_VERSION = "1.1.35";
 const CACHE_VERSION = APP_VERSION && APP_VERSION.endsWith("-dev")
   ? "dev"
   : APP_VERSION;
-const CACHE_NAME = `PWA Template-cache-${CACHE_VERSION}`;
+const CACHE_NAME = `TimeTrack-cache-${CACHE_VERSION}`;
 
 const CORE_ASSETS = [
   "./",

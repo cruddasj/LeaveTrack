@@ -32,6 +32,18 @@
     }
   };
 
+  const BANK_HOLIDAYS_ENDPOINT = 'https://www.gov.uk/bank-holidays.json';
+  const BANK_HOLIDAYS_STORAGE_KEY = 'bankHolidaysCache';
+  const BANK_HOLIDAYS_DIVISION = 'england-and-wales';
+
+  const bankHolidayState = {
+    events: [],
+    fetchedAt: null,
+    selectedYear: null,
+  };
+  let bankHolidayElements = null;
+  let bankHolidaysLoading = false;
+
   let welcomeHiddenState = false;
 
   function applyDarkMode(enabled, { persist = true, withTransition = false } = {}) {
@@ -206,6 +218,262 @@
       }
     });
     if (pruned) persistCollapsedCardState(storedState);
+  }
+
+  function getBankHolidayElements() {
+    if (bankHolidayElements) return bankHolidayElements;
+    const card = document.getElementById('bankHolidaysCard');
+    if (!card) return null;
+    bankHolidayElements = {
+      card,
+      list: card.querySelector('[data-bank-holidays-list]'),
+      yearSelect: card.querySelector('[data-bank-holidays-year]'),
+      loading: card.querySelector('[data-bank-holidays-loading]'),
+      error: card.querySelector('[data-bank-holidays-error]'),
+      empty: card.querySelector('[data-bank-holidays-empty]'),
+      refresh: card.querySelector('[data-action="refresh-bank-holidays"]'),
+    };
+    return bankHolidayElements;
+  }
+
+  function loadStoredBankHolidays() {
+    const raw = safeGet(BANK_HOLIDAYS_STORAGE_KEY);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return null;
+      const events = Array.isArray(parsed.events)
+        ? parsed.events
+            .map((event) => {
+              const date = typeof event?.date === 'string' ? event.date : '';
+              if (!date || Number.isNaN(Date.parse(date))) return null;
+              return {
+                date,
+                title:
+                  typeof event?.title === 'string' && event.title.trim().length
+                    ? event.title.trim()
+                    : 'Bank holiday',
+                notes: typeof event?.notes === 'string' ? event.notes.trim() : '',
+                bunting: !!event?.bunting,
+              };
+            })
+            .filter(Boolean)
+        : [];
+      const fetchedAt = typeof parsed.fetchedAt === 'string' ? parsed.fetchedAt : null;
+      return {
+        events: events.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        ),
+        fetchedAt,
+      };
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function storeBankHolidays(state) {
+    try {
+      safeSet(
+        BANK_HOLIDAYS_STORAGE_KEY,
+        JSON.stringify({
+          fetchedAt: state.fetchedAt,
+          events: state.events.map((event) => ({
+            date: event.date,
+            title: event.title,
+            notes: event.notes,
+            bunting: !!event.bunting,
+          })),
+        })
+      );
+    } catch (_) {
+      /* ignore */
+    }
+  }
+
+  function parseBankHolidayEvents(payload) {
+    if (!payload || typeof payload !== 'object') return [];
+    const division = payload[BANK_HOLIDAYS_DIVISION];
+    if (!division || typeof division !== 'object' || !Array.isArray(division.events)) return [];
+    return division.events
+      .map((event) => {
+        const date = typeof event?.date === 'string' ? event.date : '';
+        if (!date || Number.isNaN(Date.parse(date))) return null;
+        return {
+          date,
+          title:
+            typeof event?.title === 'string' && event.title.trim().length
+              ? event.title.trim()
+              : 'Bank holiday',
+          notes: typeof event?.notes === 'string' ? event.notes.trim() : '',
+          bunting: !!event?.bunting,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
+
+  function formatBankHolidayDate(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString(undefined, {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  }
+
+  function setBankHolidaysLoading(loading) {
+    const elements = getBankHolidayElements();
+    if (!elements) return;
+    bankHolidaysLoading = !!loading;
+    if (elements.loading) elements.loading.classList.toggle('hidden', !loading);
+    const { refresh } = elements;
+    if (refresh) {
+      const defaultLabel =
+        refresh.dataset.defaultLabel || refresh.textContent.trim() || 'Refresh data';
+      if (!refresh.dataset.defaultLabel) refresh.dataset.defaultLabel = defaultLabel;
+      refresh.disabled = loading;
+      refresh.setAttribute('aria-busy', loading ? 'true' : 'false');
+      refresh.textContent = loading ? 'Refreshing…' : refresh.dataset.defaultLabel;
+    }
+  }
+
+  function renderBankHolidays({ updateYears = false } = {}) {
+    const elements = getBankHolidayElements();
+    if (!elements) return;
+    const { list, yearSelect, empty, error } = elements;
+    if (error) error.classList.add('hidden');
+    if (!list || !yearSelect) return;
+
+    const events = bankHolidayState.events.slice();
+
+    if (updateYears) {
+      const years = Array.from(
+        new Set(
+          events
+            .map((event) => {
+              const date = new Date(event.date);
+              return Number.isNaN(date.getTime()) ? null : date.getFullYear();
+            })
+            .filter((year) => year !== null)
+        )
+      ).sort((a, b) => a - b);
+
+      yearSelect.innerHTML = '';
+
+      if (!years.length) {
+        yearSelect.disabled = true;
+        bankHolidayState.selectedYear = null;
+        yearSelect.value = '';
+      } else {
+        yearSelect.disabled = false;
+        const nowYear = new Date().getFullYear();
+        const preferred = years.includes(nowYear) ? nowYear : years[years.length - 1];
+        const previous = bankHolidayState.selectedYear
+          ? Number.parseInt(bankHolidayState.selectedYear, 10)
+          : null;
+        const resolved = previous && years.includes(previous) ? previous : preferred;
+        bankHolidayState.selectedYear = String(resolved);
+
+        years.forEach((year) => {
+          const option = document.createElement('option');
+          option.value = String(year);
+          option.textContent = String(year);
+          if (year === resolved) option.selected = true;
+          yearSelect.appendChild(option);
+        });
+      }
+    } else if (yearSelect.value) {
+      bankHolidayState.selectedYear = yearSelect.value;
+    }
+
+    list.innerHTML = '';
+    const selectedYear = Number.parseInt(bankHolidayState.selectedYear || '', 10);
+
+    const filtered = Number.isNaN(selectedYear)
+      ? events
+      : events.filter((event) => {
+          const date = new Date(event.date);
+          return !Number.isNaN(date.getTime()) && date.getFullYear() === selectedYear;
+        });
+
+    if (!filtered.length) {
+      if (empty) empty.classList.remove('hidden');
+      return;
+    }
+
+    if (empty) empty.classList.add('hidden');
+
+    filtered.forEach((event) => {
+      const wrapper = document.createElement('div');
+      wrapper.className =
+        'rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 space-y-2';
+      const title = document.createElement('p');
+      title.className = 'font-semibold text-gray-900 dark:text-gray-100';
+      title.textContent = event.title || 'Bank holiday';
+      wrapper.appendChild(title);
+      const dateLine = document.createElement('p');
+      dateLine.className = 'text-sm text-gray-600 dark:text-gray-400';
+      dateLine.textContent = formatBankHolidayDate(event.date);
+      wrapper.appendChild(dateLine);
+      if (event.notes) {
+        const notes = document.createElement('p');
+        notes.className = 'text-sm text-gray-500 dark:text-gray-400';
+        notes.textContent = event.notes;
+        wrapper.appendChild(notes);
+      }
+      list.appendChild(wrapper);
+    });
+  }
+
+  async function refreshBankHolidays() {
+    if (bankHolidaysLoading) return;
+    const elements = getBankHolidayElements();
+    if (!elements) return;
+    setBankHolidaysLoading(true);
+    if (elements.error) elements.error.classList.add('hidden');
+    try {
+      const response = await fetch(BANK_HOLIDAYS_ENDPOINT, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+      const payload = await response.json();
+      const events = parseBankHolidayEvents(payload);
+      bankHolidayState.events = events.slice();
+      bankHolidayState.fetchedAt = new Date().toISOString();
+      storeBankHolidays(bankHolidayState);
+      renderBankHolidays({ updateYears: true });
+    } catch (error) {
+      console.error('Unable to refresh bank holidays', error);
+      if (elements.error) elements.error.classList.remove('hidden');
+      if (elements.empty) elements.empty.classList.add('hidden');
+    } finally {
+      setBankHolidaysLoading(false);
+    }
+  }
+
+  function initializeBankHolidays() {
+    const elements = getBankHolidayElements();
+    if (!elements) return;
+
+    const stored = loadStoredBankHolidays();
+    if (stored) {
+      bankHolidayState.events = stored.events.slice();
+      bankHolidayState.fetchedAt = stored.fetchedAt || null;
+      renderBankHolidays({ updateYears: true });
+      if (!bankHolidayState.events.length) {
+        void refreshBankHolidays();
+      }
+    } else {
+      renderBankHolidays({ updateYears: true });
+      void refreshBankHolidays();
+    }
+
+    if (elements.yearSelect) {
+      elements.yearSelect.addEventListener('change', () => {
+        bankHolidayState.selectedYear = elements.yearSelect.value;
+        renderBankHolidays();
+      });
+    }
   }
 
   function setSidebarOpen(open) {
@@ -530,7 +798,7 @@
         return true;
       }
 
-      finishWithMessage('PWA Template has been updated to the latest version.', {
+      finishWithMessage('TimeTrack has been updated to the latest version.', {
         reload: true,
       });
       return true;
@@ -567,7 +835,7 @@
       const newWorker = await newWorkerPromise;
       if (await applyUpdate(newWorker)) return;
 
-      finishWithMessage("You're already using the latest version of PWA Template.");
+      finishWithMessage("You're already using the latest version of TimeTrack.");
     } catch (error) {
       console.error('Update check failed', error);
       finishWithMessage("We couldn't complete the update check. Please try again later.");
@@ -752,6 +1020,8 @@
       });
     });
 
+    initializeBankHolidays();
+
     const storedView = safeGet(LS_KEYS.view);
     const welcomeHidden = welcomeHiddenState;
     if (
@@ -793,6 +1063,9 @@
           break;
         case 'update-app':
           handleAppUpdateRequest(actionTarget);
+          break;
+        case 'refresh-bank-holidays':
+          void refreshBankHolidays();
           break;
         case 'close-modal':
           closeModal();
