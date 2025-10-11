@@ -2,6 +2,9 @@
 
 All notable changes to TimeTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [1.1.39] - 2025-10-11
+- Remove the narrative sentence block from the 4-day week allowance summary to focus on the tabular breakdown.
+
 ## [0.0.1] - 2025-10-11
 - Introduce a Bank Holidays page that caches GOV.UK data locally, supports year filtering, and offers a manual refresh.
 

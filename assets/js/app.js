@@ -481,9 +481,14 @@
         breakdown.hidden = true;
       }
       if (totals) totals.hidden = true;
-      if (summaryIntro)
+      if (equation) {
+        equation.textContent = '';
+        equation.hidden = true;
+      }
+      if (summaryIntro) {
         summaryIntro.textContent =
           "Enter values above to see a detailed breakdown of the individual's allowance.";
+      }
       return;
     }
 
@@ -512,15 +517,8 @@
       totals.hidden = false;
       totalDays.textContent = `Total leave: ${formatDaysDisplay(totalDaysValue)}`;
       totalHours.textContent = `Total allowance: ${formatHoursDisplay(totalHoursValue)}`;
-      const componentNarratives = components.map((component, index) => {
-        const subject = index === 0 ? 'The employee' : 'The individual';
-        const label = component.label.toLowerCase();
-        return `${subject} benefits from ${formatDaysDisplay(component.value)} of ${label}.`;
-      });
-      const totalNarrative = `In total, this provides ${formatDaysDisplay(
-        totalDaysValue,
-      )}, equivalent to ${formatHoursDisplay(totalHoursValue)}.`;
-      equation.textContent = `${componentNarratives.join(' ')} ${totalNarrative}`;
+      equation.textContent = '';
+      equation.hidden = true;
     }
 
     if (summaryIntro) {
