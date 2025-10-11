@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.1.39",
+    "date": "2025-10-11",
+    "changes": [
+      "Remove the narrative sentence block from the 4-day week allowance summary to focus on the tabular breakdown."
+    ]
+  },
+  {
     "version": "0.0.1",
     "date": "2025-10-11",
     "changes": [
