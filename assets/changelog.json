@@ -1,4 +1,11 @@
-[ 
+[
+  {
+    "version": "0.0.2",
+    "date": "2025-10-11",
+    "changes": [
+      "Center alert pop-up messaging to match the primary action alignment."
+    ]
+  },
   {
     "version": "0.0.1",
     "date": "2025-10-11",

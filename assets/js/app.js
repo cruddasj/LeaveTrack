@@ -815,6 +815,8 @@
   function closeModal() {
     const modal = document.getElementById('modal');
     if (!modal || modal.classList.contains('modal-hidden')) return;
+    const modalBody = modal.querySelector('#modal-body');
+    if (modalBody) modalBody.classList.remove('text-center');
     modal.classList.add('modal-hidden');
     modal.setAttribute('aria-hidden', 'true');
     const handler = modalCloseHandler;
@@ -846,6 +848,7 @@
       return;
     }
     modalBody.innerHTML = '';
+    modalBody.classList.add('text-center');
     if (content instanceof Node) {
       modalBody.appendChild(content);
     } else if (typeof content === 'string') {
@@ -855,7 +858,7 @@
       modalBody.appendChild(paragraph);
     }
     const footer = document.createElement('div');
-    footer.className = 'mt-6 flex justify-end';
+    footer.className = 'mt-6 flex justify-center';
     const closeButton = document.createElement('button');
     closeButton.type = 'button';
     closeButton.className = 'btn btn-blue';
@@ -888,6 +891,7 @@
         return;
       }
 
+      modalBody.classList.remove('text-center');
       modalBody.innerHTML = '';
       const wrapper = document.createElement('div');
       wrapper.className = 'modal-confirm';
