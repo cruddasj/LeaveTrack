@@ -855,7 +855,7 @@
       modalBody.appendChild(paragraph);
     }
     const footer = document.createElement('div');
-    footer.className = 'mt-6 flex justify-end';
+    footer.className = 'mt-6 flex justify-center';
     const closeButton = document.createElement('button');
     closeButton.type = 'button';
     closeButton.className = 'btn btn-blue';
