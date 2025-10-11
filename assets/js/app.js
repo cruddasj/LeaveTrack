@@ -512,18 +512,19 @@
       totals.hidden = false;
       totalDays.textContent = `Total leave: ${formatDaysDisplay(totalDaysValue)}`;
       totalHours.textContent = `Total allowance: ${formatHoursDisplay(totalHoursValue)}`;
-      const componentsDescription = components
-        .map((component) => `${component.label} (${formatDaysDisplay(component.value)})`)
-        .join(' + ');
-      equation.textContent = `${componentsDescription} = ${formatDaysDisplay(
+      const componentNarratives = components.map((component, index) => {
+        const subject = index === 0 ? 'The employee' : 'The individual';
+        const label = component.label.toLowerCase();
+        return `${subject} benefits from ${formatDaysDisplay(component.value)} of ${label}.`;
+      });
+      const totalNarrative = `In total, this provides ${formatDaysDisplay(
         totalDaysValue,
-      )}. ${formatNumberWithPrecision(totalDaysValue)} days × 7.4 = ${formatHoursDisplay(
-        totalHoursValue,
-      )}.`;
+      )}, equivalent to ${formatHoursDisplay(totalHoursValue)}.`;
+      equation.textContent = `${componentNarratives.join(' ')} ${totalNarrative}`;
     }
 
     if (summaryIntro) {
-      summaryIntro.textContent = 'Breakdown of your 4-day week leave allowance:';
+      summaryIntro.textContent = "Breakdown of the individual's 4-day week leave allowance:";
     }
   }
 
