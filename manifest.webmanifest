@@ -1,12 +1,12 @@
 {
-  "name": "PWA Template",
-  "short_name": "PWA Template",
+  "name": "TimeTrack",
+  "short_name": "TimeTrack",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#111827",
-  "description": "Model your assets, goals, and wealth projections with PWA Template.",
+  "description": "Stay informed with TimeTrack themes, updates, and UK bank holidays in one place.",
   "icons": [
     { "src": "assets/icons/icon-1024-maskable.png", "sizes": "1024x1024", "type": "image/png", "purpose": "maskable" },
     { "src": "assets/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },

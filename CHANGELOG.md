@@ -1,6 +1,10 @@
 # Changelog
 
-All notable changes to PWA Template will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
+All notable changes to TimeTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
+
+## [1.1.35] - 2025-10-11
+- Rename the app to TimeTrack across the interface and documentation.
+- Introduce a Bank Holidays page that caches GOV.UK data locally, supports year filtering, and offers a manual refresh.
 
 ## [0.0.0] - 2025-10-11
 - Create base Progressive Web app.

@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.1.35",
+    "date": "2025-10-11",
+    "changes": [
+      "Rename the app to TimeTrack and refresh visible branding.",
+      "Add a Bank Holidays page that stores GOV.UK data locally, supports year filtering, and provides a manual refresh option."
+    ]
+  },
+  {
     "version": "0.0.0",
     "date": "2025-10-11",
     "changes": [
