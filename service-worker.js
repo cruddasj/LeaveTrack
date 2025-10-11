@@ -1,4 +1,4 @@
-const APP_VERSION = "1.1.39";
+const APP_VERSION = "1.1.40";
 const CACHE_VERSION = APP_VERSION && APP_VERSION.endsWith("-dev")
   ? "dev"
   : APP_VERSION;
