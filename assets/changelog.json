@@ -1,25 +1,8 @@
 [
   {
-    "version": "1.1.38",
-    "date": "2025-10-11",
-    "changes": [
-      "Limit the Bank Holidays view to current and future years with clearer empty-state messaging.",
-      "Align the Bank Holidays refresh button styling with the Settings page.",
-      "Reword allowance guidance to focus on individual team members."
-    ]
-  },
-  {
-    "version": "0.0.2",
-    "date": "2025-10-11",
-    "changes": [
-      "Center alert pop-up messaging to match the primary action alignment."
-    ]
-  },
-  {
     "version": "0.0.1",
     "date": "2025-10-11",
     "changes": [
-      "Rename the app to TimeTrack and refresh visible branding.",
       "Add a Bank Holidays page that stores GOV.UK data locally, supports year filtering, and provides a manual refresh option.",
       "Add initial 4-day week page"
     ]
