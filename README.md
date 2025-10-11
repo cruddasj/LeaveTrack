@@ -1,10 +1,10 @@
-# TimeTrack
+# LeaveTrack
 
 > **These works are a personal project and in no way associated with my employer.**
 
 ## Purpose
 
-TimeTrack is a lightweight Progressive Web App that brings together installation guidance, theme controls, update tooling, and quick-reference utilities like UK bank holidays.
+LeaveTrack is a lightweight Progressive Web App that brings together installation guidance, theme controls, update tooling, and quick-reference utilities like UK bank holidays.
 
 ## Features
 
@@ -30,7 +30,7 @@ Then visit `http://localhost:8080` in your browser.
 
 ## Progressive Web App
 
-TimeTrack is installable as a Progressive Web App (PWA):
+LeaveTrack is installable as a Progressive Web App (PWA):
 
 1. The `manifest.webmanifest` file describes the app metadata and reuses the sidebar logo for install icons.
 2. `service-worker.js` caches the core assets so the app can load offline after the first visit.

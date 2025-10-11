@@ -1,7 +1,7 @@
 {
-  "name": "TimeTrack",
+  "name": "LeaveTrack",
   "version": "1.0.0",
-  "description": "TimeTrack is a lightweight Progressive Web App that helps you stay on top of updates, manage appearance preferences, and review key timelines from one place.",
+  "description": "LeaveTrack is a lightweight Progressive Web App that helps you stay on top of updates, manage appearance preferences, and review key timelines from one place.",
   "main": "service-worker.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cruddasj/TimeTrack.git"
+    "url": "git+https://github.com/cruddasj/LeaveTrack.git"
   },
   "keywords": [],
   "author": "James Cruddas",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/cruddasj/TimeTrack/issues"
+    "url": "https://github.com/cruddasj/LeaveTrack/issues"
   },
-  "homepage": "https://github.com/cruddasj/TimeTrack#readme",
+  "homepage": "https://github.com/cruddasj/LeaveTrack#readme",
   "devDependencies": {
     "sharp": "^0.33.4",
     "tailwindcss": "^3.4.14"
