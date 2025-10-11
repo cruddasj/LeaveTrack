@@ -482,7 +482,8 @@
       }
       if (totals) totals.hidden = true;
       if (summaryIntro)
-        summaryIntro.textContent = 'Enter values above to see a detailed breakdown of your allowance.';
+        summaryIntro.textContent =
+          "Enter values above to see a detailed breakdown of the individual's allowance.";
       return;
     }
 
@@ -630,11 +631,18 @@
     if (!list || !yearSelect) return;
 
     const events = bankHolidayState.events.slice();
+    const currentYear = new Date().getFullYear();
+
+    const displayableEvents = events.filter((event) => {
+      const date = new Date(event.date);
+      if (Number.isNaN(date.getTime())) return false;
+      return date.getFullYear() >= currentYear;
+    });
 
     if (updateYears) {
       const years = Array.from(
         new Set(
-          events
+          displayableEvents
             .map((event) => {
               const date = new Date(event.date);
               return Number.isNaN(date.getTime()) ? null : date.getFullYear();
@@ -675,8 +683,8 @@
     const selectedYear = Number.parseInt(bankHolidayState.selectedYear || '', 10);
 
     const filtered = Number.isNaN(selectedYear)
-      ? events
-      : events.filter((event) => {
+      ? displayableEvents
+      : displayableEvents.filter((event) => {
           const date = new Date(event.date);
           return !Number.isNaN(date.getTime()) && date.getFullYear() === selectedYear;
         });

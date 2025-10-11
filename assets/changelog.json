@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.1.38",
+    "date": "2025-10-11",
+    "changes": [
+      "Limit the Bank Holidays view to current and future years with clearer empty-state messaging.",
+      "Align the Bank Holidays refresh button styling with the Settings page.",
+      "Reword allowance guidance to focus on individual team members."
+    ]
+  },
+  {
     "version": "0.0.2",
     "date": "2025-10-11",
     "changes": [

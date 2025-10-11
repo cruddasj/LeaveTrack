@@ -212,14 +212,14 @@
           Bank Holidays
         </h2>
         <div class="card" id="bankHolidaysCard">
-          <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-4 sm:items-start">
             <div>
               <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 UK Bank Holidays
               </h3>
               <p class="text-sm text-gray-600 dark:text-gray-400">
-                View upcoming and past bank holidays for England and Wales. Data comes from
-                GOV.UK and is saved on this device for offline access.
+                Review upcoming bank holidays for England and Wales. Data comes from GOV.UK and is
+                saved on this device for offline access.
               </p>
             </div>
             <button
@@ -253,7 +253,7 @@
             </div>
             <div class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
               <p data-bank-holidays-empty class="hidden text-gray-500 dark:text-gray-400">
-                No bank holidays found for the selected year.
+                No upcoming bank holidays found for the selected year.
               </p>
             </div>
           </div>
@@ -271,7 +271,8 @@
               Annual leave inputs
             </h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Enter your allowances to see the total leave available in hours for a 4-day working week.
+              Enter the individual's allowances to see the total leave available in hours for a 4-day working
+              week.
             </p>
           </div>
           <form class="grid gap-6 md:grid-cols-2" novalidate>
@@ -343,7 +344,7 @@
           </form>
           <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4" data-four-day-summary>
             <p class="text-sm text-gray-600 dark:text-gray-400" data-four-day-summary-intro>
-              Enter values above to see a detailed breakdown of your allowance.
+              Enter values above to see a detailed breakdown of the individual's allowance.
             </p>
             <dl class="grid gap-2 text-sm text-gray-700 dark:text-gray-300" data-four-day-breakdown hidden></dl>
             <div class="space-y-1" data-four-day-totals hidden>
