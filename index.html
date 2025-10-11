@@ -153,6 +153,12 @@
             Bank Holidays
           </span>
         </button>
+        <button class="nav-btn" data-target="four-day-week">
+          <span class="flex items-center">
+            <i class="fa-solid fa-briefcase-clock h-5 w-5 mr-3"></i>
+            4-day week
+          </span>
+        </button>
         <button class="nav-btn" data-target="settings">
           <span class="flex items-center">
             <i class="fa-solid fa-sliders-h h-5 w-5 mr-3"></i>
@@ -252,6 +258,100 @@
             </div>
           </div>
           <div class="mt-6 space-y-4" data-bank-holidays-list></div>
+        </div>
+      </div>
+
+      <div id="four-day-week" class="content-section">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          4-day week leave planner
+        </h2>
+        <div class="card space-y-6" id="fourDayWeekCard">
+          <div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Annual leave inputs
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Enter your allowances to see the total leave available in hours for a 4-day working week.
+            </p>
+          </div>
+          <form class="grid gap-6 md:grid-cols-2" novalidate>
+            <div class="space-y-2">
+              <label for="fourDayStartDate" class="form-label">Start date</label>
+              <input type="date" id="fourDayStartDate" class="input-field" />
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                Used to determine the financial year and remaining bank holidays.
+              </p>
+            </div>
+            <div class="space-y-2">
+              <label for="fourDayCoreLeave" class="form-label">Core annual leave allowance (days)</label>
+              <input
+                type="number"
+                id="fourDayCoreLeave"
+                class="input-field"
+                inputmode="decimal"
+                step="0.1"
+                min="0"
+              />
+            </div>
+            <div class="space-y-2">
+              <label for="fourDayLongService" class="form-label">Long service leave (days)</label>
+              <input
+                type="number"
+                id="fourDayLongService"
+                class="input-field"
+                inputmode="decimal"
+                step="0.1"
+                min="0"
+              />
+            </div>
+            <div class="space-y-2">
+              <label for="fourDayCarryOver" class="form-label">Carry over leave (days)</label>
+              <input
+                type="number"
+                id="fourDayCarryOver"
+                class="input-field"
+                inputmode="decimal"
+                step="0.1"
+                min="0"
+              />
+            </div>
+            <div class="space-y-2">
+              <label for="fourDayPurchased" class="form-label">Purchased leave (days)</label>
+              <input
+                type="number"
+                id="fourDayPurchased"
+                class="input-field"
+                inputmode="numeric"
+                step="1"
+                min="0"
+              />
+            </div>
+            <div class="space-y-2">
+              <label for="fourDayBankHolidays" class="form-label">Bank holidays (days)</label>
+              <input
+                type="number"
+                id="fourDayBankHolidays"
+                class="input-field"
+                inputmode="numeric"
+                step="1"
+                min="0"
+              />
+              <p class="text-xs text-gray-500 dark:text-gray-400" data-four-day-bankholidays-help>
+                Default determined by GOV.UK bank holiday data.
+              </p>
+            </div>
+          </form>
+          <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4" data-four-day-summary>
+            <p class="text-sm text-gray-600 dark:text-gray-400" data-four-day-summary-intro>
+              Enter values above to see a detailed breakdown of your allowance.
+            </p>
+            <dl class="grid gap-2 text-sm text-gray-700 dark:text-gray-300" data-four-day-breakdown hidden></dl>
+            <div class="space-y-1" data-four-day-totals hidden>
+              <p class="font-semibold text-gray-900 dark:text-gray-100" data-four-day-total-days></p>
+              <p class="font-semibold text-gray-900 dark:text-gray-100" data-four-day-total-hours></p>
+              <p class="text-xs text-gray-500 dark:text-gray-400" data-four-day-equation></p>
+            </div>
+          </div>
         </div>
       </div>
 
