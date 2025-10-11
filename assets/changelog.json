@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.1.40",
+    "date": "2025-10-11",
+    "changes": [
+      "Add a confirmation message after manually refreshing UK bank holidays to confirm the data stored offline."
+    ]
+  },
+  {
     "version": "1.1.39",
     "date": "2025-10-11",
     "changes": [
