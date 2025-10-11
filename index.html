@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PWA Template</title>
+    <title>TimeTrack</title>
     <meta name="theme-color" content="#111827" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/icons/app-logo.svg" type="image/svg+xml" />
@@ -99,7 +99,7 @@
           <use href="#app-logo" xlink:href="#app-logo" />
         </svg>
         <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">
-          PWA Template
+          TimeTrack
         </h1>
       </div>
     </div>
@@ -125,7 +125,7 @@
             id="brandTitle"
             class="text-2xl leading-none font-bold text-center text-gray-900 dark:text-gray-100"
           >
-            PWA Template
+            TimeTrack
           </h1>
         </button>
       </div>
@@ -147,6 +147,12 @@
             Welcome
           </span>
         </button>
+        <button class="nav-btn" data-target="bank-holidays">
+          <span class="flex items-center">
+            <i class="fa-solid fa-calendar-day h-5 w-5 mr-3"></i>
+            Bank Holidays
+          </span>
+        </button>
         <button class="nav-btn" data-target="settings">
           <span class="flex items-center">
             <i class="fa-solid fa-sliders-h h-5 w-5 mr-3"></i>
@@ -164,17 +170,17 @@
     <main class="flex-1 p-4 md:p-8 overflow-y-auto md:overflow-y-visible overflow-x-hidden">
       <div id="welcome" class="content-section active" data-first-time>
         <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-          Welcome to PWA Template
+          Welcome to TimeTrack
         </h2>
         <div class="card" data-first-time>
           <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
             Get started
           </h3>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
-            PWA Template is a lightweight Progressive Web App that keeps your data on this device. Adjust the appearance, manage updates, and stay informed about new releases from the Settings page.
+            TimeTrack is a lightweight Progressive Web App that keeps your data on this device. Adjust the appearance, manage updates, and stay informed about new releases from the Settings page.
           </p>
           <ul class="list-disc pl-5 space-y-2 text-gray-700 dark:text-gray-300 mb-6">
-            <li>Install PWA Template as a PWA to access it like a native app.</li>
+            <li>Install TimeTrack as a PWA to access it like a native app.</li>
             <li>Use dark mode or alternate themes to match your environment.</li>
             <li>Review the changelog after each update to see what's new.</li>
           </ul>
@@ -190,8 +196,62 @@
             About this release
           </h3>
           <p class="text-gray-700 dark:text-gray-300">
-            This simplified build focuses on the core PWA experience so you can install PWA Template, manage its theme, and follow future progress through the built-in changelog.
+            This simplified build focuses on the core PWA experience so you can install TimeTrack, manage its theme, and follow future progress through the built-in changelog.
           </p>
+        </div>
+      </div>
+
+      <div id="bank-holidays" class="content-section">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          Bank Holidays
+        </h2>
+        <div class="card" id="bankHolidaysCard">
+          <div class="flex flex-col gap-4">
+            <div>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                UK Bank Holidays
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                View upcoming and past bank holidays for England and Wales. Data comes from
+                GOV.UK and is saved on this device for offline access.
+              </p>
+            </div>
+            <button
+              class="btn btn-blue w-full sm:w-auto"
+              type="button"
+              data-action="refresh-bank-holidays"
+            >
+              Refresh data
+            </button>
+          </div>
+          <p
+            class="text-sm text-gray-500 dark:text-gray-400 hidden mt-4"
+            data-bank-holidays-loading
+          >
+            Refreshing bank holidays…
+          </p>
+          <p
+            class="text-sm text-red-600 dark:text-red-400 hidden mt-4"
+            data-bank-holidays-error
+          >
+            We couldn't load bank holidays. Please check your connection and try again.
+          </p>
+          <div class="grid gap-4 md:grid-cols-2 mt-6">
+            <div class="space-y-3">
+              <label for="bankHolidayYear" class="form-label">Year</label>
+              <select
+                id="bankHolidayYear"
+                class="input-field"
+                data-bank-holidays-year
+              ></select>
+            </div>
+            <div class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+              <p data-bank-holidays-empty class="hidden text-gray-500 dark:text-gray-400">
+                No bank holidays found for the selected year.
+              </p>
+            </div>
+          </div>
+          <div class="mt-6 space-y-4" data-bank-holidays-list></div>
         </div>
       </div>
 
@@ -237,7 +297,7 @@
             data-collapsible-content
           >
             <p class="text-sm text-gray-700 dark:text-gray-300">
-              PWA Template version
+              TimeTrack version
               <span
                 data-app-version
                 class="font-semibold text-gray-900 dark:text-gray-100"
@@ -427,7 +487,7 @@
             data-collapsible-content
           >
             <p class="text-sm text-gray-700 dark:text-gray-300">
-              The most recent PWA Template updates appear here.
+              The most recent TimeTrack updates appear here.
             </p>
             <div data-changelog-list class="space-y-4"></div>
             <p

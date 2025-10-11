@@ -1,16 +1,17 @@
-# PWA Template
+# TimeTrack
 
 > **These works are a personal project and in no way associated with my employer.**
 
 ## Purpose
 
-PWA Template is a lightweight Progressive Web App shell that delivers the base installation experience, theme controls, and update surfaces for future personal finance tools.
+TimeTrack is a lightweight Progressive Web App that brings together installation guidance, theme controls, update tooling, and quick-reference utilities like UK bank holidays.
 
 ## Features
 
 - **Progressive Web App base** – Installable shell with offline caching managed by the service worker.
 - **Custom Themes** – Toggle dark mode or choose alternate visual themes.
 - **Update tools** – Check for service worker updates and review release notes from the built-in changelog.
+- **Bank Holidays** – Review UK bank holidays sourced from GOV.UK, stored locally with year filtering and a manual refresh.
 - **Local reset** – Clear locally stored data with a single action during testing.
 
 ## Getting Started
@@ -29,7 +30,7 @@ Then visit `http://localhost:8080` in your browser.
 
 ## Progressive Web App
 
-PWA Template is installable as a Progressive Web App (PWA):
+TimeTrack is installable as a Progressive Web App (PWA):
 
 1. The `manifest.webmanifest` file describes the app metadata and reuses the sidebar logo for install icons.
 2. `service-worker.js` caches the core assets so the app can load offline after the first visit.
