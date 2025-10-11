@@ -722,7 +722,7 @@
     updateFourDayWeekSummary();
   }
 
-  async function refreshBankHolidays() {
+  async function refreshBankHolidays({ showConfirmationOnSuccess = false } = {}) {
     if (bankHolidaysLoading) return;
     const elements = getBankHolidayElements();
     if (!elements) return;
@@ -737,6 +737,17 @@
       bankHolidayState.fetchedAt = new Date().toISOString();
       storeBankHolidays(bankHolidayState);
       renderBankHolidays({ updateYears: true });
+      if (showConfirmationOnSuccess) {
+        const savedCount = events.length;
+        let message = 'Bank holiday data refreshed.';
+        if (savedCount > 0) {
+          const noun = savedCount === 1 ? 'bank holiday' : 'bank holidays';
+          message = `Bank holiday data refreshed. ${savedCount} ${noun} saved for offline access.`;
+        } else {
+          message = 'Bank holiday data refreshed, but no upcoming bank holidays were returned.';
+        }
+        showAlert(message);
+      }
     } catch (error) {
       console.error('Unable to refresh bank holidays', error);
       if (elements.error) elements.error.classList.remove('hidden');
@@ -1365,7 +1376,7 @@
           handleAppUpdateRequest(actionTarget);
           break;
         case 'refresh-bank-holidays':
-          void refreshBankHolidays();
+          void refreshBankHolidays({ showConfirmationOnSuccess: true });
           break;
         case 'close-modal':
           closeModal();
