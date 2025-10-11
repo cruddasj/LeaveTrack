@@ -1108,7 +1108,7 @@
         return true;
       }
 
-      finishWithMessage('TimeTrack has been updated to the latest version.', {
+      finishWithMessage('LeaveTrack has been updated to the latest version.', {
         reload: true,
       });
       return true;
@@ -1145,7 +1145,7 @@
       const newWorker = await newWorkerPromise;
       if (await applyUpdate(newWorker)) return;
 
-      finishWithMessage("You're already using the latest version of TimeTrack.");
+      finishWithMessage("You're already using the latest version of LeaveTrack.");
     } catch (error) {
       console.error('Update check failed', error);
       finishWithMessage("We couldn't complete the update check. Please try again later.");

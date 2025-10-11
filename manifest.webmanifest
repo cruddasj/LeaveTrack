@@ -1,12 +1,12 @@
 {
-  "name": "TimeTrack",
-  "short_name": "TimeTrack",
+  "name": "LeaveTrack",
+  "short_name": "LeaveTrack",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#111827",
-  "description": "Stay informed with TimeTrack themes, updates, and UK bank holidays in one place.",
+  "description": "Stay informed with LeaveTrack themes, updates, and UK bank holidays in one place.",
   "icons": [
     { "src": "assets/icons/icon-1024-maskable.png", "sizes": "1024x1024", "type": "image/png", "purpose": "maskable" },
     { "src": "assets/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },

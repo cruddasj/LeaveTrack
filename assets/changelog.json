@@ -1,4 +1,11 @@
-[
+[ 
+  {
+    "version": "1.1.41",
+    "date": "2025-10-11",
+    "changes": [
+      "Rebrand the application to LeaveTrack across the UI, metadata, and documentation."
+    ]
+  },
   {
     "version": "1.1.40",
     "date": "2025-10-11",
