@@ -1,60 +1,10 @@
 [ 
   {
-    "version": "1.1.45",
-    "date": "2025-10-12",
-    "changes": [
-      "Limit the bank holiday booker to weekday options and present leave totals as stat cards for improved readability."
-    ]
-  },
-  {
-    "version": "1.1.44",
-    "date": "2025-10-12",
-    "changes": [
-      "Add a bank holiday booker that highlights remaining holidays by usual day off and make the 4-day week cards collapsible.",
-      "Introduce a 9-day fortnight page with matching annual leave inputs and an every-other-week bank holiday finder that derives the financial year from the chosen start date and shows both matching and non-matching holidays."
-    ]
-  },
-  {
-    "version": "1.1.43",
-    "date": "2025-10-12",
-    "changes": [
-      "Show a compressed-hours allowance in the 4-day week summary based on 9.25-hour days."
-    ]
-  },
-  {
-    "version": "1.1.42",
-    "date": "2025-10-11",
-    "changes": [
-      "Simplify the bank holiday refresh confirmation to omit offline save counts."
-    ]
-  },
-  {
-    "version": "1.1.41",
-    "date": "2025-10-11",
-    "changes": [
-      "Rebrand the application to LeaveTrack across the UI, metadata, and documentation."
-    ]
-  },
-  {
-    "version": "1.1.40",
-    "date": "2025-10-11",
-    "changes": [
-      "Add a confirmation message after manually refreshing UK bank holidays to confirm the data stored offline."
-    ]
-  },
-  {
-    "version": "1.1.39",
-    "date": "2025-10-11",
-    "changes": [
-      "Remove the narrative sentence block from the 4-day week allowance summary to focus on the tabular breakdown."
-    ]
-  },
-  {
     "version": "0.0.1",
     "date": "2025-10-11",
     "changes": [
-      "Add a Bank Holidays page that stores GOV.UK data locally, supports year filtering, and provides a manual refresh option.",
-      "Add initial 4-day week page"
+      "Add initial 4-day week page",
+      "Add initial 9-day fortnight page"
     ]
   },
   {
