@@ -1071,18 +1071,12 @@
     const dayValue = daySelect ? String(daySelect.value || '').toLowerCase() : '';
 
     if (!dayValue) {
-      return {
-        ...base,
-        message: 'Select a non-working day to preview matching bank holidays.',
-      };
+      return null;
     }
 
     const startValue = start ? start.value : '';
     if (!startValue) {
-      return {
-        ...base,
-        message: 'Enter a start date above to calculate bank holiday matches.',
-      };
+      return null;
     }
 
     const startDate = toStartOfDay(startValue);
@@ -1207,10 +1201,7 @@
     const { startDate } = booker;
     const startValue = startDate ? startDate.value : '';
     if (!startValue) {
-      return {
-        ...base,
-        message: 'Pick the first non-working day to begin the every other week pattern.',
-      };
+      return null;
     }
 
     const start = toStartOfDay(startValue);
@@ -1535,7 +1526,7 @@
       }
       .event-item--empty {
         border-style: dashed;
-        text-align: center;
+        text-align: left;
         color: #6b7280;
         background: #f9fafb;
       }
