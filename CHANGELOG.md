@@ -2,6 +2,12 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [1.1.45] - 2025-10-12
+- Limit the bank holiday booker to weekday options and present leave totals as stat cards for improved readability.
+
+## [1.1.44] - 2025-10-12
+- Add a bank holiday booker that highlights remaining dates by usual day off and make the 4-day week cards collapsible.
+
 ## [1.1.43] - 2025-10-12
 - Show a compressed-hours allowance in the 4-day week summary based on 9.25-hour days.
 
