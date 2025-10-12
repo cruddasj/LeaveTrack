@@ -1,5 +1,12 @@
 [
   {
+    "version": "0.0.3",
+    "date": "2025-10-12",
+    "changes": [
+      "Add print-to-PDF reports for the 4-day week and 9-day fortnight calculators"
+    ]
+  },
+  {
     "version": "0.0.2",
     "date": "2025-10-12",
     "changes": [
