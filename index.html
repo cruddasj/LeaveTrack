@@ -159,6 +159,12 @@
             4-day week
           </span>
         </button>
+        <button class="nav-btn" data-target="nine-day-fortnight">
+          <span class="flex items-center">
+            <i class="fa-solid fa-business-time h-5 w-5 mr-3"></i>
+            9-day fortnight
+          </span>
+        </button>
         <button class="nav-btn" data-target="settings">
           <span class="flex items-center">
             <i class="fa-solid fa-sliders-h h-5 w-5 mr-3"></i>
@@ -469,6 +475,214 @@
                     <p class="font-semibold text-gray-900 dark:text-gray-100" data-booker-non-matches-label></p>
                     <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300" data-booker-non-matches-list></ul>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="nine-day-fortnight" class="content-section">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          9-day fortnight leave entitlement
+        </h2>
+        <div class="space-y-6">
+          <div
+            class="card is-collapsible"
+            id="nineDayFortnightCard"
+            data-collapsible
+            data-collapsible-id="nine-day-fortnight-annual"
+          >
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <button
+                type="button"
+                class="card-toggle"
+                data-collapsible-trigger
+                aria-expanded="true"
+                aria-controls="nine-day-fortnight-annual-content"
+              >
+                <span>Annual leave inputs</span>
+                <svg
+                  class="chev"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 8l4 4 4-4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </h3>
+            <div
+              id="nine-day-fortnight-annual-content"
+              class="card-body space-y-6"
+              data-collapsible-content
+            >
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Enter the individual's allowances to see the total leave available in hours for a 9-day
+                fortnight working pattern.
+              </p>
+              <form class="grid gap-6 md:grid-cols-2" novalidate>
+                <div class="space-y-2">
+                  <label for="nineDayStartDate" class="form-label">Start date</label>
+                  <input type="date" id="nineDayStartDate" class="input-field" />
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Used to determine the financial year and remaining bank holidays.
+                  </p>
+                </div>
+                <div class="space-y-2">
+                  <label for="nineDayCoreLeave" class="form-label">Core annual leave allowance (days)</label>
+                  <input
+                    type="number"
+                    id="nineDayCoreLeave"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="nineDayLongService" class="form-label">Long service leave (days)</label>
+                  <input
+                    type="number"
+                    id="nineDayLongService"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="nineDayCarryOver" class="form-label">Carry over leave (days)</label>
+                  <input
+                    type="number"
+                    id="nineDayCarryOver"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="nineDayPurchased" class="form-label">Purchased leave (days)</label>
+                  <input
+                    type="number"
+                    id="nineDayPurchased"
+                    class="input-field"
+                    inputmode="numeric"
+                    step="1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="nineDayBankHolidays" class="form-label">Bank holidays (days)</label>
+                  <input
+                    type="number"
+                    id="nineDayBankHolidays"
+                    class="input-field"
+                    inputmode="numeric"
+                    step="1"
+                    min="0"
+                  />
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-nine-day-bankholidays-help>
+                    Default determined by GOV.UK bank holiday data.
+                  </p>
+                </div>
+              </form>
+              <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4" data-nine-day-summary>
+                <p class="text-sm text-gray-600 dark:text-gray-400" data-nine-day-summary-intro>
+                  Enter values above to see a detailed breakdown of the individual's allowance.
+                </p>
+                <dl class="grid gap-2 text-sm text-gray-700 dark:text-gray-300" data-nine-day-breakdown hidden></dl>
+                <div class="space-y-3" data-nine-day-totals hidden>
+                  <div class="grid gap-3 sm:grid-cols-3">
+                    <div class="stat-card" data-nine-day-total-days>
+                      <p class="stat-card__label">Total leave</p>
+                      <p class="stat-card__value">0 days</p>
+                    </div>
+                    <div class="stat-card" data-nine-day-total-hours>
+                      <p class="stat-card__label">Total allowance</p>
+                      <p class="stat-card__value">0 hours</p>
+                    </div>
+                    <div class="stat-card" data-nine-day-total-compressed>
+                      <p class="stat-card__label">Compressed hours allowance</p>
+                      <p class="stat-card__value">0 days</p>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 text-center" data-nine-day-equation></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="card is-collapsible"
+            id="nineDayFortnightBookerCard"
+            data-collapsible
+            data-collapsible-id="nine-day-fortnight-booker"
+          >
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <button
+                type="button"
+                class="card-toggle"
+                data-collapsible-trigger
+                aria-expanded="true"
+                aria-controls="nine-day-fortnight-booker-content"
+              >
+                <span>Bank holiday booker</span>
+                <svg
+                  class="chev"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 8l4 4 4-4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </h3>
+            <div
+              id="nine-day-fortnight-booker-content"
+              class="card-body space-y-6"
+              data-collapsible-content
+            >
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Pick the first non-working day in the pattern to highlight bank holidays that land on the same date every other
+                week.
+              </p>
+              <div class="space-y-4">
+                <div class="grid gap-6 md:grid-cols-2">
+                  <div class="space-y-2">
+                    <label for="nineDayBookerYear" class="form-label">Financial year end</label>
+                    <select id="nineDayBookerYear" class="input-field"></select>
+                  </div>
+                  <div class="space-y-2">
+                    <label for="nineDayBookerStart" class="form-label">First non-working day</label>
+                    <input type="date" id="nineDayBookerStart" class="input-field" />
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      We'll check every other week from this date up to 31 March of the selected year.
+                    </p>
+                  </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400" data-nine-day-booker-message>
+                  Select a year and pick the first non-working day to preview matching bank holidays.
+                </p>
+                <div class="space-y-3" data-nine-day-booker-results hidden>
+                  <p class="font-semibold text-gray-900 dark:text-gray-100" data-nine-day-booker-summary></p>
+                  <ul class="space-y-2" data-nine-day-booker-list></ul>
                 </div>
               </div>
             </div>

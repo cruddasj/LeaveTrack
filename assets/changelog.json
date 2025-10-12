@@ -1,4 +1,11 @@
-[ 
+[{
+    "version": "1.1.46",
+    "date": "2025-10-12",
+    "changes": [
+      "Introduce a 9-day fortnight leave calculator with an every-other-week bank holiday matcher."
+    ]
+  },
+  
   {
     "version": "1.1.45",
     "date": "2025-10-12",

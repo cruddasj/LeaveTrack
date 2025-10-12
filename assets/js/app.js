@@ -64,12 +64,23 @@
     'Saturday',
   ];
 
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
   const fourDayWeekState = {
     elements: null,
     bookerElements: null,
     initialized: false,
     userOverriddenBankHolidays: false,
     lastDefault: null,
+  };
+
+  const nineDayFortnightState = {
+    elements: null,
+    bookerElements: null,
+    initialized: false,
+    userOverriddenBankHolidays: false,
+    lastDefault: null,
+    selectedYear: null,
   };
 
   let welcomeHiddenState = false;
@@ -458,6 +469,32 @@
     return elements;
   }
 
+  function getNineDayFortnightElements() {
+    if (nineDayFortnightState.elements) return nineDayFortnightState.elements;
+    const card = document.getElementById('nineDayFortnightCard');
+    if (!card) return null;
+    const elements = {
+      card,
+      start: card.querySelector('#nineDayStartDate'),
+      core: card.querySelector('#nineDayCoreLeave'),
+      longService: card.querySelector('#nineDayLongService'),
+      carryOver: card.querySelector('#nineDayCarryOver'),
+      purchased: card.querySelector('#nineDayPurchased'),
+      bankHolidays: card.querySelector('#nineDayBankHolidays'),
+      summary: card.querySelector('[data-nine-day-summary]'),
+      summaryIntro: card.querySelector('[data-nine-day-summary-intro]'),
+      breakdown: card.querySelector('[data-nine-day-breakdown]'),
+      totals: card.querySelector('[data-nine-day-totals]'),
+      totalDays: card.querySelector('[data-nine-day-total-days]'),
+      totalHours: card.querySelector('[data-nine-day-total-hours]'),
+      totalCompressed: card.querySelector('[data-nine-day-total-compressed]'),
+      equation: card.querySelector('[data-nine-day-equation]'),
+      bankHolidayHelp: card.querySelector('[data-nine-day-bankholidays-help]'),
+    };
+    nineDayFortnightState.elements = elements;
+    return elements;
+  }
+
   function getBankHolidayBookerElements() {
     if (fourDayWeekState.bookerElements) return fourDayWeekState.bookerElements;
     const card = document.getElementById('bankHolidayBookerCard');
@@ -473,6 +510,23 @@
       nonMatchesList: card.querySelector('[data-booker-non-matches-list]'),
     };
     fourDayWeekState.bookerElements = elements;
+    return elements;
+  }
+
+  function getNineDayFortnightBookerElements() {
+    if (nineDayFortnightState.bookerElements) return nineDayFortnightState.bookerElements;
+    const card = document.getElementById('nineDayFortnightBookerCard');
+    if (!card) return null;
+    const elements = {
+      card,
+      yearSelect: card.querySelector('#nineDayBookerYear'),
+      startDate: card.querySelector('#nineDayBookerStart'),
+      message: card.querySelector('[data-nine-day-booker-message]'),
+      results: card.querySelector('[data-nine-day-booker-results]'),
+      summary: card.querySelector('[data-nine-day-booker-summary]'),
+      list: card.querySelector('[data-nine-day-booker-list]'),
+    };
+    nineDayFortnightState.bookerElements = elements;
     return elements;
   }
 
@@ -652,6 +706,167 @@
     }
   }
 
+  function updateNineDayFortnightBooker({ updateYears = false } = {}) {
+    const booker = getNineDayFortnightBookerElements();
+    if (!booker) return;
+    const { yearSelect, startDate, message, results, summary, list } = booker;
+
+    if (list) list.innerHTML = '';
+    if (summary) summary.textContent = '';
+    if (results) results.hidden = true;
+
+    const events = bankHolidayState.events.slice();
+
+    if (updateYears && yearSelect) {
+      const years = Array.from(
+        new Set(
+          events
+            .map((event) => {
+              const date = new Date(event.date);
+              return Number.isNaN(date.getTime()) ? null : date.getFullYear();
+            })
+            .filter((year) => year !== null)
+        )
+      ).sort((a, b) => a - b);
+
+      yearSelect.innerHTML = '';
+
+      if (!years.length) {
+        yearSelect.disabled = true;
+        nineDayFortnightState.selectedYear = null;
+      } else {
+        yearSelect.disabled = false;
+        const previous = nineDayFortnightState.selectedYear
+          ? Number.parseInt(nineDayFortnightState.selectedYear, 10)
+          : null;
+        const nowYear = new Date().getFullYear();
+        const fallback = years.includes(nowYear) ? nowYear : years[years.length - 1];
+        const resolved = previous && years.includes(previous) ? previous : fallback;
+        nineDayFortnightState.selectedYear = String(resolved);
+        years.forEach((year) => {
+          const option = document.createElement('option');
+          option.value = String(year);
+          option.textContent = String(year);
+          if (year === resolved) option.selected = true;
+          yearSelect.appendChild(option);
+        });
+      }
+    }
+
+    if (yearSelect && !updateYears) {
+      nineDayFortnightState.selectedYear = yearSelect.value || null;
+    }
+
+    const selectedYear = nineDayFortnightState.selectedYear
+      ? Number.parseInt(nineDayFortnightState.selectedYear, 10)
+      : NaN;
+
+    if (!events.length) {
+      if (yearSelect) {
+        yearSelect.disabled = true;
+        yearSelect.value = '';
+      }
+      if (message) {
+        message.textContent =
+          'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.';
+      }
+      return;
+    }
+
+    if (!Number.isFinite(selectedYear) || Number.isNaN(selectedYear)) {
+      if (message) message.textContent = 'Select a year to preview matching bank holidays.';
+      return;
+    }
+
+    if (yearSelect && yearSelect.value !== String(selectedYear)) {
+      yearSelect.value = String(selectedYear);
+    }
+
+    const startValue = startDate ? startDate.value : '';
+    if (!startValue) {
+      if (message) {
+        message.textContent = 'Pick the first non-working day to check the every other week pattern.';
+      }
+      return;
+    }
+
+    const startNormalized = toStartOfDay(startValue);
+    if (!startNormalized) {
+      if (message) message.textContent = 'Enter a valid start date to continue.';
+      return;
+    }
+
+    const rangeEnd = new Date(selectedYear, 2, 31, 23, 59, 59, 999);
+
+    if (startNormalized > rangeEnd) {
+      if (message) {
+        message.textContent = `No dates in range. Choose a date on or before 31 March ${selectedYear}.`;
+      }
+      return;
+    }
+
+    const matches = events
+      .map((event) => {
+        const eventDate = toStartOfDay(event.date);
+        if (!eventDate) return null;
+        if (eventDate < startNormalized || eventDate > rangeEnd) return null;
+        const diff = Math.round((eventDate.getTime() - startNormalized.getTime()) / MS_PER_DAY);
+        if (diff < 0 || diff % 14 !== 0) return null;
+        return {
+          title: event.title || 'Bank holiday',
+          date: eventDate,
+        };
+      })
+      .filter((event) => event !== null)
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    const startLabel = formatHumanDate(startNormalized);
+    const endLabel = formatHumanDate(rangeEnd);
+    const weekdayLabel = WEEKDAY_LABELS[startNormalized.getDay()] || 'day';
+
+    if (!matches.length) {
+      if (message) {
+        message.textContent = `No bank holidays fall on the ${weekdayLabel.toLowerCase()} every other week pattern between ${startLabel} and ${endLabel}.`;
+      }
+      if (results && list) {
+        const emptyItem = document.createElement('li');
+        emptyItem.className = 'text-sm text-gray-500 dark:text-gray-400';
+        emptyItem.textContent = 'No matching bank holidays in this window.';
+        list.appendChild(emptyItem);
+        results.hidden = false;
+        if (summary) summary.textContent = 'Matching bank holidays (0)';
+      }
+      return;
+    }
+
+    if (message) {
+      message.textContent = `Showing bank holidays on your every other week ${weekdayLabel.toLowerCase()} between ${startLabel} and ${endLabel}.`;
+    }
+
+    if (summary) summary.textContent = `Matching bank holidays (${matches.length})`;
+
+    if (list) {
+      matches.forEach((match) => {
+        const entry = document.createElement('li');
+        entry.className =
+          'rounded-lg bg-gray-50 dark:bg-gray-900/40 p-3 space-y-1 border border-gray-200 dark:border-gray-700';
+        const title = document.createElement('p');
+        title.className = 'font-medium text-gray-900 dark:text-gray-100';
+        title.textContent = match.title;
+        entry.appendChild(title);
+        const dateLine = document.createElement('p');
+        dateLine.className = 'text-xs text-gray-600 dark:text-gray-400';
+        dateLine.textContent = formatBankHolidayDate(match.date);
+        entry.appendChild(dateLine);
+        list.appendChild(entry);
+      });
+    }
+
+    if (results) {
+      results.hidden = false;
+    }
+  }
+
   function formatNumberWithPrecision(value, fractionDigits = 2) {
     const number = Number.isFinite(value) ? value : 0;
     return new Intl.NumberFormat(undefined, {
@@ -754,6 +969,98 @@
     }
   }
 
+  function updateNineDayFortnightSummary() {
+    const elements = getNineDayFortnightElements();
+    if (!elements) return;
+    const {
+      core,
+      longService,
+      carryOver,
+      purchased,
+      bankHolidays,
+      breakdown,
+      totals,
+      totalDays,
+      totalHours,
+      totalCompressed,
+      equation,
+      summaryIntro,
+    } = elements;
+
+    const setStatValue = (wrapper, value) => {
+      if (!wrapper) return;
+      const valueEl = wrapper.querySelector('.stat-card__value');
+      if (!valueEl) return;
+      valueEl.textContent = value;
+    };
+
+    const components = [
+      { id: 'core', label: 'Core annual leave', value: getNumericInputValue(core) },
+      { id: 'longService', label: 'Long service leave', value: getNumericInputValue(longService) },
+      { id: 'carryOver', label: 'Carry over leave', value: getNumericInputValue(carryOver) },
+      { id: 'purchased', label: 'Purchased leave', value: getNumericInputValue(purchased, { allowDecimal: false }) },
+      { id: 'bankHolidays', label: 'Bank holidays', value: getNumericInputValue(bankHolidays, { allowDecimal: false }) },
+    ];
+
+    const hasValues = components.some((component) => component.value);
+
+    if (!hasValues) {
+      if (breakdown) {
+        breakdown.innerHTML = '';
+        breakdown.hidden = true;
+      }
+      if (totals) totals.hidden = true;
+      if (equation) {
+        equation.textContent = '';
+        equation.hidden = true;
+      }
+      if (summaryIntro) {
+        summaryIntro.textContent =
+          "Enter values above to see a detailed breakdown of the individual's allowance.";
+      }
+      setStatValue(totalDays, formatDaysDisplay(0));
+      setStatValue(totalHours, formatHoursDisplay(0));
+      setStatValue(totalCompressed, formatDaysDisplay(0));
+      return;
+    }
+
+    const totalDaysValue = components.reduce((sum, component) => sum + component.value, 0);
+    const totalHoursValue = totalDaysValue * 7.4;
+
+    if (breakdown) {
+      breakdown.innerHTML = '';
+      components.forEach((component) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex items-start justify-between gap-4';
+        const term = document.createElement('dt');
+        term.className = 'font-medium text-gray-900 dark:text-gray-100';
+        term.textContent = component.label;
+        const definition = document.createElement('dd');
+        definition.className = 'text-right text-gray-700 dark:text-gray-300';
+        definition.textContent = formatDaysDisplay(component.value);
+        wrapper.appendChild(term);
+        wrapper.appendChild(definition);
+        breakdown.appendChild(wrapper);
+      });
+      breakdown.hidden = false;
+    }
+
+    const compressedAllowanceValue = totalHoursValue / 8.22;
+
+    if (totals && totalDays && totalHours && equation) {
+      totals.hidden = false;
+      setStatValue(totalDays, formatDaysDisplay(totalDaysValue));
+      setStatValue(totalHours, formatHoursDisplay(totalHoursValue));
+      setStatValue(totalCompressed, formatDaysDisplay(compressedAllowanceValue));
+      equation.textContent = '';
+      equation.hidden = true;
+    }
+
+    if (summaryIntro) {
+      summaryIntro.textContent = "Breakdown of the individual's 9-day fortnight leave allowance:";
+    }
+  }
+
   function updateFourDayWeekBankHolidayDefault({ force = false } = {}) {
     const elements = getFourDayWeekElements();
     if (!elements) return;
@@ -785,6 +1092,48 @@
         bankHolidayHelp.textContent = 'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.';
       } else if (!computed) {
         bankHolidayHelp.textContent = 'No bank holidays are remaining in this financial year based on the selected start date.';
+      } else {
+        const { count, effectiveStart, rangeEnd } = computed;
+        const startLabel = formatHumanDate(effectiveStart);
+        const endLabel = formatHumanDate(rangeEnd);
+        bankHolidayHelp.textContent = `Counting ${count} bank holidays between ${startLabel} and ${endLabel}.`;
+      }
+    }
+  }
+
+  function updateNineDayFortnightBankHolidayDefault({ force = false } = {}) {
+    const elements = getNineDayFortnightElements();
+    if (!elements) return;
+    const { start, bankHolidays, bankHolidayHelp } = elements;
+    if (!start || !bankHolidays) return;
+
+    const startValue = start.value;
+    if (!startValue) {
+      nineDayFortnightState.lastDefault = null;
+      if (!nineDayFortnightState.userOverriddenBankHolidays || force) {
+        bankHolidays.value = '';
+      }
+      if (bankHolidayHelp)
+        bankHolidayHelp.textContent = 'Select a start date to automatically calculate bank holidays.';
+      return;
+    }
+
+    const computed = computeFourDayWeekBankHolidayDefault(new Date(startValue));
+    nineDayFortnightState.lastDefault = computed;
+
+    if ((!nineDayFortnightState.userOverriddenBankHolidays || force) && computed) {
+      bankHolidays.value = String(computed.count);
+    } else if (!computed && (force || !nineDayFortnightState.userOverriddenBankHolidays)) {
+      bankHolidays.value = '';
+    }
+
+    if (bankHolidayHelp) {
+      if (!bankHolidayState.events.length) {
+        bankHolidayHelp.textContent =
+          'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.';
+      } else if (!computed) {
+        bankHolidayHelp.textContent =
+          'No bank holidays are remaining in this financial year based on the selected start date.';
       } else {
         const { count, effectiveStart, rangeEnd } = computed;
         const startLabel = formatHumanDate(effectiveStart);
@@ -842,6 +1191,63 @@
     updateFourDayWeekBankHolidayDefault({ force: true });
     updateFourDayWeekSummary();
     updateBankHolidayBooker();
+  }
+
+  function initializeNineDayFortnight() {
+    if (nineDayFortnightState.initialized) return;
+    const elements = getNineDayFortnightElements();
+    if (!elements) return;
+    const booker = getNineDayFortnightBookerElements();
+
+    const { start, core, longService, carryOver, purchased, bankHolidays } = elements;
+    const bookerYearSelect = booker ? booker.yearSelect : null;
+    const bookerStartDate = booker ? booker.startDate : null;
+
+    if (start && !start.value) {
+      start.value = formatDateForInput(new Date());
+    }
+
+    const handleInputChange = () => {
+      updateNineDayFortnightSummary();
+    };
+
+    [core, longService, carryOver, purchased].forEach((input) => {
+      if (!input) return;
+      input.addEventListener('input', handleInputChange);
+    });
+
+    if (bankHolidays) {
+      bankHolidays.addEventListener('input', () => {
+        nineDayFortnightState.userOverriddenBankHolidays = true;
+        updateNineDayFortnightSummary();
+      });
+    }
+
+    if (start) {
+      start.addEventListener('change', () => {
+        nineDayFortnightState.userOverriddenBankHolidays = false;
+        updateNineDayFortnightBankHolidayDefault({ force: true });
+        updateNineDayFortnightSummary();
+      });
+    }
+
+    if (bookerYearSelect) {
+      bookerYearSelect.addEventListener('change', () => {
+        nineDayFortnightState.selectedYear = bookerYearSelect.value || null;
+        updateNineDayFortnightBooker();
+      });
+    }
+
+    if (bookerStartDate) {
+      bookerStartDate.addEventListener('change', () => {
+        updateNineDayFortnightBooker();
+      });
+    }
+
+    nineDayFortnightState.initialized = true;
+    updateNineDayFortnightBankHolidayDefault({ force: true });
+    updateNineDayFortnightSummary();
+    updateNineDayFortnightBooker({ updateYears: true });
   }
 
   function setBankHolidaysLoading(loading) {
@@ -931,6 +1337,9 @@
       updateFourDayWeekBankHolidayDefault();
       updateFourDayWeekSummary();
       updateBankHolidayBooker();
+      updateNineDayFortnightBankHolidayDefault();
+      updateNineDayFortnightSummary();
+      updateNineDayFortnightBooker({ updateYears });
       return;
     }
 
@@ -960,6 +1369,9 @@
     updateFourDayWeekBankHolidayDefault();
     updateFourDayWeekSummary();
     updateBankHolidayBooker();
+    updateNineDayFortnightBankHolidayDefault();
+    updateNineDayFortnightSummary();
+    updateNineDayFortnightBooker({ updateYears });
   }
 
   async function refreshBankHolidays({ showConfirmationOnSuccess = false } = {}) {
@@ -1569,6 +1981,7 @@
 
     initializeBankHolidays();
     initializeFourDayWeek();
+    initializeNineDayFortnight();
 
     const storedView = safeGet(LS_KEYS.view);
     const welcomeHidden = welcomeHiddenState;
