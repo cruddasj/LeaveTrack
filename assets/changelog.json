@@ -1,5 +1,19 @@
 [ 
   {
+    "version": "1.1.45",
+    "date": "2025-10-12",
+    "changes": [
+      "Limit the bank holiday booker to weekday options and present leave totals as stat cards for improved readability."
+    ]
+  },
+  {
+    "version": "1.1.44",
+    "date": "2025-10-12",
+    "changes": [
+      "Add a bank holiday booker that highlights remaining holidays by usual day off and make the 4-day week cards collapsible."
+    ]
+  },
+  {
     "version": "1.1.43",
     "date": "2025-10-12",
     "changes": [
