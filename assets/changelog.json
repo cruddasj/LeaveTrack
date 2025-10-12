@@ -1,4 +1,12 @@
-[
+[ 
+  {
+    "version": "0.0.7",
+    "date": "2025-10-12",
+    "changes": [
+      "Hide the Bank holiday booker section in PDF exports until the required selections are filled in.",
+      "Left-align the empty Bank holiday booker list messages in PDF exports for easier reading."
+    ]
+  },
   {
     "version": "0.0.6",
     "date": "2025-10-12",
