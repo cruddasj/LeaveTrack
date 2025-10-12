@@ -1,4 +1,11 @@
-[ 
+[
+  {
+    "version": "0.0.6",
+    "date": "2025-10-12",
+    "changes": [
+      "Move the Print to PDF button beneath its description on larger screens so it aligns with the card content."
+    ]
+  },
   {
     "version": "0.0.5",
     "date": "2025-10-12",
