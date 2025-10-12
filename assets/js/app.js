@@ -1412,7 +1412,7 @@
       `Total standard leave (days) = ${allowancesDetail || '0'}.`,
       `Total allowance (hours) = ${totalDaysFormatted} × ${standardHoursFormatted} = ${totalHoursFormatted} hours.`,
       `Compressed allowance (days) = ${totalHoursFormatted} ÷ ${compressedHoursFormatted} = ${compressedFormatted} days.`,
-      'Purchased leave and bank holidays are treated as whole days when entered.',
+      'Purchased leave and bank holidays are treated as whole days.',
     ]
       .map((item) => `<li>${escapeHtml(item)}</li>`)
       .join('');
@@ -1549,8 +1549,12 @@
         color: #6b7280;
       }
       @media print {
+        @page {
+          margin-top: 0;
+          margin-bottom: 0;
+        }
         body {
-          padding: 1.5rem;
+          padding: 2rem;
           background: #ffffff;
         }
         table {
@@ -1603,7 +1607,6 @@
       ${bankHolidayNoteMarkup}
     </section>
     ${bookerSection}
-    <footer>Report generated with LeaveTrack.</footer>
   </body>
 </html>`;
 
@@ -2737,7 +2740,7 @@
           handleLeaveReportPrint({
             elements,
             title: '4-day week leave entitlement',
-            scheduleLabel: '4-day week pattern',
+            scheduleLabel: '4-day week',
             compressedDayHours: FOUR_DAY_COMPRESSED_HOURS,
             compressedLabel: 'Compressed allowance (days)',
             bankHolidayNote,
@@ -2755,7 +2758,7 @@
           handleLeaveReportPrint({
             elements,
             title: '9-day fortnight leave entitlement',
-            scheduleLabel: '9-day fortnight pattern',
+            scheduleLabel: '9-day fortnight',
             compressedDayHours: NINE_DAY_COMPRESSED_HOURS,
             compressedLabel: '9-day fortnight allowance (days)',
             bankHolidayNote,
