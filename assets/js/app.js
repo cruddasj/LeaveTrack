@@ -64,12 +64,86 @@
     'Saturday',
   ];
 
-  const fourDayWeekState = {
+  const leaveCalculatorConfigs = {
+    fourDayWeek: {
+      cardId: 'fourDayWeekCard',
+      selectors: {
+        start: '#fourDayStartDate',
+        core: '#fourDayCoreLeave',
+        longService: '#fourDayLongService',
+        carryOver: '#fourDayCarryOver',
+        purchased: '#fourDayPurchased',
+        bankHolidays: '#fourDayBankHolidays',
+        summary: '[data-leave-summary="four-day-week"]',
+        summaryIntro: '[data-leave-summary-intro="four-day-week"]',
+        breakdown: '[data-leave-breakdown="four-day-week"]',
+        totals: '[data-leave-totals="four-day-week"]',
+        totalDays: '[data-leave-total-days="four-day-week"]',
+        totalHours: '[data-leave-total-hours="four-day-week"]',
+        totalCompressed: '[data-leave-total-compressed="four-day-week"]',
+        equation: '[data-leave-equation="four-day-week"]',
+        bankHolidayHelp: '[data-leave-bankholidays-help="four-day-week"]',
+      },
+      summaryIntro: {
+        empty:
+          "Enter values above to see a detailed breakdown of the individual's allowance.",
+        active: "Breakdown of the individual's 4-day week leave allowance:",
+      },
+      hoursPerDay: 7.4,
+      compressedDivision: 9.25,
+    },
+    nineDayFortnight: {
+      cardId: 'nineDayFortnightCard',
+      selectors: {
+        start: '#nineDayStartDate',
+        core: '#nineDayCoreLeave',
+        longService: '#nineDayLongService',
+        carryOver: '#nineDayCarryOver',
+        purchased: '#nineDayPurchased',
+        bankHolidays: '#nineDayBankHolidays',
+        summary: '[data-leave-summary="nine-day-fortnight"]',
+        summaryIntro: '[data-leave-summary-intro="nine-day-fortnight"]',
+        breakdown: '[data-leave-breakdown="nine-day-fortnight"]',
+        totals: '[data-leave-totals="nine-day-fortnight"]',
+        totalDays: '[data-leave-total-days="nine-day-fortnight"]',
+        totalHours: '[data-leave-total-hours="nine-day-fortnight"]',
+        totalCompressed: '[data-leave-total-compressed="nine-day-fortnight"]',
+        equation: '[data-leave-equation="nine-day-fortnight"]',
+        bankHolidayHelp: '[data-leave-bankholidays-help="nine-day-fortnight"]',
+      },
+      summaryIntro: {
+        empty:
+          "Enter values above to see a detailed breakdown of the individual's allowance.",
+        active: "Breakdown of the individual's 9-day fortnight leave allowance:",
+      },
+      hoursPerDay: 7.4,
+      compressedDivision: 8.22,
+    },
+  };
+
+  const leaveCalculatorStates = {
+    fourDayWeek: {
+      elements: null,
+      initialized: false,
+      userOverriddenBankHolidays: false,
+      lastDefault: null,
+    },
+    nineDayFortnight: {
+      elements: null,
+      initialized: false,
+      userOverriddenBankHolidays: false,
+      lastDefault: null,
+    },
+  };
+
+  const weeklyBookerState = {
     elements: null,
-    bookerElements: null,
     initialized: false,
-    userOverriddenBankHolidays: false,
-    lastDefault: null,
+  };
+
+  const fortnightBookerState = {
+    elements: null,
+    initialized: false,
   };
 
   let welcomeHiddenState = false;
@@ -432,34 +506,43 @@
     };
   }
 
-  function getFourDayWeekElements() {
-    if (fourDayWeekState.elements) return fourDayWeekState.elements;
-    const card = document.getElementById('fourDayWeekCard');
+  function getLeaveCalculatorConfig(key) {
+    return Object.prototype.hasOwnProperty.call(leaveCalculatorConfigs, key)
+      ? leaveCalculatorConfigs[key]
+      : null;
+  }
+
+  function getLeaveCalculatorState(key) {
+    return Object.prototype.hasOwnProperty.call(leaveCalculatorStates, key)
+      ? leaveCalculatorStates[key]
+      : null;
+  }
+
+  function getLeaveCalculatorElements(key) {
+    const config = getLeaveCalculatorConfig(key);
+    const state = getLeaveCalculatorState(key);
+    if (!config || !state) return null;
+    if (state.elements) return state.elements;
+    const card = document.getElementById(config.cardId);
     if (!card) return null;
-    const elements = {
-      card,
-      start: card.querySelector('#fourDayStartDate'),
-      core: card.querySelector('#fourDayCoreLeave'),
-      longService: card.querySelector('#fourDayLongService'),
-      carryOver: card.querySelector('#fourDayCarryOver'),
-      purchased: card.querySelector('#fourDayPurchased'),
-      bankHolidays: card.querySelector('#fourDayBankHolidays'),
-      summary: card.querySelector('[data-four-day-summary]'),
-      summaryIntro: card.querySelector('[data-four-day-summary-intro]'),
-      breakdown: card.querySelector('[data-four-day-breakdown]'),
-      totals: card.querySelector('[data-four-day-totals]'),
-      totalDays: card.querySelector('[data-four-day-total-days]'),
-      totalHours: card.querySelector('[data-four-day-total-hours]'),
-      totalCompressed: card.querySelector('[data-four-day-total-compressed]'),
-      equation: card.querySelector('[data-four-day-equation]'),
-      bankHolidayHelp: card.querySelector('[data-four-day-bankholidays-help]'),
-    };
-    fourDayWeekState.elements = elements;
+    const elements = { card };
+    Object.entries(config.selectors).forEach(([name, selector]) => {
+      elements[name] = selector ? card.querySelector(selector) : null;
+    });
+    state.elements = elements;
     return elements;
   }
 
-  function getBankHolidayBookerElements() {
-    if (fourDayWeekState.bookerElements) return fourDayWeekState.bookerElements;
+  function getFourDayWeekElements() {
+    return getLeaveCalculatorElements('fourDayWeek');
+  }
+
+  function getNineDayFortnightElements() {
+    return getLeaveCalculatorElements('nineDayFortnight');
+  }
+
+  function getWeeklyBankHolidayBookerElements() {
+    if (weeklyBookerState.elements) return weeklyBookerState.elements;
     const card = document.getElementById('bankHolidayBookerCard');
     if (!card) return null;
     const elements = {
@@ -472,12 +555,29 @@
       nonMatchesLabel: card.querySelector('[data-booker-non-matches-label]'),
       nonMatchesList: card.querySelector('[data-booker-non-matches-list]'),
     };
-    fourDayWeekState.bookerElements = elements;
+    weeklyBookerState.elements = elements;
     return elements;
   }
 
-  function updateBankHolidayBooker() {
-    const booker = getBankHolidayBookerElements();
+  function getFortnightBookerElements() {
+    if (fortnightBookerState.elements) return fortnightBookerState.elements;
+    const card = document.getElementById('nineDayFortnightBookerCard');
+    if (!card) return null;
+    const elements = {
+      card,
+      yearSelect: card.querySelector('#nineDayFortnightYear'),
+      firstDate: card.querySelector('#nineDayFirstNonWorkingDate'),
+      message: card.querySelector('[data-fortnight-booker-message]'),
+      results: card.querySelector('[data-fortnight-booker-results]'),
+      heading: card.querySelector('[data-fortnight-booker-heading]'),
+      list: card.querySelector('[data-fortnight-booker-list]'),
+    };
+    fortnightBookerState.elements = elements;
+    return elements;
+  }
+
+  function updateWeeklyBankHolidayBooker() {
+    const booker = getWeeklyBankHolidayBookerElements();
     if (!booker) return;
     const {
       daySelect,
@@ -676,10 +776,25 @@
     return Number.isNaN(parsed) ? 0 : parsed;
   }
 
-  function updateFourDayWeekSummary() {
-    const elements = getFourDayWeekElements();
-    if (!elements) return;
-    const { core, longService, carryOver, purchased, bankHolidays, breakdown, totals, totalDays, totalHours, totalCompressed, equation, summaryIntro } = elements;
+  function updateLeaveCalculatorSummary(key) {
+    const elements = getLeaveCalculatorElements(key);
+    const config = getLeaveCalculatorConfig(key);
+    if (!elements || !config) return;
+    const {
+      core,
+      longService,
+      carryOver,
+      purchased,
+      bankHolidays,
+      breakdown,
+      totals,
+      totalDays,
+      totalHours,
+      totalCompressed,
+      equation,
+      summaryIntro,
+    } = elements;
+
     const setStatValue = (wrapper, value) => {
       if (!wrapper) return;
       const valueEl = wrapper.querySelector('.stat-card__value');
@@ -696,6 +811,8 @@
     ];
 
     const hasValues = components.some((component) => component.value);
+    const summaryIntroEmpty = config.summaryIntro?.empty || '';
+    const summaryIntroActive = config.summaryIntro?.active || '';
 
     if (!hasValues) {
       if (breakdown) {
@@ -708,8 +825,7 @@
         equation.hidden = true;
       }
       if (summaryIntro) {
-        summaryIntro.textContent =
-          "Enter values above to see a detailed breakdown of the individual's allowance.";
+        summaryIntro.textContent = summaryIntroEmpty;
       }
       setStatValue(totalDays, formatDaysDisplay(0));
       setStatValue(totalHours, formatHoursDisplay(0));
@@ -718,7 +834,8 @@
     }
 
     const totalDaysValue = components.reduce((sum, component) => sum + component.value, 0);
-    const totalHoursValue = totalDaysValue * 7.4;
+    const hoursPerDay = Number.isFinite(config.hoursPerDay) ? config.hoursPerDay : 7.4;
+    const totalHoursValue = totalDaysValue * hoursPerDay;
 
     if (breakdown) {
       breakdown.innerHTML = '';
@@ -738,7 +855,10 @@
       breakdown.hidden = false;
     }
 
-    const compressedAllowanceValue = totalHoursValue / 9.25;
+    const division = Number.isFinite(config.compressedDivision)
+      ? config.compressedDivision
+      : 1;
+    const compressedAllowanceValue = division === 0 ? 0 : totalHoursValue / division;
 
     if (totals && totalDays && totalHours && equation) {
       totals.hidden = false;
@@ -750,20 +870,29 @@
     }
 
     if (summaryIntro) {
-      summaryIntro.textContent = "Breakdown of the individual's 4-day week leave allowance:";
+      summaryIntro.textContent = summaryIntroActive;
     }
   }
 
-  function updateFourDayWeekBankHolidayDefault({ force = false } = {}) {
-    const elements = getFourDayWeekElements();
-    if (!elements) return;
+  function updateFourDayWeekSummary() {
+    updateLeaveCalculatorSummary('fourDayWeek');
+  }
+
+  function updateNineDayFortnightSummary() {
+    updateLeaveCalculatorSummary('nineDayFortnight');
+  }
+
+  function updateLeaveCalculatorBankHolidayDefault(key, { force = false } = {}) {
+    const state = getLeaveCalculatorState(key);
+    const elements = getLeaveCalculatorElements(key);
+    if (!state || !elements) return;
     const { start, bankHolidays, bankHolidayHelp } = elements;
     if (!start || !bankHolidays) return;
 
     const startValue = start.value;
     if (!startValue) {
-      fourDayWeekState.lastDefault = null;
-      if (!fourDayWeekState.userOverriddenBankHolidays || force) {
+      state.lastDefault = null;
+      if (!state.userOverriddenBankHolidays || force) {
         bankHolidays.value = '';
       }
       if (bankHolidayHelp)
@@ -772,11 +901,11 @@
     }
 
     const computed = computeFourDayWeekBankHolidayDefault(new Date(startValue));
-    fourDayWeekState.lastDefault = computed;
+    state.lastDefault = computed;
 
-    if ((!fourDayWeekState.userOverriddenBankHolidays || force) && computed) {
+    if ((!state.userOverriddenBankHolidays || force) && computed) {
       bankHolidays.value = String(computed.count);
-    } else if (!computed && (force || !fourDayWeekState.userOverriddenBankHolidays)) {
+    } else if (!computed && (force || !state.userOverriddenBankHolidays)) {
       bankHolidays.value = '';
     }
 
@@ -794,21 +923,28 @@
     }
   }
 
-  function initializeFourDayWeek() {
-    if (fourDayWeekState.initialized) return;
-    const elements = getFourDayWeekElements();
+  function updateFourDayWeekBankHolidayDefault(options) {
+    updateLeaveCalculatorBankHolidayDefault('fourDayWeek', options);
+  }
+
+  function updateNineDayFortnightBankHolidayDefault(options) {
+    updateLeaveCalculatorBankHolidayDefault('nineDayFortnight', options);
+  }
+
+  function initializeLeaveCalculator(key, { onStartChange } = {}) {
+    const state = getLeaveCalculatorState(key);
+    if (!state || state.initialized) return;
+    const elements = getLeaveCalculatorElements(key);
     if (!elements) return;
-    const booker = getBankHolidayBookerElements();
 
     const { start, core, longService, carryOver, purchased, bankHolidays } = elements;
-    const bookerDaySelect = booker ? booker.daySelect : null;
 
     if (start && !start.value) {
       start.value = formatDateForInput(new Date());
     }
 
     const handleInputChange = () => {
-      updateFourDayWeekSummary();
+      updateLeaveCalculatorSummary(key);
     };
 
     [core, longService, carryOver, purchased].forEach((input) => {
@@ -818,30 +954,254 @@
 
     if (bankHolidays) {
       bankHolidays.addEventListener('input', () => {
-        fourDayWeekState.userOverriddenBankHolidays = true;
-        updateFourDayWeekSummary();
+        state.userOverriddenBankHolidays = true;
+        updateLeaveCalculatorSummary(key);
       });
     }
 
     if (start) {
       start.addEventListener('change', () => {
-        fourDayWeekState.userOverriddenBankHolidays = false;
-        updateFourDayWeekBankHolidayDefault({ force: true });
-        updateFourDayWeekSummary();
-        updateBankHolidayBooker();
+        state.userOverriddenBankHolidays = false;
+        updateLeaveCalculatorBankHolidayDefault(key, { force: true });
+        updateLeaveCalculatorSummary(key);
+        if (typeof onStartChange === 'function') onStartChange();
       });
     }
 
-    if (bookerDaySelect) {
-      bookerDaySelect.addEventListener('change', () => {
-        updateBankHolidayBooker();
+    state.initialized = true;
+    updateLeaveCalculatorBankHolidayDefault(key, { force: true });
+    updateLeaveCalculatorSummary(key);
+    if (typeof onStartChange === 'function') onStartChange();
+  }
+
+  function initializeFourDayWeek() {
+    initializeLeaveCalculator('fourDayWeek', {
+      onStartChange: () => {
+        updateWeeklyBankHolidayBooker();
+      },
+    });
+    initializeWeeklyBankHolidayBooker();
+  }
+
+  function initializeNineDayFortnight() {
+    initializeLeaveCalculator('nineDayFortnight', {
+      onStartChange: () => {
+        updateFortnightBankHolidayBooker();
+      },
+    });
+    initializeFortnightBankHolidayBooker();
+  }
+
+  function initializeWeeklyBankHolidayBooker() {
+    if (weeklyBookerState.initialized) return;
+    const elements = getWeeklyBankHolidayBookerElements();
+    if (!elements) return;
+    const { daySelect } = elements;
+    if (daySelect) {
+      daySelect.addEventListener('change', () => {
+        updateWeeklyBankHolidayBooker();
+      });
+    }
+    weeklyBookerState.initialized = true;
+    updateWeeklyBankHolidayBooker();
+  }
+
+  function updateFortnightBookerYearOptions() {
+    const elements = getFortnightBookerElements();
+    if (!elements) return;
+    const { yearSelect } = elements;
+    if (!yearSelect) return;
+
+    const years = Array.from(
+      new Set(
+        bankHolidayState.events
+          .map((event) => {
+            const eventDate = toStartOfDay(event.date);
+            return eventDate ? eventDate.getFullYear() : null;
+          })
+          .filter((year) => year !== null)
+      )
+    ).sort((a, b) => a - b);
+
+    const previousValue = yearSelect.value;
+    yearSelect.innerHTML = '';
+
+    if (!years.length) {
+      yearSelect.disabled = true;
+      yearSelect.value = '';
+      updateFortnightBankHolidayBooker();
+      return;
+    }
+
+    yearSelect.disabled = false;
+    const currentYear = new Date().getFullYear();
+    const preferred = years.includes(currentYear) ? currentYear : years[years.length - 1];
+    const previousNumber = Number.parseInt(previousValue || '', 10);
+    const resolved = years.includes(previousNumber) ? previousNumber : preferred;
+
+    years.forEach((year) => {
+      const option = document.createElement('option');
+      option.value = String(year);
+      option.textContent = String(year);
+      if (year === resolved) option.selected = true;
+      yearSelect.appendChild(option);
+    });
+
+    if (String(resolved) !== previousValue) {
+      yearSelect.value = String(resolved);
+    }
+
+    updateFortnightBankHolidayBooker();
+  }
+
+  function updateFortnightBankHolidayBooker() {
+    const elements = getFortnightBookerElements();
+    if (!elements) return;
+    const { yearSelect, firstDate, message, results, heading, list } = elements;
+
+    if (list) list.innerHTML = '';
+    if (results) results.hidden = true;
+
+    const firstDateValue = firstDate ? firstDate.value : '';
+    const yearValue = yearSelect ? Number.parseInt(yearSelect.value || '', 10) : NaN;
+
+    if (!firstDateValue) {
+      if (message) {
+        message.textContent = 'Pick a first non-working day to see matching bank holidays.';
+      }
+      return;
+    }
+
+    const startDate = toStartOfDay(firstDateValue);
+    if (!startDate) {
+      if (message) {
+        message.textContent = 'Enter a valid first non-working day to continue.';
+      }
+      return;
+    }
+
+    if (!bankHolidayState.events.length) {
+      if (message) {
+        message.textContent =
+          'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.';
+      }
+      return;
+    }
+
+    if (!Number.isFinite(yearValue)) {
+      if (message) {
+        message.textContent = 'Select a financial year to continue.';
+      }
+      return;
+    }
+
+    const windowEnd = new Date(yearValue, 2, 31, 23, 59, 59, 999);
+    const windowStart = startDate;
+
+    if (windowStart.getTime() > windowEnd.getTime()) {
+      if (message) {
+        message.textContent = 'No dates in range.';
+      }
+      return;
+    }
+
+    const occurrenceTimes = new Set();
+    for (
+      let cursor = new Date(windowStart.getFullYear(), windowStart.getMonth(), windowStart.getDate());
+      cursor.getTime() <= windowEnd.getTime();
+      cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 14)
+    ) {
+      cursor.setHours(0, 0, 0, 0);
+      occurrenceTimes.add(cursor.getTime());
+    }
+
+    const matches = bankHolidayState.events
+      .map((event) => {
+        const eventDate = toStartOfDay(event.date);
+        if (!eventDate) return null;
+        return {
+          title: event.title,
+          notes: event.notes,
+          date: eventDate,
+        };
+      })
+      .filter((event) => {
+        if (!event) return false;
+        const time = event.date.getTime();
+        return time >= windowStart.getTime() && time <= windowEnd.getTime() && occurrenceTimes.has(time);
+      })
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    const periodStartLabel = formatHumanDate(windowStart);
+    const periodEndLabel = `31 March ${yearValue}`;
+
+    if (!matches.length) {
+      if (message) {
+        message.textContent = `No bank holidays fall on your non-working days between ${periodStartLabel} and ${periodEndLabel}.`;
+      }
+      if (heading) heading.textContent = '';
+      return;
+    }
+
+    if (heading) {
+      heading.textContent = `Bank holidays on your non-working days (${matches.length})`;
+    }
+
+    matches.forEach((item) => {
+      const entry = document.createElement('li');
+      entry.className =
+        'rounded-lg bg-gray-50 dark:bg-gray-900/40 p-3 space-y-1 border border-gray-200 dark:border-gray-700';
+      const title = document.createElement('p');
+      title.className = 'font-medium text-gray-900 dark:text-gray-100';
+      title.textContent = item.title || 'Bank holiday';
+      entry.appendChild(title);
+      const dateLine = document.createElement('p');
+      dateLine.className = 'text-xs text-gray-600 dark:text-gray-400';
+      dateLine.textContent = formatBankHolidayDate(item.date);
+      entry.appendChild(dateLine);
+      if (item.notes) {
+        const notes = document.createElement('p');
+        notes.className = 'text-xs text-gray-500 dark:text-gray-400';
+        notes.textContent = item.notes;
+        entry.appendChild(notes);
+      }
+      if (list) list.appendChild(entry);
+    });
+
+    if (message) {
+      message.textContent = `Every other week non-working days from ${periodStartLabel} to ${periodEndLabel}.`;
+    }
+
+    if (results) {
+      results.hidden = false;
+    }
+  }
+
+  function initializeFortnightBankHolidayBooker() {
+    if (fortnightBookerState.initialized) return;
+    const elements = getFortnightBookerElements();
+    if (!elements) return;
+    const { yearSelect, firstDate } = elements;
+
+    if (firstDate && !firstDate.value) {
+      firstDate.value = formatDateForInput(new Date());
+    }
+
+    if (yearSelect) {
+      yearSelect.addEventListener('change', () => {
+        updateFortnightBankHolidayBooker();
       });
     }
 
-    fourDayWeekState.initialized = true;
-    updateFourDayWeekBankHolidayDefault({ force: true });
-    updateFourDayWeekSummary();
-    updateBankHolidayBooker();
+    if (firstDate) {
+      firstDate.addEventListener('change', () => {
+        updateFortnightBankHolidayBooker();
+      });
+    }
+
+    fortnightBookerState.initialized = true;
+    updateFortnightBookerYearOptions();
+    updateFortnightBankHolidayBooker();
   }
 
   function setBankHolidaysLoading(loading) {
@@ -930,7 +1290,10 @@
       if (empty) empty.classList.remove('hidden');
       updateFourDayWeekBankHolidayDefault();
       updateFourDayWeekSummary();
-      updateBankHolidayBooker();
+      updateWeeklyBankHolidayBooker();
+      updateNineDayFortnightBankHolidayDefault();
+      updateNineDayFortnightSummary();
+      updateFortnightBookerYearOptions();
       return;
     }
 
@@ -959,7 +1322,10 @@
 
     updateFourDayWeekBankHolidayDefault();
     updateFourDayWeekSummary();
-    updateBankHolidayBooker();
+    updateWeeklyBankHolidayBooker();
+    updateNineDayFortnightBankHolidayDefault();
+    updateNineDayFortnightSummary();
+    updateFortnightBookerYearOptions();
   }
 
   async function refreshBankHolidays({ showConfirmationOnSuccess = false } = {}) {
@@ -1569,6 +1935,7 @@
 
     initializeBankHolidays();
     initializeFourDayWeek();
+    initializeNineDayFortnight();
 
     const storedView = safeGet(LS_KEYS.view);
     const welcomeHidden = welcomeHiddenState;

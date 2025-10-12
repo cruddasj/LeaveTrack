@@ -1,4 +1,12 @@
-[ 
+[
+  {
+    "version": "1.1.46",
+    "date": "2025-10-12",
+    "changes": [
+      "Add a 9-day fortnight calculator with 8.22-hour compressed totals.",
+      "Show an every-other-week bank holiday booker that filters GOV.UK holidays by the rotating day off."
+    ]
+  },
   {
     "version": "1.1.45",
     "date": "2025-10-12",

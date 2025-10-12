@@ -2,6 +2,10 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [1.1.46] - 2025-10-12
+- Add a 9-day fortnight calculator with compressed-hours totals based on 8.22-hour working days.
+- Provide an every-other-week bank holiday booker that surfaces GOV.UK holidays matching the rotating day off.
+
 ## [1.1.45] - 2025-10-12
 - Limit the bank holiday booker to weekday options and present leave totals as stat cards for improved readability.
 
