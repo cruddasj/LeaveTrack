@@ -1,4 +1,12 @@
-[
+[ 
+  {
+    "version": "0.0.3",
+    "date": "2025-10-12",
+    "changes": [
+      "Add print to PDF summaries for the 4-day week and 9-day fortnight calculators",
+      "Include detailed inputs and totals in the exported leave breakdown"
+    ]
+  },
   {
     "version": "0.0.2",
     "date": "2025-10-12",

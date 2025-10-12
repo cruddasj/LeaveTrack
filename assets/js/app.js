@@ -32,6 +32,16 @@
     }
   };
 
+  function escapeHtml(value) {
+    if (value === null || value === undefined) return '';
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   const BANK_HOLIDAYS_ENDPOINT = 'https://www.gov.uk/bank-holidays.json';
   const BANK_HOLIDAYS_STORAGE_KEY = 'bankHolidaysCache';
   const BANK_HOLIDAYS_DIVISION = 'england-and-wales';
@@ -63,6 +73,8 @@
     'Friday',
     'Saturday',
   ];
+
+  const STANDARD_WORKING_DAY_HOURS = 7.4;
 
   const fourDayWeekState = {
     elements: null,
@@ -470,6 +482,7 @@
       totalCompressed: card.querySelector('[data-four-day-total-compressed]'),
       equation: card.querySelector('[data-four-day-equation]'),
       bankHolidayHelp: card.querySelector('[data-four-day-bankholidays-help]'),
+      printButton: card.querySelector('[data-action="print-four-day"]'),
     };
     fourDayWeekState.elements = elements;
     return elements;
@@ -496,6 +509,7 @@
       totalCompressed: card.querySelector('[data-nine-day-total-compressed]'),
       equation: card.querySelector('[data-nine-day-equation]'),
       bankHolidayHelp: card.querySelector('[data-nine-day-bankholidays-help]'),
+      printButton: card.querySelector('[data-action="print-nine-day"]'),
     };
     nineDayFortnightState.elements = elements;
     return elements;
@@ -737,26 +751,291 @@
     return Number.isNaN(parsed) ? 0 : parsed;
   }
 
+  function computeLeaveSummary(inputs, { compressedDayLengthHours }) {
+    const { core, longService, carryOver, purchased, bankHolidays } = inputs || {};
+
+    const components = [
+      { id: 'core', label: 'Core annual leave', value: getNumericInputValue(core) },
+      { id: 'longService', label: 'Long service leave', value: getNumericInputValue(longService) },
+      { id: 'carryOver', label: 'Carry over leave', value: getNumericInputValue(carryOver) },
+      {
+        id: 'purchased',
+        label: 'Purchased leave',
+        value: getNumericInputValue(purchased, { allowDecimal: false }),
+      },
+      {
+        id: 'bankHolidays',
+        label: 'Bank holidays',
+        value: getNumericInputValue(bankHolidays, { allowDecimal: false }),
+      },
+    ];
+
+    const hasValues = components.some((component) => component.value);
+    const totalDaysValue = components.reduce((sum, component) => sum + component.value, 0);
+    const totalHoursValue = totalDaysValue * STANDARD_WORKING_DAY_HOURS;
+    const normalizedCompressed =
+      Number.isFinite(compressedDayLengthHours) && compressedDayLengthHours > 0
+        ? compressedDayLengthHours
+        : 0;
+    const compressedAllowanceValue =
+      normalizedCompressed > 0 ? totalHoursValue / normalizedCompressed : 0;
+
+    return {
+      components,
+      hasValues,
+      totalDaysValue,
+      totalHoursValue,
+      compressedAllowanceValue,
+    };
+  }
+
+  function openLeaveSummaryPrintWindow({
+    documentTitle,
+    heading,
+    description,
+    summary,
+    startDateValue,
+    bankHolidayNote,
+    compressedDayLengthHours,
+    scheduleLabel,
+  }) {
+    const printWindow = window.open('', '_blank', 'noopener=yes');
+    if (!printWindow || !printWindow.document) {
+      showAlert('Unable to open the print preview. Please allow pop-ups and try again.');
+      return;
+    }
+
+    const generatedAt = new Date();
+    const generatedLabel = generatedAt.toLocaleString(undefined, {
+      dateStyle: 'long',
+      timeStyle: 'short',
+    });
+
+    const startHuman = startDateValue ? formatHumanDate(startDateValue) : '';
+    const startDisplay = startHuman
+      ? `${startHuman} (${startDateValue})`
+      : startDateValue || 'Not provided';
+
+    const componentRows = summary.components
+      .map(
+        (component) =>
+          `        <tr>\n          <th scope="row">${escapeHtml(component.label)}</th>\n          <td>${escapeHtml(formatDaysDisplay(component.value))}</td>\n        </tr>`
+      )
+      .join('\n');
+
+    const totalsRows =
+      `        <tr>\n          <th scope="row">Total standard leave (days)</th>\n          <td>${escapeHtml(formatDaysDisplay(summary.totalDaysValue))}</td>\n        </tr>\n` +
+      `        <tr>\n          <th scope="row">Total allowance (hours)</th>\n          <td>${escapeHtml(formatHoursDisplay(summary.totalHoursValue))}</td>\n        </tr>\n` +
+      `        <tr>\n          <th scope="row">Compressed allowance (days)</th>\n          <td>${escapeHtml(formatDaysDisplay(summary.compressedAllowanceValue))}</td>\n        </tr>`;
+
+    const descriptionParagraph = description
+      ? `<p class="description">${escapeHtml(description)}</p>`
+      : '';
+
+    const bankHolidayParagraph = bankHolidayNote
+      ? `<p class="note"><strong>Bank holidays:</strong> ${escapeHtml(bankHolidayNote)}</p>`
+      : '';
+
+    const compressedHoursLabel = formatNumberWithPrecision(compressedDayLengthHours, 2);
+    const standardHoursLabel = formatNumberWithPrecision(STANDARD_WORKING_DAY_HOURS, 2);
+    const scheduleDescription = scheduleLabel || 'compressed schedule';
+
+    const markup = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>${escapeHtml(documentTitle)}</title>
+    <style>
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: #111827;
+        background: #ffffff;
+        padding: 2rem;
+      }
+      header {
+        margin-bottom: 2rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+        margin-bottom: 0.25rem;
+      }
+      h2 {
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+        color: #111827;
+      }
+      .meta {
+        color: #4b5563;
+        font-size: 0.95rem;
+        margin: 0;
+      }
+      .description {
+        margin-top: 0.75rem;
+        color: #374151;
+        font-size: 1rem;
+      }
+      section {
+        margin-bottom: 2rem;
+      }
+      table.summary-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+      table.summary-table caption {
+        text-align: left;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #1f2937;
+      }
+      table.summary-table th,
+      table.summary-table td {
+        padding: 0.75rem 0;
+        border-top: 1px solid #e5e7eb;
+        font-size: 0.95rem;
+      }
+      table.summary-table th {
+        text-align: left;
+        font-weight: 600;
+        color: #111827;
+      }
+      table.summary-table td {
+        text-align: right;
+        color: #111827;
+      }
+      .note {
+        font-size: 0.9rem;
+        color: #4b5563;
+        margin-top: 0.5rem;
+      }
+      dl.key-values {
+        margin: 0;
+      }
+      dl.key-values div {
+        display: flex;
+        justify-content: space-between;
+        gap: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        padding: 0.5rem 0;
+      }
+      dl.key-values div:first-of-type {
+        border-top: none;
+        padding-top: 0;
+      }
+      dl.key-values dt {
+        font-weight: 600;
+        color: #111827;
+      }
+      dl.key-values dd {
+        margin: 0;
+        color: #1f2937;
+      }
+      @media print {
+        body {
+          padding: 1rem;
+        }
+        header {
+          margin-bottom: 1rem;
+        }
+        section {
+          margin-bottom: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>${escapeHtml(heading)}</h1>
+      <p class="meta">Generated on ${escapeHtml(generatedLabel)}</p>
+      ${descriptionParagraph}
+    </header>
+    <section>
+      <h2>Key details</h2>
+      <dl class="key-values">
+        <div>
+          <dt>Start date</dt>
+          <dd>${escapeHtml(startDisplay)}</dd>
+        </div>
+      </dl>
+      <table class="summary-table">
+        <caption>Annual leave components</caption>
+        <tbody>
+${componentRows}
+        </tbody>
+      </table>
+    </section>
+    <section>
+      <h2>Totals</h2>
+      <table class="summary-table">
+        <tbody>
+${totalsRows}
+        </tbody>
+      </table>
+      <p class="note">Totals convert days to hours using ${escapeHtml(standardHoursLabel)} hours per standard day.</p>
+      <p class="note">Compressed allowance uses ${escapeHtml(compressedHoursLabel)}-hour days for the ${escapeHtml(scheduleDescription)}.</p>
+      ${bankHolidayParagraph}
+    </section>
+  </body>
+</html>`;
+
+    const { document: printDocument } = printWindow;
+    printDocument.open();
+    printDocument.write(markup);
+    printDocument.close();
+
+    const triggerPrint = () => {
+      try {
+        printWindow.focus();
+        printWindow.print();
+      } catch (_) {
+        /* ignore */
+      }
+    };
+
+    if ('onafterprint' in printWindow) {
+      printWindow.addEventListener('afterprint', () => {
+        try {
+          printWindow.close();
+        } catch (_) {
+          /* ignore */
+        }
+      });
+    }
+
+    setTimeout(triggerPrint, 200);
+  }
+
   function updateFourDayWeekSummary() {
     const elements = getFourDayWeekElements();
     if (!elements) return;
-    const { core, longService, carryOver, purchased, bankHolidays, breakdown, totals, totalDays, totalHours, totalCompressed, equation, summaryIntro } = elements;
+    const {
+      core,
+      longService,
+      carryOver,
+      purchased,
+      bankHolidays,
+      breakdown,
+      totals,
+      totalDays,
+      totalHours,
+      totalCompressed,
+      equation,
+      summaryIntro,
+      printButton,
+    } = elements;
+
+    const summary = computeLeaveSummary(
+      { core, longService, carryOver, purchased, bankHolidays },
+      { compressedDayLengthHours: 9.25 }
+    );
+    const { components, hasValues, totalDaysValue, totalHoursValue, compressedAllowanceValue } = summary;
+
     const setStatValue = (wrapper, value) => {
       if (!wrapper) return;
       const valueEl = wrapper.querySelector('.stat-card__value');
       if (!valueEl) return;
       valueEl.textContent = value;
     };
-
-    const components = [
-      { id: 'core', label: 'Core annual leave', value: getNumericInputValue(core) },
-      { id: 'longService', label: 'Long service leave', value: getNumericInputValue(longService) },
-      { id: 'carryOver', label: 'Carry over leave', value: getNumericInputValue(carryOver) },
-      { id: 'purchased', label: 'Purchased leave', value: getNumericInputValue(purchased, { allowDecimal: false }) },
-      { id: 'bankHolidays', label: 'Bank holidays', value: getNumericInputValue(bankHolidays, { allowDecimal: false }) },
-    ];
-
-    const hasValues = components.some((component) => component.value);
 
     if (!hasValues) {
       if (breakdown) {
@@ -775,11 +1054,9 @@
       setStatValue(totalDays, formatDaysDisplay(0));
       setStatValue(totalHours, formatHoursDisplay(0));
       setStatValue(totalCompressed, formatDaysDisplay(0));
+      if (printButton) printButton.disabled = true;
       return;
     }
-
-    const totalDaysValue = components.reduce((sum, component) => sum + component.value, 0);
-    const totalHoursValue = totalDaysValue * 7.4;
 
     if (breakdown) {
       breakdown.innerHTML = '';
@@ -799,9 +1076,7 @@
       breakdown.hidden = false;
     }
 
-    const compressedAllowanceValue = totalHoursValue / 9.25;
-
-    if (totals && totalDays && totalHours && equation) {
+    if (totals && totalDays && totalHours && totalCompressed && equation) {
       totals.hidden = false;
       setStatValue(totalDays, formatDaysDisplay(totalDaysValue));
       setStatValue(totalHours, formatHoursDisplay(totalHoursValue));
@@ -813,6 +1088,8 @@
     if (summaryIntro) {
       summaryIntro.textContent = "Breakdown of the individual's 4-day week leave allowance:";
     }
+
+    if (printButton) printButton.disabled = false;
   }
 
   function updateNineDayFortnightSummary() {
@@ -831,7 +1108,14 @@
       totalCompressed,
       equation,
       summaryIntro,
+      printButton,
     } = elements;
+
+    const summary = computeLeaveSummary(
+      { core, longService, carryOver, purchased, bankHolidays },
+      { compressedDayLengthHours: 8.22 }
+    );
+    const { components, hasValues, totalDaysValue, totalHoursValue, compressedAllowanceValue } = summary;
 
     const setStatValue = (wrapper, value) => {
       if (!wrapper) return;
@@ -839,16 +1123,6 @@
       if (!valueEl) return;
       valueEl.textContent = value;
     };
-
-    const components = [
-      { id: 'core', label: 'Core annual leave', value: getNumericInputValue(core) },
-      { id: 'longService', label: 'Long service leave', value: getNumericInputValue(longService) },
-      { id: 'carryOver', label: 'Carry over leave', value: getNumericInputValue(carryOver) },
-      { id: 'purchased', label: 'Purchased leave', value: getNumericInputValue(purchased, { allowDecimal: false }) },
-      { id: 'bankHolidays', label: 'Bank holidays', value: getNumericInputValue(bankHolidays, { allowDecimal: false }) },
-    ];
-
-    const hasValues = components.some((component) => component.value);
 
     if (!hasValues) {
       if (breakdown) {
@@ -867,11 +1141,9 @@
       setStatValue(totalDays, formatDaysDisplay(0));
       setStatValue(totalHours, formatHoursDisplay(0));
       setStatValue(totalCompressed, formatDaysDisplay(0));
+      if (printButton) printButton.disabled = true;
       return;
     }
-
-    const totalDaysValue = components.reduce((sum, component) => sum + component.value, 0);
-    const totalHoursValue = totalDaysValue * 7.4;
 
     if (breakdown) {
       breakdown.innerHTML = '';
@@ -891,9 +1163,7 @@
       breakdown.hidden = false;
     }
 
-    const compressedAllowanceValue = totalHoursValue / 8.22;
-
-    if (totals && totalDays && totalHours && equation) {
+    if (totals && totalDays && totalHours && totalCompressed && equation) {
       totals.hidden = false;
       setStatValue(totalDays, formatDaysDisplay(totalDaysValue));
       setStatValue(totalHours, formatHoursDisplay(totalHoursValue));
@@ -905,6 +1175,60 @@
     if (summaryIntro) {
       summaryIntro.textContent = "Breakdown of the individual's 9-day fortnight leave allowance:";
     }
+
+    if (printButton) printButton.disabled = false;
+  }
+
+  function handleFourDayWeekPrint() {
+    const elements = getFourDayWeekElements();
+    if (!elements) return;
+    const summary = computeLeaveSummary(elements, { compressedDayLengthHours: 9.25 });
+    if (!summary.hasValues) {
+      showAlert('Enter allowance details before printing a summary.');
+      return;
+    }
+
+    const startValue = elements.start ? elements.start.value : '';
+    const bankHolidayNote = elements.bankHolidayHelp
+      ? elements.bankHolidayHelp.textContent.trim()
+      : '';
+
+    openLeaveSummaryPrintWindow({
+      documentTitle: '4-day week leave summary',
+      heading: '4-day week leave entitlement',
+      description: 'Detailed breakdown of the 4-day week calculator values and totals.',
+      summary,
+      startDateValue: startValue,
+      bankHolidayNote,
+      compressedDayLengthHours: 9.25,
+      scheduleLabel: '4-day week pattern',
+    });
+  }
+
+  function handleNineDayFortnightPrint() {
+    const elements = getNineDayFortnightElements();
+    if (!elements) return;
+    const summary = computeLeaveSummary(elements, { compressedDayLengthHours: 8.22 });
+    if (!summary.hasValues) {
+      showAlert('Enter allowance details before printing a summary.');
+      return;
+    }
+
+    const startValue = elements.start ? elements.start.value : '';
+    const bankHolidayNote = elements.bankHolidayHelp
+      ? elements.bankHolidayHelp.textContent.trim()
+      : '';
+
+    openLeaveSummaryPrintWindow({
+      documentTitle: '9-day fortnight leave summary',
+      heading: '9-day fortnight leave entitlement',
+      description: 'Detailed breakdown of the 9-day fortnight calculator values and totals.',
+      summary,
+      startDateValue: startValue,
+      bankHolidayNote,
+      compressedDayLengthHours: 8.22,
+      scheduleLabel: '9-day fortnight pattern',
+    });
   }
 
   function updateFourDayWeekBankHolidayDefault({ force = false } = {}) {
@@ -1146,7 +1470,7 @@
     if (!elements) return;
     const booker = getBankHolidayBookerElements();
 
-    const { start, core, longService, carryOver, purchased, bankHolidays } = elements;
+    const { start, core, longService, carryOver, purchased, bankHolidays, printButton } = elements;
     const bookerDaySelect = booker ? booker.daySelect : null;
 
     if (start && !start.value) {
@@ -1178,6 +1502,10 @@
       });
     }
 
+    if (printButton) {
+      printButton.addEventListener('click', handleFourDayWeekPrint);
+    }
+
     if (bookerDaySelect) {
       bookerDaySelect.addEventListener('change', () => {
         updateBankHolidayBooker();
@@ -1196,7 +1524,7 @@
     if (!elements) return;
     const booker = getNineDayFortnightBookerElements();
 
-    const { start, core, longService, carryOver, purchased, bankHolidays } = elements;
+    const { start, core, longService, carryOver, purchased, bankHolidays, printButton } = elements;
     const bookerStartInput = booker ? booker.startDate : null;
 
     if (start && !start.value) {
@@ -1235,6 +1563,10 @@
       bookerStartInput.addEventListener('change', () => {
         updateNineDayFortnightBooker();
       });
+    }
+
+    if (printButton) {
+      printButton.addEventListener('click', handleNineDayFortnightPrint);
     }
 
     nineDayFortnightState.initialized = true;
