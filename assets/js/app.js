@@ -429,6 +429,7 @@
       totals: card.querySelector('[data-four-day-totals]'),
       totalDays: card.querySelector('[data-four-day-total-days]'),
       totalHours: card.querySelector('[data-four-day-total-hours]'),
+      totalCompressed: card.querySelector('[data-four-day-total-compressed]'),
       equation: card.querySelector('[data-four-day-equation]'),
       bankHolidayHelp: card.querySelector('[data-four-day-bankholidays-help]'),
     };
@@ -463,7 +464,7 @@
   function updateFourDayWeekSummary() {
     const elements = getFourDayWeekElements();
     if (!elements) return;
-    const { core, longService, carryOver, purchased, bankHolidays, breakdown, totals, totalDays, totalHours, equation, summaryIntro } = elements;
+    const { core, longService, carryOver, purchased, bankHolidays, breakdown, totals, totalDays, totalHours, totalCompressed, equation, summaryIntro } = elements;
 
     const components = [
       { id: 'core', label: 'Core annual leave', value: getNumericInputValue(core) },
@@ -484,6 +485,9 @@
       if (equation) {
         equation.textContent = '';
         equation.hidden = true;
+      }
+      if (totalCompressed) {
+        totalCompressed.textContent = '';
       }
       if (summaryIntro) {
         summaryIntro.textContent =
@@ -513,10 +517,15 @@
       breakdown.hidden = false;
     }
 
+    const compressedAllowanceValue = totalHoursValue / 9.25;
+
     if (totals && totalDays && totalHours && equation) {
       totals.hidden = false;
       totalDays.textContent = `Total leave: ${formatDaysDisplay(totalDaysValue)}`;
       totalHours.textContent = `Total allowance: ${formatHoursDisplay(totalHoursValue)}`;
+      if (totalCompressed) {
+        totalCompressed.textContent = `Compressed hours allowance: ${formatDaysDisplay(compressedAllowanceValue)}`;
+      }
       equation.textContent = '';
       equation.hidden = true;
     }

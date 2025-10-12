@@ -2,6 +2,9 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [1.1.43] - 2025-10-12
+- Show a compressed-hours allowance in the 4-day week summary based on 9.25-hour days.
+
 ## [1.1.42] - 2025-10-11
 - Simplify the bank holiday refresh confirmation to omit offline save counts.
 
