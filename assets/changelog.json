@@ -1,4 +1,11 @@
-[
+[ 
+  {
+    "version": "0.0.5",
+    "date": "2025-10-12",
+    "changes": [
+      "Start the Bank holiday booker sections on a new page when printing so no content is clipped"
+    ]
+  },
   {
     "version": "0.0.3",
     "date": "2025-10-12",

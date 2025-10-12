@@ -105,6 +105,13 @@
   body {
     margin: 0 !important;
   }
+
+  #bankHolidayBookerCard,
+  #nineDayFortnightBookerCard {
+    /* Keep the bank holiday bookers on their own page to avoid clipping */
+    break-before: page;
+    page-break-before: always;
+  }
 }
 
 @layer components {
