@@ -740,10 +740,7 @@
       if (showConfirmationOnSuccess) {
         const savedCount = events.length;
         let message = 'Bank holiday data refreshed.';
-        if (savedCount > 0) {
-          const noun = savedCount === 1 ? 'bank holiday' : 'bank holidays';
-          message = `Bank holiday data refreshed. ${savedCount} ${noun} saved for offline access.`;
-        } else {
+        if (savedCount === 0) {
           message = 'Bank holiday data refreshed, but no upcoming bank holidays were returned.';
         }
         showAlert(message);
