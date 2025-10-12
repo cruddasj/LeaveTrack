@@ -7,6 +7,7 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 
 ## [1.1.44] - 2025-10-12
 - Add a bank holiday booker that highlights remaining dates by usual day off and make the 4-day week cards collapsible.
+- Introduce a 9-day fortnight page with matching annual leave inputs and an every-other-week bank holiday finder.
 
 ## [1.1.43] - 2025-10-12
 - Show a compressed-hours allowance in the 4-day week summary based on 9.25-hour days.
