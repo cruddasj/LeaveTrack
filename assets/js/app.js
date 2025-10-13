@@ -8,6 +8,7 @@
     mobileNavSticky: 'mobileNavSticky',
     view: 'activeView',
     collapsible: 'collapsedCards',
+    settings: 'appSettings',
   };
 
   const root = document.documentElement;
@@ -31,6 +32,238 @@
       return null;
     }
   };
+
+  function loadStoredSettings() {
+    const fallback = { ...SETTINGS_DEFAULTS };
+    const raw = safeGet(LS_KEYS.settings);
+    if (!raw) return fallback;
+    try {
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return fallback;
+      const normalized = { ...fallback };
+      if (Number.isFinite(parsed.accrualStartMonth)) {
+        normalized.accrualStartMonth = parsed.accrualStartMonth;
+      }
+      if (Number.isFinite(parsed.accrualStartDay)) {
+        normalized.accrualStartDay = parsed.accrualStartDay;
+      }
+      if (typeof parsed.accrualStartIso === 'string') {
+        normalized.accrualStartIso = parsed.accrualStartIso;
+      }
+      if (Number.isFinite(parsed.standardDayHours)) {
+        normalized.standardDayHours = parsed.standardDayHours;
+      }
+      if (Number.isFinite(parsed.fourDayCompressedHours)) {
+        normalized.fourDayCompressedHours = parsed.fourDayCompressedHours;
+      }
+      if (Number.isFinite(parsed.nineDayCompressedHours)) {
+        normalized.nineDayCompressedHours = parsed.nineDayCompressedHours;
+      }
+      return normalized;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function persistSettings(values) {
+    try {
+      safeSet(LS_KEYS.settings, JSON.stringify(values));
+    } catch (_) {
+      /* ignore */
+    }
+  }
+
+  function updateSettings(partial) {
+    settingsState.values = { ...settingsState.values, ...partial };
+    persistSettings(settingsState.values);
+  }
+
+  function getAppSettings() {
+    return settingsState.values;
+  }
+
+  function resolveAccrualAnchorDate(year) {
+    const settings = getAppSettings();
+    const rawMonth = Number.isFinite(settings.accrualStartMonth)
+      ? settings.accrualStartMonth
+      : DEFAULT_ACCRUAL_START_MONTH;
+    const rawDay = Number.isFinite(settings.accrualStartDay)
+      ? settings.accrualStartDay
+      : DEFAULT_ACCRUAL_START_DAY;
+    const month = Math.min(Math.max(1, rawMonth), 12);
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const day = Math.min(Math.max(1, rawDay), daysInMonth);
+    const date = new Date(year, month - 1, day);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  function ensureAccrualStartIso() {
+    const current = getAppSettings().accrualStartIso;
+    if (current) {
+      const parsed = toStartOfDay(current);
+      if (parsed) return formatDateForInput(parsed);
+    }
+    const now = new Date();
+    let candidate = resolveAccrualAnchorDate(now.getFullYear());
+    if (candidate.getTime() > now.getTime()) {
+      candidate = resolveAccrualAnchorDate(now.getFullYear() - 1);
+    }
+    const iso = formatDateForInput(candidate);
+    updateSettings({ accrualStartIso: iso });
+    return iso;
+  }
+
+  function computeAccrualYearEnd(startDate) {
+    const normalized = toStartOfDay(startDate);
+    if (!normalized) return null;
+    const end = new Date(normalized.getTime());
+    end.setFullYear(end.getFullYear() + 1);
+    end.setDate(end.getDate() - 1);
+    end.setHours(0, 0, 0, 0);
+    return end;
+  }
+
+  function getAccrualYearSummaryLabels() {
+    const startIso = ensureAccrualStartIso();
+    const startDate = toStartOfDay(startIso);
+    if (!startDate) {
+      return { startLabel: '', endLabel: '' };
+    }
+    const endDate = computeAccrualYearEnd(startDate);
+    return {
+      startLabel: startDate ? formatHumanDate(startDate) : '',
+      endLabel: endDate ? formatHumanDate(endDate) : '',
+    };
+  }
+
+  function getSettingsElements() {
+    if (settingsState.elements) return settingsState.elements;
+    const elements = {
+      leaveYearStart: document.getElementById('settingsLeaveYearStart'),
+      leaveYearEnd: document.getElementById('settingsLeaveYearEnd'),
+      leaveYearSummary: document.querySelector('[data-settings-leave-year-summary]'),
+      standardHours: document.getElementById('settingsStandardHours'),
+      fourDayHours: document.getElementById('settingsFourDayHours'),
+      nineDayHours: document.getElementById('settingsNineDayHours'),
+    };
+    settingsState.elements = elements;
+    return elements;
+  }
+
+  function formatHoursInputValue(value) {
+    return Number.isFinite(value) ? (Math.round(value * 100) / 100).toFixed(2) : '';
+  }
+
+  function sanitizeHoursValue(rawValue, fallback) {
+    const parsed = Number.parseFloat(rawValue);
+    if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+    return Math.round(parsed * 100) / 100;
+  }
+
+  function refreshSettingsUi() {
+    const elements = getSettingsElements();
+    const settings = getAppSettings();
+    const startIso = ensureAccrualStartIso();
+    if (elements.leaveYearStart && startIso) {
+      elements.leaveYearStart.value = startIso;
+    }
+    if (elements.leaveYearEnd) {
+      const endDate = computeAccrualYearEnd(startIso);
+      elements.leaveYearEnd.value = endDate ? formatDateForInput(endDate) : '';
+    }
+    if (elements.leaveYearSummary) {
+      const { startLabel, endLabel } = getAccrualYearSummaryLabels();
+      elements.leaveYearSummary.textContent =
+        startLabel && endLabel
+          ? `Your leave accrual year runs from ${startLabel} to ${endLabel}.`
+          : 'Select a start date to define your leave accrual year.';
+    }
+    if (elements.standardHours) {
+      elements.standardHours.value = formatHoursInputValue(settings.standardDayHours);
+    }
+    if (elements.fourDayHours) {
+      elements.fourDayHours.value = formatHoursInputValue(settings.fourDayCompressedHours);
+    }
+    if (elements.nineDayHours) {
+      elements.nineDayHours.value = formatHoursInputValue(settings.nineDayCompressedHours);
+    }
+  }
+
+  function initializeSettingsControls() {
+    const elements = getSettingsElements();
+    if (!elements) return;
+
+    refreshSettingsUi();
+
+    if (elements.leaveYearStart) {
+      elements.leaveYearStart.addEventListener('change', (event) => {
+        const value = event.target.value;
+        const normalized = toStartOfDay(value);
+        if (!normalized) {
+          event.target.value = ensureAccrualStartIso();
+          return;
+        }
+        updateSettings({
+          accrualStartMonth: normalized.getMonth() + 1,
+          accrualStartDay: normalized.getDate(),
+          accrualStartIso: formatDateForInput(normalized),
+        });
+        refreshSettingsUi();
+        renderBankHolidays({ updateYears: true });
+        updateFourDayWeekBankHolidayDefault({ force: true });
+        updateBankHolidayBooker();
+        updateNineDayFortnightBankHolidayDefault({ force: true });
+        updateNineDayFortnightBooker();
+      });
+    }
+
+    if (elements.standardHours) {
+      elements.standardHours.addEventListener('change', (event) => {
+        const sanitized = sanitizeHoursValue(event.target.value, DEFAULT_STANDARD_DAY_HOURS);
+        updateSettings({ standardDayHours: sanitized });
+        refreshSettingsUi();
+        updateFourDayWeekSummary();
+        updateNineDayFortnightSummary();
+      });
+    }
+
+    if (elements.fourDayHours) {
+      elements.fourDayHours.addEventListener('change', (event) => {
+        const sanitized = sanitizeHoursValue(event.target.value, DEFAULT_FOUR_DAY_COMPRESSED_HOURS);
+        updateSettings({ fourDayCompressedHours: sanitized });
+        refreshSettingsUi();
+        updateFourDayWeekSummary();
+      });
+    }
+
+    if (elements.nineDayHours) {
+      elements.nineDayHours.addEventListener('change', (event) => {
+        const sanitized = sanitizeHoursValue(event.target.value, DEFAULT_NINE_DAY_COMPRESSED_HOURS);
+        updateSettings({ nineDayCompressedHours: sanitized });
+        refreshSettingsUi();
+        updateNineDayFortnightSummary();
+      });
+    }
+  }
+
+  function getStandardDayHours() {
+    const value = Number.parseFloat(getAppSettings().standardDayHours);
+    if (!Number.isFinite(value) || value <= 0) return DEFAULT_STANDARD_DAY_HOURS;
+    return value;
+  }
+
+  function getFourDayCompressedHours() {
+    const value = Number.parseFloat(getAppSettings().fourDayCompressedHours);
+    if (!Number.isFinite(value) || value <= 0) return DEFAULT_FOUR_DAY_COMPRESSED_HOURS;
+    return value;
+  }
+
+  function getNineDayCompressedHours() {
+    const value = Number.parseFloat(getAppSettings().nineDayCompressedHours);
+    if (!Number.isFinite(value) || value <= 0) return DEFAULT_NINE_DAY_COMPRESSED_HOURS;
+    return value;
+  }
 
   const BANK_HOLIDAYS_ENDPOINT = 'https://www.gov.uk/bank-holidays.json';
   const BANK_HOLIDAYS_STORAGE_KEY = 'bankHolidaysCache';
@@ -82,9 +315,26 @@
 
   let welcomeHiddenState = false;
 
-  const STANDARD_DAY_HOURS = 7.4;
-  const FOUR_DAY_COMPRESSED_HOURS = 9.25;
-  const NINE_DAY_COMPRESSED_HOURS = 8.22;
+  const DEFAULT_STANDARD_DAY_HOURS = 7.4;
+  const DEFAULT_FOUR_DAY_COMPRESSED_HOURS = 9.25;
+  const DEFAULT_NINE_DAY_COMPRESSED_HOURS = 8.22;
+
+  const DEFAULT_ACCRUAL_START_MONTH = 4;
+  const DEFAULT_ACCRUAL_START_DAY = 6;
+
+  const SETTINGS_DEFAULTS = {
+    accrualStartMonth: DEFAULT_ACCRUAL_START_MONTH,
+    accrualStartDay: DEFAULT_ACCRUAL_START_DAY,
+    accrualStartIso: null,
+    standardDayHours: DEFAULT_STANDARD_DAY_HOURS,
+    fourDayCompressedHours: DEFAULT_FOUR_DAY_COMPRESSED_HOURS,
+    nineDayCompressedHours: DEFAULT_NINE_DAY_COMPRESSED_HOURS,
+  };
+
+  const settingsState = {
+    values: { ...SETTINGS_DEFAULTS },
+    elements: null,
+  };
 
   function applyDarkMode(enabled, { persist = true, withTransition = false } = {}) {
     const shouldEnable = !!enabled;
@@ -271,6 +521,7 @@
       loading: card.querySelector('[data-bank-holidays-loading]'),
       error: card.querySelector('[data-bank-holidays-error]'),
       empty: card.querySelector('[data-bank-holidays-empty]'),
+      rangeSummary: card.querySelector('[data-bank-holidays-range]'),
       refresh: card.querySelector('[data-action="refresh-bank-holidays"]'),
     };
     return bankHolidayElements;
@@ -389,25 +640,29 @@
     return `${year}-${month}-${day}`;
   }
 
-  function getFinancialYearRange(date) {
+  function getAccrualYearRange(date) {
     const normalized = toStartOfDay(date);
     if (!normalized) return null;
-    const year = normalized.getFullYear();
-    const startYear = normalized.getMonth() >= 3 ? year : year - 1;
-    const rangeStart = new Date(startYear, 3, 1);
-    rangeStart.setHours(0, 0, 0, 0);
-    const rangeEnd = new Date(startYear + 1, 2, 31);
+    const normalizedYear = normalized.getFullYear();
+    const anchorCurrentYear = resolveAccrualAnchorDate(normalizedYear);
+    let startYear = normalizedYear;
+    if (normalized < anchorCurrentYear) {
+      startYear -= 1;
+    }
+    const rangeStart = resolveAccrualAnchorDate(startYear);
+    const nextStart = resolveAccrualAnchorDate(startYear + 1);
+    const rangeEnd = new Date(nextStart.getTime() - 1);
     rangeEnd.setHours(23, 59, 59, 999);
     return { start: rangeStart, end: rangeEnd };
   }
 
-  function getFinancialYearStartYear(date) {
-    const range = getFinancialYearRange(date);
+  function getAccrualYearStartYear(date) {
+    const range = getAccrualYearRange(date);
     if (!range) return null;
     return range.start.getFullYear();
   }
 
-  function formatFinancialYearLabel(startYear) {
+  function formatAccrualYearLabel(startYear) {
     if (!Number.isFinite(startYear)) return '';
     const endYear = startYear + 1;
     return `${startYear} to ${endYear}`;
@@ -422,9 +677,9 @@
     return `${year}-${month}-${day}`;
   }
 
-  function computeFinancialYearBankHolidayDefault(startDate) {
+  function computeAccrualYearBankHolidayDefault(startDate) {
     if (!bankHolidayState.events.length) return null;
-    const range = getFinancialYearRange(startDate);
+    const range = getAccrualYearRange(startDate);
     if (!range) return null;
 
     const startNormalized = toStartOfDay(startDate);
@@ -573,7 +828,8 @@
     const dayValue = daySelect ? String(daySelect.value || '').toLowerCase() : '';
     if (!dayValue) {
       if (message) {
-        message.textContent = 'Select a non-working day to preview matching bank holidays.';
+        message.textContent =
+          'Select a non-working day to preview matching bank holidays in this leave accrual year.';
       }
       return;
     }
@@ -584,7 +840,8 @@
 
     if (!startValue) {
       if (message) {
-        message.textContent = 'Enter a start date above to calculate bank holiday matches.';
+        message.textContent =
+          'Enter a start date above to calculate bank holiday matches for this leave accrual year.';
       }
       return;
     }
@@ -600,15 +857,17 @@
     const startDate = toStartOfDay(startValue);
     if (!startDate) {
       if (message) {
-        message.textContent = 'Enter a valid start date above to calculate bank holiday matches.';
+        message.textContent =
+          'Enter a valid start date above to calculate bank holiday matches for this leave accrual year.';
       }
       return;
     }
 
-    const computed = computeFinancialYearBankHolidayDefault(startDate);
+    const computed = computeAccrualYearBankHolidayDefault(startDate);
     if (!computed) {
       if (message) {
-        message.textContent = 'Unable to determine the financial year for the selected start date.';
+        message.textContent =
+          'Unable to determine the leave accrual year for the selected start date.';
       }
       return;
     }
@@ -616,7 +875,8 @@
     const { effectiveStart, rangeEnd } = computed;
     if (!effectiveStart || !rangeEnd) {
       if (message) {
-        message.textContent = 'Unable to determine the remaining range for the selected start date.';
+        message.textContent =
+          'Unable to determine the remaining leave accrual year window for the selected start date.';
       }
       return;
     }
@@ -648,7 +908,7 @@
       if (message) {
         const startLabel = formatHumanDate(effectiveStart);
         const endLabel = formatHumanDate(rangeEnd);
-        message.textContent = `No remaining bank holidays between ${startLabel} and ${endLabel}.`;
+        message.textContent = `No remaining bank holidays between ${startLabel} and ${endLabel} in this leave accrual year.`;
       }
       return;
     }
@@ -721,7 +981,7 @@
     if (message) {
       const startLabel = formatHumanDate(effectiveStart);
       const endLabel = formatHumanDate(rangeEnd);
-      message.textContent = `Highlighting bank holidays between ${startLabel} and ${endLabel}.`;
+      message.textContent = `Highlighting bank holidays between ${startLabel} and ${endLabel} for this leave accrual year.`;
     }
 
     if (results) {
@@ -817,8 +1077,10 @@
       return;
     }
 
+    const standardDayHours = getStandardDayHours();
+    const compressedDayHours = getFourDayCompressedHours();
     const totalDaysValue = components.reduce((sum, component) => sum + component.value, 0);
-    const totalHoursValue = totalDaysValue * STANDARD_DAY_HOURS;
+    const totalHoursValue = totalDaysValue * standardDayHours;
 
     if (breakdown) {
       breakdown.innerHTML = '';
@@ -838,7 +1100,8 @@
       breakdown.hidden = false;
     }
 
-    const compressedAllowanceValue = totalHoursValue / FOUR_DAY_COMPRESSED_HOURS;
+    const compressedAllowanceValue =
+      compressedDayHours > 0 ? totalHoursValue / compressedDayHours : 0;
 
     if (totals && totalDays && totalHours && equation) {
       totals.hidden = false;
@@ -903,8 +1166,10 @@
       return;
     }
 
+    const standardDayHours = getStandardDayHours();
+    const compressedDayHours = getNineDayCompressedHours();
     const totalDaysValue = components.reduce((sum, component) => sum + component.value, 0);
-    const totalHoursValue = totalDaysValue * STANDARD_DAY_HOURS;
+    const totalHoursValue = totalDaysValue * standardDayHours;
 
     if (breakdown) {
       breakdown.innerHTML = '';
@@ -924,7 +1189,8 @@
       breakdown.hidden = false;
     }
 
-    const compressedAllowanceValue = totalHoursValue / NINE_DAY_COMPRESSED_HOURS;
+    const compressedAllowanceValue =
+      compressedDayHours > 0 ? totalHoursValue / compressedDayHours : 0;
 
     if (totals && totalDays && totalHours && equation) {
       totals.hidden = false;
@@ -943,8 +1209,9 @@
   function createLeaveReportPayload(elements, compressedDayHours) {
     const components = getLeaveComponents(elements);
     const hasValues = components.some((component) => component.value);
+    const standardDayHours = getStandardDayHours();
     const totalDaysValue = components.reduce((sum, component) => sum + component.value, 0);
-    const totalHoursValue = totalDaysValue * STANDARD_DAY_HOURS;
+    const totalHoursValue = totalDaysValue * standardDayHours;
     const normalizedCompressedHours = Number.isFinite(compressedDayHours)
       ? compressedDayHours
       : 0;
@@ -973,14 +1240,14 @@
         const startLabel = formatHumanDate(effectiveStart);
         const endLabel = formatHumanDate(rangeEnd);
         if (startLabel && endLabel) {
-          return `Bank holidays automatically calculated${countText} between ${startLabel} and ${endLabel} based on the selected start date.`;
+          return `Bank holidays automatically calculated${countText} between ${startLabel} and ${endLabel} based on the selected start date for this leave accrual year.`;
         }
       }
       if (Number.isFinite(count)) {
-        return `Bank holidays automatically calculated${countText} based on the selected start date.`;
+        return `Bank holidays automatically calculated${countText} based on the selected start date for this leave accrual year.`;
       }
     }
-    return 'Bank holidays value automatically calculated based on the selected start date when available.';
+    return 'Bank holidays value automatically calculated from your leave accrual year settings when available.';
   }
 
   function openPrintWindowWithHtml(html, title) {
@@ -1099,11 +1366,11 @@
       };
     }
 
-    const computed = computeFinancialYearBankHolidayDefault(startDate);
+    const computed = computeAccrualYearBankHolidayDefault(startDate);
     if (!computed) {
       return {
         ...base,
-        message: 'Unable to determine the financial year for the selected start date.',
+        message: 'Unable to determine the leave accrual year for the selected start date.',
       };
     }
 
@@ -1111,7 +1378,8 @@
     if (!effectiveStart || !rangeEnd) {
       return {
         ...base,
-        message: 'Unable to determine the remaining range for the selected start date.',
+        message:
+          'Unable to determine the remaining leave accrual year window for the selected start date.',
       };
     }
 
@@ -1141,7 +1409,7 @@
       const endLabel = formatHumanDate(rangeEnd);
       return {
         ...base,
-        message: `No remaining bank holidays between ${startLabel} and ${endLabel}.`,
+        message: `No remaining bank holidays between ${startLabel} and ${endLabel} in this leave accrual year.`,
       };
     }
 
@@ -1171,7 +1439,7 @@
 
     return {
       ...base,
-      message: `Highlighting bank holidays between ${startLabel} and ${endLabel}.`,
+      message: `Highlighting bank holidays between ${startLabel} and ${endLabel} for this leave accrual year.`,
       matchesLabel: `Bank holidays on ${selectedDayLabel} (${matches.length})`,
       nonMatchesLabel: `Bank holidays on other days (${others.length})`,
       matches: matches.map((event) => ({
@@ -1224,11 +1492,11 @@
       };
     }
 
-    const range = getFinancialYearRange(start);
+    const range = getAccrualYearRange(start);
     if (!range) {
       return {
         ...base,
-        message: 'Unable to determine the financial year for the selected date.',
+        message: 'Unable to determine the leave accrual year for the selected date.',
       };
     }
 
@@ -1284,11 +1552,11 @@
 
     let message;
     if (matches.length) {
-      message = `Found ${matches.length} bank holidays on the every other week pattern between ${startLabel} and ${endLabel}.`;
+      message = `Found ${matches.length} bank holidays on the every other week pattern between ${startLabel} and ${endLabel} in this leave accrual year.`;
     } else if (eventsInWindow.length) {
-      message = `No bank holidays align with this every other week pattern between ${startLabel} and ${endLabel}. Showing other bank holidays for reference.`;
+      message = `No bank holidays align with this every other week pattern between ${startLabel} and ${endLabel} in this leave accrual year. Showing other bank holidays for reference.`;
     } else {
-      message = `No bank holidays fall between ${startLabel} and ${endLabel}.`;
+      message = `No bank holidays fall between ${startLabel} and ${endLabel} in this leave accrual year.`;
     }
 
     return {
@@ -1405,8 +1673,15 @@
       )
       .join(' + ');
 
-    const standardHoursFormatted = formatNumberWithPrecision(STANDARD_DAY_HOURS, 2);
-    const compressedHoursFormatted = formatNumberWithPrecision(compressedDayHours, 2);
+    const standardHours = getStandardDayHours();
+    const normalizedCompressedHours = Number.isFinite(compressedDayHours)
+      ? compressedDayHours
+      : 0;
+    const standardHoursFormatted = formatNumberWithPrecision(standardHours, 2);
+    const compressedHoursFormatted = formatNumberWithPrecision(
+      normalizedCompressedHours,
+      2
+    );
     const totalDaysFormatted = formatNumberWithPrecision(payload.totalDaysValue, 2);
     const totalHoursFormatted = formatNumberWithPrecision(payload.totalHoursValue, 2);
     const compressedFormatted = formatNumberWithPrecision(payload.compressedAllowanceValue, 2);
@@ -1629,11 +1904,12 @@
         bankHolidays.value = '';
       }
       if (bankHolidayHelp)
-        bankHolidayHelp.textContent = 'Select a start date to automatically calculate bank holidays.';
+        bankHolidayHelp.textContent =
+          'Select a start date to automatically calculate bank holidays for this leave accrual year.';
       return;
     }
 
-    const computed = computeFinancialYearBankHolidayDefault(new Date(startValue));
+    const computed = computeAccrualYearBankHolidayDefault(new Date(startValue));
     fourDayWeekState.lastDefault = computed;
 
     if ((!fourDayWeekState.userOverriddenBankHolidays || force) && computed) {
@@ -1644,14 +1920,16 @@
 
     if (bankHolidayHelp) {
       if (!bankHolidayState.events.length) {
-        bankHolidayHelp.textContent = 'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.';
+        bankHolidayHelp.textContent =
+          'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.';
       } else if (!computed) {
-        bankHolidayHelp.textContent = 'No bank holidays are remaining in this financial year based on the selected start date.';
+        bankHolidayHelp.textContent =
+          'No bank holidays are remaining in this leave accrual year based on the selected start date.';
       } else {
         const { count, effectiveStart, rangeEnd } = computed;
         const startLabel = formatHumanDate(effectiveStart);
         const endLabel = formatHumanDate(rangeEnd);
-        bankHolidayHelp.textContent = `Counting ${count} bank holidays between ${startLabel} and ${endLabel}.`;
+        bankHolidayHelp.textContent = `Counting ${count} bank holidays between ${startLabel} and ${endLabel} for this leave accrual year.`;
       }
     }
   }
@@ -1669,11 +1947,12 @@
         bankHolidays.value = '';
       }
       if (bankHolidayHelp)
-        bankHolidayHelp.textContent = 'Select a start date to automatically calculate bank holidays.';
+        bankHolidayHelp.textContent =
+          'Select a start date to automatically calculate bank holidays for this leave accrual year.';
       return;
     }
 
-    const computed = computeFinancialYearBankHolidayDefault(new Date(startValue));
+    const computed = computeAccrualYearBankHolidayDefault(new Date(startValue));
     nineDayFortnightState.lastDefault = computed;
 
     if ((!nineDayFortnightState.userOverriddenBankHolidays || force) && computed) {
@@ -1687,12 +1966,13 @@
         bankHolidayHelp.textContent =
           'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.';
       } else if (!computed) {
-        bankHolidayHelp.textContent = 'No bank holidays are remaining in this financial year based on the selected start date.';
+        bankHolidayHelp.textContent =
+          'No bank holidays are remaining in this leave accrual year based on the selected start date.';
       } else {
         const { count, effectiveStart, rangeEnd } = computed;
         const startLabel = formatHumanDate(effectiveStart);
         const endLabel = formatHumanDate(rangeEnd);
-        bankHolidayHelp.textContent = `Counting ${count} bank holidays between ${startLabel} and ${endLabel}.`;
+        bankHolidayHelp.textContent = `Counting ${count} bank holidays between ${startLabel} and ${endLabel} for this leave accrual year.`;
       }
     }
   }
@@ -1725,7 +2005,8 @@
     const startValue = startDate ? startDate.value : '';
     if (!startValue) {
       if (message) {
-        message.textContent = 'Pick the first non-working day to begin the every other week pattern.';
+        message.textContent =
+          'Pick the first non-working day to begin the every other week pattern for this leave accrual year.';
       }
       return;
     }
@@ -1738,10 +2019,10 @@
       return;
     }
 
-    const range = getFinancialYearRange(start);
+    const range = getAccrualYearRange(start);
     if (!range) {
       if (message) {
-        message.textContent = 'Unable to determine the financial year for the selected date.';
+        message.textContent = 'Unable to determine the leave accrual year for the selected date.';
       }
       return;
     }
@@ -1836,11 +2117,11 @@
       const startLabel = formatHumanDate(start);
       const endLabel = formatHumanDate(windowEnd);
       if (matches.length) {
-        message.textContent = `Found ${matches.length} bank holidays on the every other week pattern between ${startLabel} and ${endLabel}.`;
+        message.textContent = `Found ${matches.length} bank holidays on the every other week pattern between ${startLabel} and ${endLabel} in this leave accrual year.`;
       } else if (eventsInWindow.length) {
-        message.textContent = `No bank holidays align with this every other week pattern between ${startLabel} and ${endLabel}. Showing other bank holidays for reference.`;
+        message.textContent = `No bank holidays align with this every other week pattern between ${startLabel} and ${endLabel} in this leave accrual year. Showing other bank holidays for reference.`;
       } else {
-        message.textContent = `No bank holidays fall between ${startLabel} and ${endLabel}.`;
+        message.textContent = `No bank holidays fall between ${startLabel} and ${endLabel} in this leave accrual year.`;
       }
     }
 
@@ -1976,22 +2257,22 @@
     if (!list || !yearSelect) return;
 
     const events = bankHolidayState.events.slice();
-    const currentFinancialYear = getFinancialYearRange(new Date());
-    const currentFinancialYearStart = currentFinancialYear
-      ? currentFinancialYear.start.getFullYear()
+    const currentAccrualYear = getAccrualYearRange(new Date());
+    const currentAccrualYearStart = currentAccrualYear
+      ? currentAccrualYear.start.getFullYear()
       : new Date().getFullYear();
 
     const displayableEvents = events.filter((event) => {
-      const startYear = getFinancialYearStartYear(event.date);
+      const startYear = getAccrualYearStartYear(event.date);
       if (startYear === null) return false;
-      return startYear >= currentFinancialYearStart;
+      return startYear >= currentAccrualYearStart;
     });
 
     if (updateYears) {
       const years = Array.from(
         new Set(
           displayableEvents
-            .map((event) => getFinancialYearStartYear(event.date))
+            .map((event) => getAccrualYearStartYear(event.date))
             .filter((year) => year !== null)
         )
       ).sort((a, b) => a - b);
@@ -2004,8 +2285,8 @@
         yearSelect.value = '';
       } else {
         yearSelect.disabled = false;
-        const preferred = years.includes(currentFinancialYearStart)
-          ? currentFinancialYearStart
+        const preferred = years.includes(currentAccrualYearStart)
+          ? currentAccrualYearStart
           : years[years.length - 1];
         const previous = bankHolidayState.selectedYear
           ? Number.parseInt(bankHolidayState.selectedYear, 10)
@@ -2016,7 +2297,7 @@
         years.forEach((year) => {
           const option = document.createElement('option');
           option.value = String(year);
-          option.textContent = formatFinancialYearLabel(year);
+          option.textContent = formatAccrualYearLabel(year);
           if (year === resolved) option.selected = true;
           yearSelect.appendChild(option);
         });
@@ -2028,10 +2309,25 @@
     list.innerHTML = '';
     const selectedStartYear = Number.parseInt(bankHolidayState.selectedYear || '', 10);
 
+    const summaryTargetYear = Number.isNaN(selectedStartYear)
+      ? currentAccrualYearStart
+      : selectedStartYear;
+
+    if (elements.rangeSummary) {
+      const startDate = resolveAccrualAnchorDate(summaryTargetYear);
+      const endDate = computeAccrualYearEnd(startDate);
+      const startLabel = startDate ? formatHumanDate(startDate) : '';
+      const endLabel = endDate ? formatHumanDate(endDate) : '';
+      elements.rangeSummary.textContent =
+        startLabel && endLabel
+          ? `Showing bank holidays between ${startLabel} and ${endLabel} based on your leave accrual year settings.`
+          : 'Showing bank holidays using your leave accrual year settings.';
+    }
+
     const filtered = Number.isNaN(selectedStartYear)
       ? displayableEvents
       : displayableEvents.filter((event) => {
-          const startYear = getFinancialYearStartYear(event.date);
+          const startYear = getAccrualYearStartYear(event.date);
           return startYear !== null && startYear === selectedStartYear;
         });
 
@@ -2605,6 +2901,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    settingsState.values = loadStoredSettings();
+    initializeSettingsControls();
+
     const storedTheme = safeGet(LS_KEYS.theme);
     applyDarkMode(storedTheme === '1', { persist: false });
 
@@ -2745,7 +3044,7 @@
             elements,
             title: '4-day week leave entitlement',
             scheduleLabel: '4-day week',
-            compressedDayHours: FOUR_DAY_COMPRESSED_HOURS,
+            compressedDayHours: getFourDayCompressedHours(),
             compressedLabel: 'Compressed allowance (days)',
             bankHolidayNote,
             bookerReport: getFourDayBookerReportData(),
@@ -2763,7 +3062,7 @@
             elements,
             title: '9-day fortnight leave entitlement',
             scheduleLabel: '9-day fortnight',
-            compressedDayHours: NINE_DAY_COMPRESSED_HOURS,
+            compressedDayHours: getNineDayCompressedHours(),
             compressedLabel: '9-day fortnight allowance (days)',
             bankHolidayNote,
             bookerReport: getNineDayBookerReportData(),
