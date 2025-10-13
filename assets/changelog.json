@@ -1,4 +1,11 @@
-[ 
+[{
+    "version": "0.0.9",
+    "date": "2025-10-13",
+    "changes": [
+      "Let you configure the leave accrual year and show the selected range across the bank holiday tools.",
+      "Make the standard, 4-day week, and 9-day fortnight hour conversions configurable from Settings."
+    ]
+  },
   {
     "version": "0.0.8",
     "date": "2025-10-13",
