@@ -401,6 +401,18 @@
     return { start: rangeStart, end: rangeEnd };
   }
 
+  function getFinancialYearStartYear(date) {
+    const range = getFinancialYearRange(date);
+    if (!range) return null;
+    return range.start.getFullYear();
+  }
+
+  function formatFinancialYearLabel(startYear) {
+    if (!Number.isFinite(startYear)) return '';
+    const endYear = startYear + 1;
+    return `${startYear} to ${endYear}`;
+  }
+
   function toDateKey(value) {
     const normalized = toStartOfDay(value);
     if (!normalized) return '';
@@ -1964,22 +1976,22 @@
     if (!list || !yearSelect) return;
 
     const events = bankHolidayState.events.slice();
-    const currentYear = new Date().getFullYear();
+    const currentFinancialYear = getFinancialYearRange(new Date());
+    const currentFinancialYearStart = currentFinancialYear
+      ? currentFinancialYear.start.getFullYear()
+      : new Date().getFullYear();
 
     const displayableEvents = events.filter((event) => {
-      const date = new Date(event.date);
-      if (Number.isNaN(date.getTime())) return false;
-      return date.getFullYear() >= currentYear;
+      const startYear = getFinancialYearStartYear(event.date);
+      if (startYear === null) return false;
+      return startYear >= currentFinancialYearStart;
     });
 
     if (updateYears) {
       const years = Array.from(
         new Set(
           displayableEvents
-            .map((event) => {
-              const date = new Date(event.date);
-              return Number.isNaN(date.getTime()) ? null : date.getFullYear();
-            })
+            .map((event) => getFinancialYearStartYear(event.date))
             .filter((year) => year !== null)
         )
       ).sort((a, b) => a - b);
@@ -1992,8 +2004,9 @@
         yearSelect.value = '';
       } else {
         yearSelect.disabled = false;
-        const nowYear = new Date().getFullYear();
-        const preferred = years.includes(nowYear) ? nowYear : years[years.length - 1];
+        const preferred = years.includes(currentFinancialYearStart)
+          ? currentFinancialYearStart
+          : years[years.length - 1];
         const previous = bankHolidayState.selectedYear
           ? Number.parseInt(bankHolidayState.selectedYear, 10)
           : null;
@@ -2003,7 +2016,7 @@
         years.forEach((year) => {
           const option = document.createElement('option');
           option.value = String(year);
-          option.textContent = String(year);
+          option.textContent = formatFinancialYearLabel(year);
           if (year === resolved) option.selected = true;
           yearSelect.appendChild(option);
         });
@@ -2013,13 +2026,13 @@
     }
 
     list.innerHTML = '';
-    const selectedYear = Number.parseInt(bankHolidayState.selectedYear || '', 10);
+    const selectedStartYear = Number.parseInt(bankHolidayState.selectedYear || '', 10);
 
-    const filtered = Number.isNaN(selectedYear)
+    const filtered = Number.isNaN(selectedStartYear)
       ? displayableEvents
       : displayableEvents.filter((event) => {
-          const date = new Date(event.date);
-          return !Number.isNaN(date.getTime()) && date.getFullYear() === selectedYear;
+          const startYear = getFinancialYearStartYear(event.date);
+          return startYear !== null && startYear === selectedStartYear;
         });
 
     if (!filtered.length) {
