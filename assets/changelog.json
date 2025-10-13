@@ -1,5 +1,12 @@
 [ 
   {
+    "version": "0.0.8",
+    "date": "2025-10-13",
+    "changes": [
+      "Group the Bank Holidays view by financial year so each option spans 1 April to 31 March."
+    ]
+  },
+  {
     "version": "0.0.7",
     "date": "2025-10-12",
     "changes": [

@@ -2,6 +2,9 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [0.0.8] - 2025-10-13
+- Group the Bank Holidays view by financial year so each option spans 1 April to 31 March.
+
 ## [0.0.7] - 2025-10-12
 - Hide the Bank holiday booker section in exported PDFs until the required selections are provided.
 - Left-align empty Bank holiday booker list messages in PDF exports for improved readability.
