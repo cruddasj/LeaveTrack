@@ -241,7 +241,7 @@
           </p>
           <div class="grid gap-4 md:grid-cols-2 mt-6">
             <div class="space-y-3">
-              <label for="bankHolidayYear" class="form-label">Financial year</label>
+              <label for="bankHolidayYear" class="form-label">Leave accrual year</label>
               <select
                 id="bankHolidayYear"
                 class="input-field"
@@ -249,8 +249,11 @@
               ></select>
             </div>
             <div class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+              <p data-bank-holidays-range>
+                Showing bank holidays using your leave accrual year settings.
+              </p>
               <p data-bank-holidays-empty class="hidden text-gray-500 dark:text-gray-400">
-                No upcoming bank holidays found for the selected financial year.
+                No upcoming bank holidays found for the selected leave accrual year.
               </p>
             </div>
           </div>
@@ -310,7 +313,7 @@
                   <label for="fourDayStartDate" class="form-label">Start date</label>
                   <input type="date" id="fourDayStartDate" class="input-field" />
                   <p class="text-xs text-gray-500 dark:text-gray-400">
-                    Used to determine the financial year and remaining bank holidays.
+                    Used to determine the leave accrual year window and remaining bank holidays.
                   </p>
                 </div>
                 <div class="space-y-2">
@@ -437,7 +440,7 @@
             >
               <p class="text-sm text-gray-600 dark:text-gray-400">
                 Pick the regular non-working day to see which bank holidays still fall on it before the end of
-                the financial year.
+                your leave accrual year.
               </p>
               <div class="space-y-4">
                 <div class="space-y-2">
@@ -451,7 +454,7 @@
                     <option value="friday">Friday</option>
                   </select>
                   <p class="text-xs text-gray-500 dark:text-gray-400">
-                    We'll use the start date above to work out the rest of the financial year.
+                    We'll use the start date above with your leave accrual year settings to work out the remaining window.
                   </p>
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400" data-booker-message>
@@ -545,7 +548,7 @@
                   <label for="nineDayStartDate" class="form-label">Start date</label>
                   <input type="date" id="nineDayStartDate" class="input-field" />
                   <p class="text-xs text-gray-500 dark:text-gray-400">
-                    Used to determine the financial year and remaining bank holidays.
+                    Used to determine the leave accrual year window and remaining bank holidays.
                   </p>
                 </div>
                 <div class="space-y-2">
@@ -678,7 +681,7 @@
                   <label for="nineDayBookerStartDate" class="form-label">First non-working day</label>
                   <input type="date" id="nineDayBookerStartDate" class="input-field" />
                   <p class="text-xs text-gray-500 dark:text-gray-400">
-                    We'll check from this date through to 31 March of the same financial year.
+                    We'll check from this date through to the end of your leave accrual year.
                   </p>
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400" data-nine-day-booker-message>
@@ -870,6 +873,147 @@
                 <span class="toggle-track"><span class="toggle-thumb"></span></span>
               </label>
             </div>
+          </div>
+        </div>
+
+        <div
+          class="card is-collapsible"
+          data-collapsible
+          data-collapsible-id="settings-leave-year"
+        >
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <button
+              type="button"
+              class="card-toggle"
+              data-collapsible-trigger
+              aria-expanded="true"
+              aria-controls="settings-leave-year-content"
+            >
+              <span>Leave accrual year</span>
+              <svg
+                class="chev"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M6 8l4 4 4-4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </h3>
+          <div
+            id="settings-leave-year-content"
+            class="card-body space-y-6"
+            data-collapsible-content
+          >
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Set when the leave accrual year starts so the calculators and bank holiday tools match your organisation's
+              timeline.
+            </p>
+            <div class="grid gap-6 md:grid-cols-2">
+              <div class="space-y-2">
+                <label for="settingsLeaveYearStart" class="form-label">Leave accrual year start</label>
+                <input type="date" id="settingsLeaveYearStart" class="input-field" />
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  Choose the first day of the leave accrual year.
+                </p>
+              </div>
+              <div class="space-y-2">
+                <label for="settingsLeaveYearEnd" class="form-label">Leave accrual year end</label>
+                <input type="date" id="settingsLeaveYearEnd" class="input-field" disabled />
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  Automatically set to one year minus one day from the selected start.
+                </p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400" data-settings-leave-year-summary>
+              We'll calculate the leave accrual year range once you choose a start date.
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="card is-collapsible"
+          data-collapsible
+          data-collapsible-id="settings-hours"
+        >
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <button
+              type="button"
+              class="card-toggle"
+              data-collapsible-trigger
+              aria-expanded="true"
+              aria-controls="settings-hours-content"
+            >
+              <span>Default leave hours</span>
+              <svg
+                class="chev"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M6 8l4 4 4-4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </h3>
+          <div
+            id="settings-hours-content"
+            class="card-body space-y-6"
+            data-collapsible-content
+          >
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Update the default day-to-hour conversions used in calculations and PDF reports.
+            </p>
+            <div class="grid gap-6 md:grid-cols-3">
+              <div class="space-y-2">
+                <label for="settingsStandardHours" class="form-label">Standard working day (hours)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  id="settingsStandardHours"
+                  class="input-field"
+                />
+              </div>
+              <div class="space-y-2">
+                <label for="settingsFourDayHours" class="form-label">4-day week day length (hours)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  id="settingsFourDayHours"
+                  class="input-field"
+                />
+              </div>
+              <div class="space-y-2">
+                <label for="settingsNineDayHours" class="form-label">9-day fortnight day length (hours)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  id="settingsNineDayHours"
+                  class="input-field"
+                />
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              Values are stored on this device and applied across both leave calculators.
+            </p>
           </div>
         </div>
 

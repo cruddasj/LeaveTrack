@@ -2,6 +2,11 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [0.0.9] - 2025-10-14
+- Let users choose the leave accrual year start date so calculators and bank holidays follow their organisation's cycle.
+- Add settings to adjust the default standard, 4-day week, and 9-day fortnight hour equivalents used in calculations.
+- Clarify bank holiday messaging to highlight the exact leave accrual year window being used.
+
 ## [0.0.8] - 2025-10-13
 - Group the Bank Holidays view by financial year so each option spans 1 April to 31 March.
 
