@@ -1,4 +1,12 @@
-[ 
+[
+  {
+    "version": "0.0.9",
+    "date": "2025-10-13",
+    "changes": [
+      "Add Settings controls for choosing the leave accrual year start date and adjusting calculator hour defaults.",
+      "Display the configured leave accrual year range on the Bank Holidays page."
+    ]
+  },
   {
     "version": "0.0.8",
     "date": "2025-10-13",
