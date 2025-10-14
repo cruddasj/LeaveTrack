@@ -2,6 +2,10 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [0.0.10] - 2025-10-14
+- Let you override the auto-calculated organisational working year end date directly from Settings.
+- Add a Standard week view with annual leave inputs, monthly accrual options, and a leave period planner that accounts for bank holidays.
+
 ## [0.0.9] - 2025-10-13
 - Allow configuring the organisational working year and show the selected date range across the bank holiday tools.
 - Add Settings controls to customise standard and compressed-day hour conversions used by the calculators.
