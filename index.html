@@ -153,6 +153,12 @@
             Bank Holidays
           </span>
         </button>
+        <button class="nav-btn" data-target="standard-week">
+          <span class="flex items-center">
+            <i class="fa-solid fa-calendar-week h-5 w-5 mr-3"></i>
+            Standard week
+          </span>
+        </button>
         <button class="nav-btn" data-target="four-day-week">
           <span class="flex items-center">
             <i class="fa-solid fa-briefcase-clock h-5 w-5 mr-3"></i>
@@ -256,6 +262,327 @@
             </p>
           </div>
           <div class="mt-6 space-y-4" data-bank-holidays-list></div>
+        </div>
+      </div>
+
+      <div id="standard-week" class="content-section">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          Standard week leave entitlement
+        </h2>
+        <div class="space-y-6">
+          <div
+            class="card is-collapsible"
+            id="standardWeekCard"
+            data-collapsible
+            data-collapsible-id="standard-week-annual"
+          >
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <button
+                type="button"
+                class="card-toggle"
+                data-collapsible-trigger
+                aria-expanded="true"
+                aria-controls="standard-week-annual-content"
+              >
+                <span>Annual leave inputs</span>
+                <svg
+                  class="chev"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 8l4 4 4-4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </h3>
+            <div
+              id="standard-week-annual-content"
+              class="card-body space-y-6"
+              data-collapsible-content
+            >
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Enter the allowances to see the total standard leave available in days and hours for a
+                5-day working week.
+              </p>
+              <form class="grid gap-6 md:grid-cols-2" novalidate>
+                <div class="space-y-2">
+                  <label for="standardWeekStartDate" class="form-label">Start date</label>
+                  <input type="date" id="standardWeekStartDate" class="input-field" />
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-leave-year-start-note>
+                    Used to determine the organisational working year and remaining bank holidays.
+                  </p>
+                </div>
+                <div class="space-y-2">
+                  <label for="standardWeekCoreLeave" class="form-label">Core annual leave allowance (days)</label>
+                  <input
+                    type="number"
+                    id="standardWeekCoreLeave"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="standardWeekLongService" class="form-label">Long service leave (days)</label>
+                  <input
+                    type="number"
+                    id="standardWeekLongService"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="standardWeekCarryOver" class="form-label">Carry over leave (days)</label>
+                  <input
+                    type="number"
+                    id="standardWeekCarryOver"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="standardWeekPurchased" class="form-label">Purchased leave (days)</label>
+                  <input
+                    type="number"
+                    id="standardWeekPurchased"
+                    class="input-field"
+                    inputmode="numeric"
+                    step="1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="standardWeekBankHolidays" class="form-label">Bank holidays (days)</label>
+                  <input
+                    type="number"
+                    id="standardWeekBankHolidays"
+                    class="input-field"
+                    inputmode="numeric"
+                    step="1"
+                    min="0"
+                  />
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-bankholidays-help>
+                    Default determined by GOV.UK bank holiday data.
+                  </p>
+                </div>
+              </form>
+              <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4" data-standard-summary>
+                <p class="text-sm text-gray-600 dark:text-gray-400" data-standard-summary-intro>
+                  Enter values above to see a detailed breakdown of the allowance.
+                </p>
+                <dl class="grid gap-2 text-sm text-gray-700 dark:text-gray-300" data-standard-breakdown hidden></dl>
+                <div class="space-y-3" data-standard-totals hidden>
+                  <div class="grid gap-3 sm:grid-cols-2">
+                    <div class="stat-card" data-standard-total-days>
+                      <p class="stat-card__label">Total standard leave in days</p>
+                      <p class="stat-card__value">0 days</p>
+                    </div>
+                    <div class="stat-card" data-standard-total-hours>
+                      <p class="stat-card__label">Total allowance in hours</p>
+                      <p class="stat-card__value">0 hours</p>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 text-center" data-standard-equation></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="card is-collapsible"
+            id="standardWeekAccrualCard"
+            data-collapsible
+            data-collapsible-id="standard-week-accrual"
+          >
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <button
+                type="button"
+                class="card-toggle"
+                data-collapsible-trigger
+                aria-expanded="true"
+                aria-controls="standard-week-accrual-content"
+              >
+                <span>Accrual settings</span>
+                <svg
+                  class="chev"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 8l4 4 4-4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </h3>
+            <div
+              id="standard-week-accrual-content"
+              class="card-body space-y-6"
+              data-collapsible-content
+            >
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Decide whether leave accrues each month and how the entitlement is credited throughout the
+                organisational year.
+              </p>
+              <div class="space-y-4">
+                <label
+                  class="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-300"
+                  for="standardAccrualToggle"
+                >
+                  <input
+                    type="checkbox"
+                    id="standardAccrualToggle"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded dark:border-gray-600"
+                  />
+                  <span>Use monthly accrual</span>
+                </label>
+                <div class="grid gap-6 md:grid-cols-2" data-standard-accrual-fields>
+                  <div class="space-y-2">
+                    <label for="standardAccrualRate" class="form-label">Accrual rate (days per month)</label>
+                    <input
+                      type="number"
+                      id="standardAccrualRate"
+                      class="input-field"
+                      inputmode="decimal"
+                      step="0.1"
+                      min="0"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <span class="form-label">How accrual is applied</span>
+                    <div class="space-y-2">
+                      <label
+                        class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
+                        for="standardAccrualModeStart"
+                      >
+                        <input
+                          type="radio"
+                          name="standardAccrualMode"
+                          value="start"
+                          id="standardAccrualModeStart"
+                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
+                          checked
+                        />
+                        <span>Credited at the start of each month</span>
+                      </label>
+                      <label
+                        class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
+                        for="standardAccrualModeProrata"
+                      >
+                        <input
+                          type="radio"
+                          name="standardAccrualMode"
+                          value="prorata"
+                          id="standardAccrualModeProrata"
+                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
+                        />
+                        <span>Accrued pro-rata throughout the month</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-accrual-help>
+                  Turn accrual on to forecast how much leave will have built up by a given date.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="card is-collapsible"
+            id="standardWeekPreviewCard"
+            data-collapsible
+            data-collapsible-id="standard-week-preview"
+          >
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <button
+                type="button"
+                class="card-toggle"
+                data-collapsible-trigger
+                aria-expanded="true"
+                aria-controls="standard-week-preview-content"
+              >
+                <span>Proposed leave period</span>
+                <svg
+                  class="chev"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 8l4 4 4-4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </h3>
+            <div
+              id="standard-week-preview-content"
+              class="card-body space-y-6"
+              data-collapsible-content
+            >
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Choose a leave period to see how many working days are required and how that compares with
+                the accrual settings above.
+              </p>
+              <form class="grid gap-6 md:grid-cols-2" novalidate>
+                <div class="space-y-2">
+                  <label for="standardLeaveStart" class="form-label">Leave start</label>
+                  <input type="date" id="standardLeaveStart" class="input-field" />
+                </div>
+                <div class="space-y-2">
+                  <label for="standardLeaveEnd" class="form-label">Leave end</label>
+                  <input type="date" id="standardLeaveEnd" class="input-field" />
+                </div>
+              </form>
+              <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4" data-standard-preview>
+                <p class="text-sm text-gray-600 dark:text-gray-400" data-standard-preview-message>
+                  Enter a start and end date to see the leave requirements.
+                </p>
+                <div class="space-y-3" data-standard-preview-results hidden>
+                  <div class="grid gap-3 sm:grid-cols-3">
+                    <div class="stat-card" data-standard-preview-needed>
+                      <p class="stat-card__label">Leave days needed</p>
+                      <p class="stat-card__value">0 days</p>
+                    </div>
+                    <div class="stat-card" data-standard-preview-bank-holidays>
+                      <p class="stat-card__label">Bank holidays in period</p>
+                      <p class="stat-card__value">0 days</p>
+                    </div>
+                    <div class="stat-card" data-standard-preview-accrued>
+                      <p class="stat-card__label">Accrued leave by end date</p>
+                      <p class="stat-card__value">0 days</p>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-preview-note></p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -843,9 +1170,10 @@
               </div>
               <div class="space-y-2">
                 <label for="leaveYearEndInput" class="form-label">End date</label>
-                <input type="date" id="leaveYearEndInput" class="input-field" readonly />
+                <input type="date" id="leaveYearEndInput" class="input-field" />
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  Calculated as one year minus one day after the start date.
+                  Calculated as one year minus one day after the start date by default. Adjust if your
+                  organisational year finishes on a different day.
                 </p>
               </div>
             </div>
