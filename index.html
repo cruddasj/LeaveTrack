@@ -239,20 +239,21 @@
           >
             We couldn't load bank holidays. Please check your connection and try again.
           </p>
-          <div class="grid gap-4 md:grid-cols-2 mt-6">
+          <div class="mt-6 space-y-3">
             <div class="space-y-3">
-              <label for="bankHolidayYear" class="form-label">Financial year</label>
+              <label for="bankHolidayYear" class="form-label">Organisational working year</label>
               <select
                 id="bankHolidayYear"
                 class="input-field"
                 data-bank-holidays-year
               ></select>
             </div>
-            <div class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-              <p data-bank-holidays-empty class="hidden text-gray-500 dark:text-gray-400">
-                No upcoming bank holidays found for the selected financial year.
-              </p>
-            </div>
+            <p data-bank-holidays-range class="text-sm text-gray-600 dark:text-gray-400">
+              Showing organisational working year details.
+            </p>
+            <p data-bank-holidays-empty class="hidden text-sm text-gray-500 dark:text-gray-400">
+              No upcoming bank holidays found for the selected organisational working year.
+            </p>
           </div>
           <div class="mt-6 space-y-4" data-bank-holidays-list></div>
         </div>
@@ -309,8 +310,8 @@
                 <div class="space-y-2">
                   <label for="fourDayStartDate" class="form-label">Start date</label>
                   <input type="date" id="fourDayStartDate" class="input-field" />
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    Used to determine the financial year and remaining bank holidays.
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-leave-year-start-note>
+                    Used to determine the organisational working year and remaining bank holidays.
                   </p>
                 </div>
                 <div class="space-y-2">
@@ -435,9 +436,9 @@
               class="card-body space-y-6"
               data-collapsible-content
             >
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                Pick the regular non-working day to see which bank holidays still fall on it before the end of
-                the financial year.
+              <p class="text-sm text-gray-600 dark:text-gray-400" data-leave-year-booker-intro>
+                Pick the regular non-working day to see which bank holidays still fall on it before the end of the
+                organisational working year.
               </p>
               <div class="space-y-4">
                 <div class="space-y-2">
@@ -450,8 +451,8 @@
                     <option value="thursday">Thursday</option>
                     <option value="friday">Friday</option>
                   </select>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    We'll use the start date above to work out the rest of the financial year.
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-leave-year-booker-hint>
+                    We'll use the start date above to work out the rest of the organisational working year.
                   </p>
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400" data-booker-message>
@@ -544,8 +545,8 @@
                 <div class="space-y-2">
                   <label for="nineDayStartDate" class="form-label">Start date</label>
                   <input type="date" id="nineDayStartDate" class="input-field" />
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    Used to determine the financial year and remaining bank holidays.
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-leave-year-start-note>
+                    Used to determine the organisational working year and remaining bank holidays.
                   </p>
                 </div>
                 <div class="space-y-2">
@@ -670,15 +671,15 @@
               class="card-body space-y-6"
               data-collapsible-content
             >
-              <p class="text-sm text-gray-600 dark:text-gray-400">
+              <p class="text-sm text-gray-600 dark:text-gray-400" data-leave-year-nine-booker-intro>
                 Choose the first non-working day in your every other week pattern to spot overlapping bank holidays.
               </p>
               <div class="space-y-4">
                 <div class="space-y-2">
                   <label for="nineDayBookerStartDate" class="form-label">First non-working day</label>
                   <input type="date" id="nineDayBookerStartDate" class="input-field" />
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    We'll check from this date through to 31 March of the same financial year.
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-leave-year-nine-booker-hint>
+                    We'll use the configured organisational working year to work out the matching range.
                   </p>
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400" data-nine-day-booker-message>
@@ -787,6 +788,171 @@
               <p class="text-xs text-gray-500 dark:text-gray-400">
                 Installs the latest version without clearing your saved preferences.
               </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card is-collapsible"
+          data-collapsible
+          data-collapsible-id="settings-leave-year"
+        >
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <button
+              type="button"
+              class="card-toggle"
+              data-collapsible-trigger
+              aria-expanded="true"
+              aria-controls="settings-leave-year-content"
+            >
+              <span>Organisational working year</span>
+              <svg
+                class="chev"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M6 8l4 4 4-4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </h3>
+          <div
+            id="settings-leave-year-content"
+            class="card-body space-y-6"
+            data-collapsible-content
+          >
+            <p class="text-sm text-gray-700 dark:text-gray-300" data-leave-year-settings-note>
+              Choose when the organisational working year begins. We'll apply the selected month and day every year and calculate
+              the end date automatically.
+            </p>
+            <div class="grid gap-6 md:grid-cols-2">
+              <div class="space-y-2">
+                <label for="leaveYearStartInput" class="form-label">Start date</label>
+                <input type="date" id="leaveYearStartInput" class="input-field" />
+                <p class="text-xs text-gray-500 dark:text-gray-400" data-leave-year-settings-help>
+                  Example shown using today's cycle.
+                </p>
+              </div>
+              <div class="space-y-2">
+                <label for="leaveYearEndInput" class="form-label">End date</label>
+                <input type="date" id="leaveYearEndInput" class="input-field" readonly />
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  Calculated as one year minus one day after the start date.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card is-collapsible"
+          data-collapsible
+          data-collapsible-id="settings-hours"
+        >
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <button
+              type="button"
+              class="card-toggle"
+              data-collapsible-trigger
+              aria-expanded="true"
+              aria-controls="settings-hours-content"
+            >
+              <span>Leave conversion defaults</span>
+              <svg
+                class="chev"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M6 8l4 4 4-4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </h3>
+          <div
+            id="settings-hours-content"
+            class="card-body space-y-6"
+            data-collapsible-content
+          >
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Enter your standard working week hours to prefill the day conversion defaults used across the calculators. You can
+              still adjust the values if your organisation uses different equivalents.
+            </p>
+            <div class="space-y-6">
+              <div class="space-y-2">
+                <label for="standardWeekHoursInput" class="form-label">Standard working week (hours)</label>
+                <input
+                  type="number"
+                  id="standardWeekHoursInput"
+                  class="input-field"
+                  inputmode="decimal"
+                  step="0.01"
+                  min="0"
+                />
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  We'll recalculate the default day rates below whenever this changes.
+                </p>
+              </div>
+              <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div class="space-y-2">
+                  <label for="standardDayHoursInput" class="form-label">Standard day (hours)</label>
+                  <input
+                    type="number"
+                    id="standardDayHoursInput"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="fourDayCompressedHoursInput" class="form-label">4-day week day (hours)</label>
+                  <input
+                    type="number"
+                    id="fourDayCompressedHoursInput"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="nineDayCompressedHoursInput" class="form-label">9-day fortnight day (hours)</label>
+                  <input
+                    type="number"
+                    id="nineDayCompressedHoursInput"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+              </div>
+              <div class="space-y-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 text-sm text-gray-700 dark:text-gray-300">
+                <p>
+                  Based on a <span data-hours-weekly-label></span>-hour week:
+                </p>
+                <ul class="list-disc pl-5 space-y-1">
+                  <li data-hours-explain="standard"></li>
+                  <li data-hours-explain="four-day"></li>
+                  <li data-hours-explain="nine-day"></li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
