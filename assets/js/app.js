@@ -2129,7 +2129,8 @@
         bankHolidays.value = '';
       }
       if (bankHolidayHelp)
-        bankHolidayHelp.textContent = 'Select a start date to automatically calculate bank holidays.';
+        bankHolidayHelp.textContent =
+          'Leave this blank if the employee works the full organisational year. Enter a start date to automatically calculate the remaining bank holidays for mid-year joiners.';
       return;
     }
 
@@ -3070,8 +3071,8 @@
     const fullRange = range ? formatLeaveYearRange(range) : '';
 
     const startMessage = fullRange
-      ? `Used to determine the organisational working year (${fullRange}) and remaining bank holidays.`
-      : 'Used to determine the organisational working year and remaining bank holidays.';
+      ? `Optional: enter a start date when someone joins part-way through the organisational working year (${fullRange}) so we can calculate the remaining bank holidays. Leave it blank for employees who are with you all year.`
+      : 'Optional: enter a start date when someone joins part-way through the organisational working year so we can calculate the remaining bank holidays. Leave it blank for employees who are with you all year.';
     $$('[data-leave-year-start-note]').forEach((el) => {
       el.textContent = startMessage;
     });

@@ -310,14 +310,16 @@
             >
               <p class="text-sm text-gray-600 dark:text-gray-400">
                 Enter the allowances to see the total standard leave available in days and hours for a
-                5-day working week.
+                5-day working week. Only add a start date if the employee joined midway through the
+                organisational working year.
               </p>
               <form class="grid gap-6 md:grid-cols-2" novalidate>
                 <div class="space-y-2">
                   <label for="standardWeekStartDate" class="form-label">Start date</label>
                   <input type="date" id="standardWeekStartDate" class="input-field" />
                   <p class="text-xs text-gray-500 dark:text-gray-400" data-leave-year-start-note>
-                    Used to determine the organisational working year and remaining bank holidays.
+                    Optional: enter a start date when someone joins part-way through the organisational
+                    working year so we can calculate the remaining bank holidays.
                   </p>
                 </div>
                 <div class="space-y-2">
@@ -577,7 +579,7 @@
                       <p class="stat-card__value">0 days</p>
                     </div>
                     <div class="stat-card" data-standard-preview-balance>
-                      <p class="stat-card__label">Balance after request</p>
+                      <p class="stat-card__label">Remaining balance after request</p>
                       <p class="stat-card__value">0 days</p>
                     </div>
                   </div>

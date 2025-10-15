@@ -2,6 +2,9 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [0.0.14] - 2025-10-15
+- Clarify that the Standard week start date is optional for mid-year joiners and rename the remaining balance label.
+
 ## [0.0.13] - 2025-10-15
 - Add a Print to PDF card to the Standard week calculator so you can export those allowances.
 

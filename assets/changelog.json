@@ -1,4 +1,11 @@
 [{
+    "version": "0.0.14",
+    "date": "2025-10-15",
+    "changes": [
+      "Clarify that the Standard week start date is optional for mid-year joiners and rename the remaining balance label."
+    ]
+  },
+  {
     "version": "0.0.13",
     "date": "2025-10-15",
     "changes": [
