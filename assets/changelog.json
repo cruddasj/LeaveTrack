@@ -1,4 +1,11 @@
 [{
+    "version": "0.0.15",
+    "date": "2025-10-16",
+    "changes": [
+      "Default the organisational working year to run from 1 April to 31 March for new users."
+    ]
+  },
+  {
     "version": "0.0.14",
     "date": "2025-10-15",
     "changes": [
