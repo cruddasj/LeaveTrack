@@ -1,4 +1,11 @@
 [{
+    "version": "0.0.13",
+    "date": "2025-10-15",
+    "changes": [
+      "Add a Print to PDF card to the Standard week calculator so you can export those allowances."
+    ]
+  },
+  {
     "version": "0.0.12",
     "date": "2025-10-16",
     "changes": [
