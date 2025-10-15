@@ -803,6 +803,32 @@
     };
   }
 
+  function computeCurrentLeaveYearBankHolidayTotal() {
+    if (!bankHolidayState.events.length) return null;
+    const range = getCurrentLeaveYearRange();
+    if (!range || !(range.start instanceof Date) || !(range.end instanceof Date)) return null;
+
+    const rangeStart = toStartOfDay(range.start);
+    if (!rangeStart) return null;
+
+    const rangeEnd = new Date(range.end.getTime());
+    if (Number.isNaN(rangeEnd.getTime())) return null;
+    rangeEnd.setHours(23, 59, 59, 999);
+
+    const count = bankHolidayState.events.reduce((total, event) => {
+      const eventDate = toStartOfDay(event.date);
+      if (!eventDate) return total;
+      if (eventDate < rangeStart || eventDate > rangeEnd) return total;
+      return total + 1;
+    }, 0);
+
+    return {
+      count,
+      rangeStart,
+      rangeEnd,
+    };
+  }
+
   function getStandardWeekElements() {
     if (standardWeekState.elements) return standardWeekState.elements;
     const card = document.getElementById('standardWeekCard');
@@ -2248,13 +2274,38 @@
 
     const startValue = start.value;
     if (!startValue) {
-      standardWeekState.lastDefault = null;
+      const currentYearDefault = computeCurrentLeaveYearBankHolidayTotal();
+      standardWeekState.lastDefault = currentYearDefault
+        ? {
+            ...currentYearDefault,
+            effectiveStart: currentYearDefault.rangeStart,
+          }
+        : null;
+
       if (!standardWeekState.userOverriddenBankHolidays || force) {
-        bankHolidays.value = '';
+        bankHolidays.value = currentYearDefault ? String(currentYearDefault.count) : '';
       }
-      if (bankHolidayHelp)
-        bankHolidayHelp.textContent =
-          'Leave this blank if the employee works the full organisational year. Enter a start date to automatically calculate the remaining bank holidays for mid-year joiners.';
+
+      if (bankHolidayHelp) {
+        if (!bankHolidayState.events.length) {
+          bankHolidayHelp.textContent =
+            'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.';
+        } else if (currentYearDefault) {
+          const { count, rangeStart, rangeEnd } = currentYearDefault;
+          const startLabel = formatHumanDate(rangeStart);
+          const endLabel = formatHumanDate(rangeEnd);
+          if (startLabel && endLabel) {
+            bankHolidayHelp.textContent = `Defaulting to ${count} bank holidays in the current organisational working year (${startLabel} to ${endLabel}). Adjust if needed.`;
+          } else {
+            bankHolidayHelp.textContent =
+              'Defaulting to the current organisational working year bank holiday total. Adjust if needed.';
+          }
+        } else {
+          bankHolidayHelp.textContent =
+            'Leave this blank if the employee works the full organisational year. Enter a start date to automatically calculate the remaining bank holidays for mid-year joiners.';
+        }
+      }
+
       return;
     }
 
@@ -3005,10 +3056,7 @@
 
       if (rate) {
         rate.addEventListener('input', () => {
-          if (rate.value.trim() === '') {
-            standardWeekState.userOverriddenAccrualRate = false;
-            updateStandardWeekAccrualDefault({ force: true });
-          } else {
+          if (rate.value.trim() !== '') {
             standardWeekState.userOverriddenAccrualRate = true;
           }
           updateStandardWeekLeavePreview();
@@ -3017,6 +3065,8 @@
           if (rate.value.trim() === '') {
             standardWeekState.userOverriddenAccrualRate = false;
             updateStandardWeekAccrualDefault({ force: true });
+          } else {
+            standardWeekState.userOverriddenAccrualRate = true;
           }
           updateStandardWeekLeavePreview();
         });
