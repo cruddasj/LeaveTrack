@@ -1187,6 +1187,83 @@
     ];
   }
 
+  function computeStandardWeekCoreProrata(elements) {
+    if (!elements) return null;
+    const { start, core } = elements;
+    if (!start || !core) return null;
+
+    const fullValue = getNumericInputValue(core);
+    if (!(fullValue > 0)) return null;
+
+    const startValue = start.value ? toStartOfDay(start.value) : null;
+    if (!startValue) return null;
+
+    const range = getFinancialYearRange(startValue);
+    if (!range) return null;
+
+    const rangeStart = toStartOfDay(range.start);
+    const rangeEnd = toStartOfDay(range.end);
+    if (!rangeStart || !rangeEnd) return null;
+
+    if (startValue.getTime() <= rangeStart.getTime()) return null;
+
+    const totalDays = Math.max(Math.floor((rangeEnd.getTime() - rangeStart.getTime()) / MS_PER_DAY) + 1, 0);
+    if (totalDays <= 0) return null;
+
+    if (startValue.getTime() > rangeEnd.getTime()) {
+      return {
+        applied: true,
+        fraction: 0,
+        originalValue: fullValue,
+        proRatedValue: 0,
+        rangeStart,
+        rangeEnd,
+        effectiveStart: startValue,
+        totalDays,
+        remainingDays: 0,
+      };
+    }
+
+    const remainingDays = Math.max(
+      Math.floor((rangeEnd.getTime() - startValue.getTime()) / MS_PER_DAY) + 1,
+      0
+    );
+    const rawFraction = remainingDays / totalDays;
+    const fraction = Math.min(Math.max(rawFraction, 0), 1);
+    const proRatedValue = roundToTwoDecimals(fullValue * fraction);
+
+    return {
+      applied: true,
+      fraction,
+      originalValue: fullValue,
+      proRatedValue,
+      rangeStart,
+      rangeEnd,
+      effectiveStart: startValue,
+      totalDays,
+      remainingDays,
+    };
+  }
+
+  function getStandardWeekAllowanceComponents(elementsOverride) {
+    const elements = elementsOverride || getStandardWeekElements();
+    if (!elements) return { components: [], coreProrata: null };
+
+    const components = getLeaveComponents(elements);
+    const coreComponent = components.find((component) => component.id === 'core');
+    let coreProrata = null;
+
+    if (coreComponent) {
+      coreProrata = computeStandardWeekCoreProrata(elements);
+      if (coreProrata && coreProrata.applied) {
+        coreComponent.meta = { proRata: coreProrata };
+        coreComponent.value = coreProrata.proRatedValue;
+      }
+    }
+
+    return { components, coreProrata };
+  }
+
   function setStatCardValue(wrapper, text) {
     if (!wrapper) return;
     const valueEl = wrapper.querySelector('.stat-card__value');
@@ -1199,8 +1276,9 @@
     if (!elements) return;
     const { summaryIntro, breakdown, totals, totalDays, totalHours, equation } = elements;
 
-    const components = getLeaveComponents(elements);
-    const hasValues = components.some((component) => component.value);
+    const { components, coreProrata } = getStandardWeekAllowanceComponents(elements);
+    const hasValues =
+      components.some((component) => component.value) || (coreProrata && coreProrata.originalValue > 0);
 
     if (!hasValues) {
       if (breakdown) {
@@ -1221,7 +1299,30 @@
     }
 
     if (summaryIntro) {
-      summaryIntro.textContent = 'Allowance breakdown based on the figures provided.';
+      if (coreProrata && coreProrata.applied) {
+        const percentLabel = formatNumberWithPrecision(coreProrata.fraction * 100, 1);
+        if (coreProrata.remainingDays > 0) {
+          const startLabel = formatHumanDate(coreProrata.effectiveStart);
+          const endLabel = formatHumanDate(coreProrata.rangeEnd);
+          const message = `
+            Allowance breakdown based on the figures provided. Core leave is pro-rated from ${formatDaysDisplay(
+              coreProrata.originalValue
+            )} to ${formatDaysDisplay(coreProrata.proRatedValue)} covering ${coreProrata.remainingDays} of ${
+            coreProrata.totalDays
+          } days remaining between ${startLabel || 'the start date'} and ${endLabel || 'the end of the working year'} (${percentLabel}% of the organisational year).
+          `;
+          summaryIntro.textContent = message.trim();
+        } else {
+          const endLabel = formatHumanDate(coreProrata.rangeEnd);
+          const message = `
+            Allowance breakdown based on the figures provided. The selected start date falls after ${endLabel ||
+            'the end of this organisational working year'}, so the pro-rated core leave is 0 days.
+          `;
+          summaryIntro.textContent = message.trim();
+        }
+      } else {
+        summaryIntro.textContent = 'Allowance breakdown based on the figures provided.';
+      }
     }
 
     if (breakdown) {
@@ -1234,7 +1335,30 @@
         term.textContent = component.label;
         const definition = document.createElement('dd');
         definition.className = 'text-right text-gray-700 dark:text-gray-300';
-        definition.textContent = formatDaysDisplay(component.value);
+        definition.textContent = '';
+        const valueLine = document.createElement('span');
+        valueLine.className = 'block';
+        valueLine.textContent = formatDaysDisplay(component.value);
+        definition.appendChild(valueLine);
+        if (component.meta && component.meta.proRata) {
+          const meta = component.meta.proRata;
+          const detailLine = document.createElement('span');
+          detailLine.className = 'block text-xs text-gray-500 dark:text-gray-400';
+          if (meta.remainingDays > 0) {
+            const percent = formatNumberWithPrecision(meta.fraction * 100, 1);
+            const detailMessage = `
+              Pro-rated from ${formatDaysDisplay(meta.originalValue)} for ${meta.remainingDays} of ${meta.totalDays} days (${percent}%).
+            `;
+            detailLine.textContent = detailMessage.trim();
+          } else {
+            const endLabel = formatHumanDate(meta.rangeEnd);
+            const detailMessage = `
+              Start date is after ${endLabel || 'this organisational working year'}, so no core leave remains.
+            `;
+            detailLine.textContent = detailMessage.trim();
+          }
+          definition.appendChild(detailLine);
+        }
         wrapper.appendChild(term);
         wrapper.appendChild(definition);
         breakdown.appendChild(wrapper);
@@ -2129,7 +2253,8 @@
         bankHolidays.value = '';
       }
       if (bankHolidayHelp)
-        bankHolidayHelp.textContent = 'Select a start date to automatically calculate bank holidays.';
+        bankHolidayHelp.textContent =
+          'Leave this blank if the employee works the full organisational year. Enter a start date to automatically calculate the remaining bank holidays for mid-year joiners.';
       return;
     }
 
@@ -2422,8 +2547,9 @@
     }
 
     const leaveElements = getStandardWeekElements();
-    const allowanceComponents = getLeaveComponents(leaveElements);
-    const hasAllowanceValues = allowanceComponents.some((component) => component.value);
+    const { components: allowanceComponents, coreProrata } = getStandardWeekAllowanceComponents(leaveElements);
+    const hasAllowanceValues =
+      allowanceComponents.some((component) => component.value) || (coreProrata && coreProrata.originalValue > 0);
     const totalAllowanceDays = allowanceComponents.reduce((sum, component) => sum + component.value, 0);
     const leaveTakenValue = getNumericInputValue(taken);
     const availableDays = totalAllowanceDays - leaveTakenValue;
@@ -2569,6 +2695,28 @@
       }
     } else {
       notes.push('Enable accrual to compare the allowance against forecasted entitlement.');
+    }
+
+    if (coreProrata && coreProrata.applied) {
+      if (coreProrata.remainingDays > 0) {
+        const startLabel = formatHumanDate(coreProrata.effectiveStart);
+        const endLabel = formatHumanDate(coreProrata.rangeEnd);
+        const percent = formatNumberWithPrecision(coreProrata.fraction * 100, 1);
+        const noteMessage = `
+          Core allowance pro-rated from ${formatDaysDisplay(coreProrata.originalValue)} to ${formatDaysDisplay(
+          coreProrata.proRatedValue
+        )} covering ${coreProrata.remainingDays} of ${coreProrata.totalDays} days between ${startLabel || 'the start date'} and ${
+          endLabel || 'the end of the working year'
+        } (${percent}%).
+        `;
+        notes.push(noteMessage.trim());
+      } else {
+        const endLabel = formatHumanDate(coreProrata.rangeEnd);
+        const noteMessage = `
+          The selected start date falls after ${endLabel || 'this organisational working year'}, so no core leave is available.
+        `;
+        notes.push(noteMessage.trim());
+      }
     }
 
     if (note) note.textContent = notes.join(' ');
@@ -3070,8 +3218,8 @@
     const fullRange = range ? formatLeaveYearRange(range) : '';
 
     const startMessage = fullRange
-      ? `Used to determine the organisational working year (${fullRange}) and remaining bank holidays.`
-      : 'Used to determine the organisational working year and remaining bank holidays.';
+      ? `Optional: enter a start date when someone joins part-way through the organisational working year (${fullRange}) so we can calculate the remaining bank holidays. Leave it blank for employees who are with you all year.`
+      : 'Optional: enter a start date when someone joins part-way through the organisational working year so we can calculate the remaining bank holidays. Leave it blank for employees who are with you all year.';
     $$('[data-leave-year-start-note]').forEach((el) => {
       el.textContent = startMessage;
     });
