@@ -1,4 +1,12 @@
 [{
+    "version": "0.0.11",
+    "date": "2025-10-15",
+    "changes": [
+      "Swap the accrual application chooser for a dropdown so it is easier to use on phones.",
+      "List the bank holidays that fall within the proposed leave period instead of only showing the count."
+    ]
+  },
+  {
     "version": "0.0.10",
     "date": "2025-10-14",
     "changes": [
