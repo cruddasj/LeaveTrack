@@ -2,6 +2,10 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [0.0.12] - 2025-10-16
+- Default the monthly accrual rate to core plus long service leave divided by 12 while keeping the field editable.
+- Highlight whether a proposed leave period is covered by the remaining allowance, including half-day end support and a field for leave already taken.
+
 ## [0.0.11] - 2025-10-15
 - Replace the "How accrual is applied" chooser with a dropdown for easier use on smaller screens.
 - Show the detailed bank holidays that fall within the proposed leave period instead of only the count.

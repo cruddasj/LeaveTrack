@@ -1,4 +1,12 @@
 [{
+    "version": "0.0.12",
+    "date": "2025-10-16",
+    "changes": [
+      "Default the monthly accrual rate to core plus long service leave divided by 12 while keeping the field editable.",
+      "Highlight whether a proposed leave period is covered by the remaining allowance, including half-day end support and a field for leave already taken."
+    ]
+  },
+  {
     "version": "0.0.11",
     "date": "2025-10-15",
     "changes": [
