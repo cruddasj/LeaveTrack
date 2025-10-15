@@ -2,6 +2,10 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [0.0.17] - 2025-10-15
+- Clearly label the Standard week accrual settings as optional and keep the monthly rate editable while typing.
+- Pre-fill the Standard week bank holidays field with the current working year total, still allowing manual overrides.
+
 ## [0.0.16] - 2025-10-15
 - Leave start date inputs now begin empty so new users can enter the correct join date themselves.
 

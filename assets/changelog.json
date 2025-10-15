@@ -1,4 +1,12 @@
 [{
+    "version": "0.0.17",
+    "date": "2025-10-15",
+    "changes": [
+      "Clearly label the Standard week accrual settings as optional and keep the monthly rate editable while typing.",
+      "Pre-fill the Standard week bank holidays field with the current working year total, still allowing manual overrides."
+    ]
+  },
+  {
     "version": "0.0.16",
     "date": "2025-10-15",
     "changes": [
