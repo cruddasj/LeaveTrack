@@ -834,8 +834,7 @@
       card,
       toggle: card.querySelector('#standardAccrualToggle'),
       rate: card.querySelector('#standardAccrualRate'),
-      modeStart: card.querySelector('#standardAccrualModeStart'),
-      modeProrata: card.querySelector('#standardAccrualModeProrata'),
+      mode: card.querySelector('#standardAccrualMode'),
       fieldsWrapper: card.querySelector('[data-standard-accrual-fields]'),
       help: card.querySelector('[data-standard-accrual-help]'),
     };
@@ -855,6 +854,9 @@
       results: card.querySelector('[data-standard-preview-results]'),
       needed: card.querySelector('[data-standard-preview-needed]'),
       bankHolidays: card.querySelector('[data-standard-preview-bank-holidays]'),
+      bankHolidayDetails: card.querySelector('[data-standard-preview-bank-holiday-details]'),
+      bankHolidayLabel: card.querySelector('[data-standard-preview-bank-holidays-label]'),
+      bankHolidayList: card.querySelector('[data-standard-preview-bank-holidays-list]'),
       accrued: card.querySelector('[data-standard-preview-accrued]'),
       note: card.querySelector('[data-standard-preview-note]'),
     };
@@ -2134,9 +2136,9 @@
   function updateStandardWeekAccrualUI() {
     const accrual = getStandardWeekAccrualElements();
     if (!accrual) return;
-    const { toggle, rate, modeStart, modeProrata, fieldsWrapper } = accrual;
+    const { toggle, rate, mode, fieldsWrapper } = accrual;
     const enabled = !!(toggle && toggle.checked);
-    [rate, modeStart, modeProrata].forEach((input) => {
+    [rate, mode].forEach((input) => {
       if (!input) return;
       input.disabled = !enabled;
       input.setAttribute('aria-disabled', enabled ? 'false' : 'true');
@@ -2224,9 +2226,23 @@
   function updateStandardWeekLeavePreview() {
     const preview = getStandardWeekPreviewElements();
     if (!preview) return;
-    const { start, end, message, results, needed, bankHolidays, accrued, note } = preview;
+    const {
+      start,
+      end,
+      message,
+      results,
+      needed,
+      bankHolidays,
+      accrued,
+      note,
+      bankHolidayDetails,
+      bankHolidayLabel,
+      bankHolidayList,
+    } = preview;
 
     if (results) results.hidden = true;
+    if (bankHolidayList) bankHolidayList.innerHTML = '';
+    if (bankHolidayDetails) bankHolidayDetails.hidden = true;
 
     const startDate = start ? toStartOfDay(start.value) : null;
     const endDate = end ? toStartOfDay(end.value) : null;
@@ -2263,19 +2279,24 @@
 
     const workingDays = countWorkingDaysInclusive(startDate, endDate);
     const hasBankHolidayData = bankHolidayState.events.length > 0;
-    let bankHolidayCount = 0;
+    let matchingBankHolidays = [];
 
     if (hasBankHolidayData) {
-      bankHolidayCount = bankHolidayState.events
-        .map((event) => toStartOfDay(event.date))
-        .filter((date) => date && date >= rangeStart && date <= rangeEnd)
-        .filter((date) => date >= startDate && date <= endDate)
-        .filter((date) => {
-          const day = date.getDay();
+      matchingBankHolidays = bankHolidayState.events
+        .map((event) => ({
+          ...event,
+          date: toStartOfDay(event.date),
+        }))
+        .filter((event) => event.date && event.date >= rangeStart && event.date <= rangeEnd)
+        .filter((event) => event.date >= startDate && event.date <= endDate)
+        .filter((event) => {
+          const day = event.date.getDay();
           return day !== 0 && day !== 6;
-        }).length;
+        })
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
     }
 
+    const bankHolidayCount = matchingBankHolidays.length;
     const leaveDaysNeeded = Math.max(workingDays - bankHolidayCount, 0);
 
     const accrualElements = getStandardWeekAccrualElements();
@@ -2283,7 +2304,9 @@
     const rateValue = accrualElements && accrualElements.rate ? Number.parseFloat(accrualElements.rate.value) : NaN;
     const accrualRate = Number.isFinite(rateValue) && rateValue > 0 ? rateValue : 0;
     const accrualMode =
-      accrualElements && accrualElements.modeProrata && accrualElements.modeProrata.checked ? 'prorata' : 'start';
+      accrualElements && accrualElements.mode && String(accrualElements.mode.value).toLowerCase() === 'prorata'
+        ? 'prorata'
+        : 'start';
 
     let accruedDays = 0;
     const accrualLimit = endDate.getTime() < rangeEnd.getTime() ? endDate : rangeEnd;
@@ -2320,6 +2343,41 @@
         );
       } else {
         notes.push('No bank holidays fall on weekdays during this period.');
+      }
+      if (bankHolidayDetails) {
+        if (bankHolidayLabel) {
+          bankHolidayLabel.textContent = `Bank holidays during this period (${bankHolidayCount})`;
+        }
+        if (bankHolidayList) {
+          if (bankHolidayCount > 0) {
+            matchingBankHolidays.forEach((event) => {
+              const entry = document.createElement('li');
+              entry.className =
+                'rounded-lg bg-gray-50 dark:bg-gray-900/40 p-3 space-y-1 border border-gray-200 dark:border-gray-700';
+              const title = document.createElement('p');
+              title.className = 'font-medium text-gray-900 dark:text-gray-100';
+              title.textContent = event.title || 'Bank holiday';
+              entry.appendChild(title);
+              const dateLine = document.createElement('p');
+              dateLine.className = 'text-xs text-gray-600 dark:text-gray-400';
+              dateLine.textContent = formatBankHolidayDate(event.date);
+              entry.appendChild(dateLine);
+              if (event.notes) {
+                const notesLine = document.createElement('p');
+                notesLine.className = 'text-xs text-gray-500 dark:text-gray-400';
+                notesLine.textContent = event.notes;
+                entry.appendChild(notesLine);
+              }
+              bankHolidayList.appendChild(entry);
+            });
+          } else {
+            const emptyEntry = document.createElement('li');
+            emptyEntry.className = 'text-sm text-gray-500 dark:text-gray-400';
+            emptyEntry.textContent = 'No bank holidays fall on weekdays during this period.';
+            bankHolidayList.appendChild(emptyEntry);
+          }
+        }
+        bankHolidayDetails.hidden = false;
       }
     } else {
       notes.push('Bank holiday data is unavailable; results do not exclude bank holidays.');
@@ -2616,7 +2674,7 @@
     }
 
     if (accrual) {
-      const { toggle, rate, modeStart, modeProrata } = accrual;
+      const { toggle, rate, mode } = accrual;
       if (rate && !rate.value) {
         rate.value = '2';
       }
@@ -2628,7 +2686,7 @@
         });
       }
 
-      [rate, modeStart, modeProrata].forEach((input) => {
+      [rate, mode].forEach((input) => {
         if (!input) return;
         input.addEventListener('input', () => {
           updateStandardWeekLeavePreview();

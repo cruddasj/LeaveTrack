@@ -2,6 +2,10 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [0.0.11] - 2025-10-15
+- Replace the "How accrual is applied" chooser with a dropdown for easier use on smaller screens.
+- Show the detailed bank holidays that fall within the proposed leave period instead of only the count.
+
 ## [0.0.10] - 2025-10-14
 - Let you override the auto-calculated organisational working year end date directly from Settings.
 - Add a Standard week view with annual leave inputs, monthly accrual options, and a leave period planner that accounts for bank holidays.

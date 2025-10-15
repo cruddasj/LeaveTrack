@@ -468,36 +468,11 @@
                     />
                   </div>
                   <div class="space-y-2">
-                    <span class="form-label">How accrual is applied</span>
-                    <div class="space-y-2">
-                      <label
-                        class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
-                        for="standardAccrualModeStart"
-                      >
-                        <input
-                          type="radio"
-                          name="standardAccrualMode"
-                          value="start"
-                          id="standardAccrualModeStart"
-                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
-                          checked
-                        />
-                        <span>Credited at the start of each month</span>
-                      </label>
-                      <label
-                        class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
-                        for="standardAccrualModeProrata"
-                      >
-                        <input
-                          type="radio"
-                          name="standardAccrualMode"
-                          value="prorata"
-                          id="standardAccrualModeProrata"
-                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
-                        />
-                        <span>Accrued pro-rata throughout the month</span>
-                      </label>
-                    </div>
+                    <label for="standardAccrualMode" class="form-label">How accrual is applied</label>
+                    <select id="standardAccrualMode" class="input-field">
+                      <option value="start">Credited at the start of each month</option>
+                      <option value="prorata">Accrued pro-rata throughout the month</option>
+                    </select>
                   </div>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-accrual-help>
@@ -577,6 +552,13 @@
                       <p class="stat-card__label">Accrued leave by end date</p>
                       <p class="stat-card__value">0 days</p>
                     </div>
+                  </div>
+                  <div class="space-y-2" data-standard-preview-bank-holiday-details hidden>
+                    <p class="font-semibold text-gray-900 dark:text-gray-100" data-standard-preview-bank-holidays-label></p>
+                    <ul
+                      class="space-y-2 text-sm text-gray-700 dark:text-gray-300"
+                      data-standard-preview-bank-holidays-list
+                    ></ul>
                   </div>
                   <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-preview-note></p>
                 </div>
