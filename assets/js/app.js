@@ -77,7 +77,9 @@
     previewElements: null,
     initialized: false,
     userOverriddenBankHolidays: false,
+    userOverriddenAccrualRate: false,
     lastDefault: null,
+    lastAccrualDefault: null,
   };
 
   const fourDayWeekState = {
@@ -850,6 +852,8 @@
       card,
       start: card.querySelector('#standardLeaveStart'),
       end: card.querySelector('#standardLeaveEnd'),
+      endPortion: card.querySelector('#standardLeaveEndPortion'),
+      taken: card.querySelector('#standardLeaveTaken'),
       message: card.querySelector('[data-standard-preview-message]'),
       results: card.querySelector('[data-standard-preview-results]'),
       needed: card.querySelector('[data-standard-preview-needed]'),
@@ -858,6 +862,8 @@
       bankHolidayLabel: card.querySelector('[data-standard-preview-bank-holidays-label]'),
       bankHolidayList: card.querySelector('[data-standard-preview-bank-holidays-list]'),
       accrued: card.querySelector('[data-standard-preview-accrued]'),
+      balance: card.querySelector('[data-standard-preview-balance]'),
+      coverage: card.querySelector('[data-standard-preview-coverage]'),
       note: card.querySelector('[data-standard-preview-note]'),
     };
     standardWeekState.previewElements = elements;
@@ -2133,6 +2139,45 @@
     }
   }
 
+  function updateStandardWeekAccrualDefault({ force = false } = {}) {
+    const elements = getStandardWeekElements();
+    const accrual = getStandardWeekAccrualElements();
+    if (!elements || !accrual) return;
+    const { core, longService } = elements;
+    const { rate, help } = accrual;
+    if (!rate) return;
+
+    const coreValue = getNumericInputValue(core);
+    const longServiceValue = getNumericInputValue(longService);
+    const total = coreValue + longServiceValue;
+    const computed = total > 0 ? roundToTwoDecimals(total / 12) : 0;
+    const defaultValue = computed > 0 ? computed : null;
+    standardWeekState.lastAccrualDefault = defaultValue;
+
+    if (help) {
+      if (defaultValue !== null) {
+        help.textContent =
+          'Default monthly accrual uses core plus long service leave divided by 12. Adjust if needed.';
+      } else {
+        help.textContent = 'Enter a monthly accrual rate to forecast how much leave will have built up by a given date.';
+      }
+    }
+
+    if (standardWeekState.userOverriddenAccrualRate && !force) {
+      return;
+    }
+
+    if (force) {
+      standardWeekState.userOverriddenAccrualRate = false;
+    }
+
+    if (defaultValue !== null) {
+      rate.value = String(defaultValue);
+    } else {
+      rate.value = '';
+    }
+  }
+
   function updateStandardWeekAccrualUI() {
     const accrual = getStandardWeekAccrualElements();
     if (!accrual) return;
@@ -2229,20 +2274,56 @@
     const {
       start,
       end,
+      endPortion,
+      taken,
       message,
       results,
       needed,
       bankHolidays,
       accrued,
+      balance,
+      coverage,
       note,
       bankHolidayDetails,
       bankHolidayLabel,
       bankHolidayList,
     } = preview;
 
+    const coverageStatusClasses = [
+      'text-emerald-600',
+      'dark:text-emerald-400',
+      'text-amber-600',
+      'dark:text-amber-400',
+      'text-red-600',
+      'dark:text-red-400',
+    ];
+    const balanceStatusClasses = [
+      'border-emerald-500',
+      'dark:border-emerald-400',
+      'bg-emerald-50',
+      'dark:bg-emerald-500/10',
+      'border-amber-500',
+      'dark:border-amber-400',
+      'bg-amber-50',
+      'dark:bg-amber-500/10',
+      'border-red-500',
+      'dark:border-red-500',
+      'bg-red-50',
+      'dark:bg-red-500/10',
+    ];
+
     if (results) results.hidden = true;
     if (bankHolidayList) bankHolidayList.innerHTML = '';
     if (bankHolidayDetails) bankHolidayDetails.hidden = true;
+    if (coverage) {
+      coverage.hidden = true;
+      coverage.textContent = '';
+      coverage.classList.remove(...coverageStatusClasses);
+    }
+    if (balance) {
+      balance.classList.remove(...balanceStatusClasses);
+      setStatCardValue(balance, '—');
+    }
 
     const startDate = start ? toStartOfDay(start.value) : null;
     const endDate = end ? toStartOfDay(end.value) : null;
@@ -2297,7 +2378,11 @@
     }
 
     const bankHolidayCount = matchingBankHolidays.length;
-    const leaveDaysNeeded = Math.max(workingDays - bankHolidayCount, 0);
+    let leaveDaysNeeded = Math.max(workingDays - bankHolidayCount, 0);
+    const endIsHalfDay = endPortion && String(endPortion.value).toLowerCase() === 'half';
+    if (endIsHalfDay && leaveDaysNeeded > 0) {
+      leaveDaysNeeded = Math.max(leaveDaysNeeded - 0.5, 0);
+    }
 
     const accrualElements = getStandardWeekAccrualElements();
     const accrualEnabled = !!(accrualElements && accrualElements.toggle && accrualElements.toggle.checked);
@@ -2318,6 +2403,14 @@
       }
     }
 
+    const leaveElements = getStandardWeekElements();
+    const allowanceComponents = getLeaveComponents(leaveElements);
+    const hasAllowanceValues = allowanceComponents.some((component) => component.value);
+    const totalAllowanceDays = allowanceComponents.reduce((sum, component) => sum + component.value, 0);
+    const leaveTakenValue = getNumericInputValue(taken);
+    const availableDays = totalAllowanceDays - leaveTakenValue;
+    const remainingAfterRequest = availableDays - leaveDaysNeeded;
+
     if (results) results.hidden = false;
     const startLabel = formatHumanDate(startDate);
     const endLabel = formatHumanDate(endDate);
@@ -2335,7 +2428,69 @@
       setStatCardValue(accrued, 'Accrual disabled');
     }
 
+    if (balance) {
+      if (hasAllowanceValues) {
+        setStatCardValue(balance, formatDaysDisplay(remainingAfterRequest));
+      } else {
+        setStatCardValue(balance, '—');
+      }
+    }
+
+    let coverageMessage = '';
+    let coverageStatus = 'neutral';
+
+    if (!hasAllowanceValues) {
+      coverageMessage = leaveTakenValue > 0
+        ? 'Add your annual leave allowances above to compare against the leave already taken.'
+        : 'Enter your annual leave allowances above to calculate your remaining balance.';
+      coverageStatus = 'warning';
+    } else if (leaveDaysNeeded === 0) {
+      if (availableDays >= 0) {
+        coverageMessage = 'No additional leave is required for this period.';
+        coverageStatus = 'positive';
+      } else {
+        coverageMessage = `No additional leave is required, but you are ${formatDaysDisplay(Math.abs(availableDays))} over your allowance.`;
+        coverageStatus = 'warning';
+      }
+    } else if (remainingAfterRequest >= 0) {
+      coverageMessage =
+        remainingAfterRequest === 0
+          ? 'This request uses the final days of your allowance.'
+          : `${formatDaysDisplay(remainingAfterRequest)} will remain after this request.`;
+      coverageStatus = 'positive';
+    } else {
+      coverageMessage = `You need ${formatDaysDisplay(Math.abs(remainingAfterRequest))} more days to cover this request.`;
+      coverageStatus = 'negative';
+    }
+
+    if (coverage && coverageMessage) {
+      coverage.hidden = false;
+      coverage.textContent = coverageMessage;
+      coverage.classList.remove(...coverageStatusClasses);
+      if (coverageStatus === 'positive') {
+        coverage.classList.add('text-emerald-600', 'dark:text-emerald-400');
+      } else if (coverageStatus === 'negative') {
+        coverage.classList.add('text-red-600', 'dark:text-red-400');
+      } else if (coverageStatus === 'warning') {
+        coverage.classList.add('text-amber-600', 'dark:text-amber-400');
+      }
+    }
+
+    if (balance) {
+      balance.classList.remove(...balanceStatusClasses);
+      if (coverageStatus === 'positive') {
+        balance.classList.add('border-emerald-500', 'dark:border-emerald-400', 'bg-emerald-50', 'dark:bg-emerald-500/10');
+      } else if (coverageStatus === 'negative') {
+        balance.classList.add('border-red-500', 'dark:border-red-500', 'bg-red-50', 'dark:bg-red-500/10');
+      } else if (coverageStatus === 'warning') {
+        balance.classList.add('border-amber-500', 'dark:border-amber-400', 'bg-amber-50', 'dark:bg-amber-500/10');
+      }
+    }
+
     const notes = [];
+    if (endIsHalfDay) {
+      notes.push('Treating the final day as a half-day deduction.');
+    }
     if (hasBankHolidayData) {
       if (bankHolidayCount > 0) {
         notes.push(
@@ -2648,7 +2803,9 @@
       }
 
       const handleAllowanceChange = () => {
+        updateStandardWeekAccrualDefault();
         updateStandardWeekSummary();
+        updateStandardWeekLeavePreview();
       };
 
       [core, longService, carryOver, purchased].forEach((input) => {
@@ -2660,6 +2817,7 @@
         bankHolidays.addEventListener('input', () => {
           standardWeekState.userOverriddenBankHolidays = true;
           updateStandardWeekSummary();
+          updateStandardWeekLeavePreview();
         });
       }
 
@@ -2675,9 +2833,6 @@
 
     if (accrual) {
       const { toggle, rate, mode } = accrual;
-      if (rate && !rate.value) {
-        rate.value = '2';
-      }
 
       if (toggle) {
         toggle.addEventListener('change', () => {
@@ -2686,19 +2841,42 @@
         });
       }
 
-      [rate, mode].forEach((input) => {
-        if (!input) return;
-        input.addEventListener('input', () => {
+      if (rate) {
+        rate.addEventListener('input', () => {
+          if (rate.value.trim() === '') {
+            standardWeekState.userOverriddenAccrualRate = false;
+            updateStandardWeekAccrualDefault({ force: true });
+          } else {
+            standardWeekState.userOverriddenAccrualRate = true;
+          }
           updateStandardWeekLeavePreview();
         });
-        input.addEventListener('change', () => {
+        rate.addEventListener('change', () => {
+          if (rate.value.trim() === '') {
+            standardWeekState.userOverriddenAccrualRate = false;
+            updateStandardWeekAccrualDefault({ force: true });
+          }
           updateStandardWeekLeavePreview();
         });
-      });
+      }
+
+      if (mode) {
+        mode.addEventListener('input', () => {
+          updateStandardWeekLeavePreview();
+        });
+        mode.addEventListener('change', () => {
+          updateStandardWeekLeavePreview();
+        });
+      }
     }
 
     if (preview) {
-      const { start: previewStart, end: previewEnd } = preview;
+      const {
+        start: previewStart,
+        end: previewEnd,
+        taken: previewTaken,
+        endPortion: previewEndPortion,
+      } = preview;
       const today = new Date();
       if (previewStart && !previewStart.value) {
         previewStart.value = formatDateForInput(today);
@@ -2715,10 +2893,23 @@
           updateStandardWeekLeavePreview();
         });
       });
+
+      if (previewTaken) {
+        previewTaken.addEventListener('input', () => {
+          updateStandardWeekLeavePreview();
+        });
+      }
+
+      if (previewEndPortion) {
+        previewEndPortion.addEventListener('change', () => {
+          updateStandardWeekLeavePreview();
+        });
+      }
     }
 
     standardWeekState.initialized = true;
     updateStandardWeekBankHolidayDefault({ force: true });
+    updateStandardWeekAccrualDefault({ force: true });
     updateStandardWeekSummary();
     updateStandardWeekAccrualUI();
     updateStandardWeekLeavePreview();

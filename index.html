@@ -533,13 +533,37 @@
                   <label for="standardLeaveEnd" class="form-label">Leave end</label>
                   <input type="date" id="standardLeaveEnd" class="input-field" />
                 </div>
+                <div class="space-y-2 md:col-span-2">
+                  <label for="standardLeaveEndPortion" class="form-label">End day duration</label>
+                  <select id="standardLeaveEndPortion" class="input-field">
+                    <option value="full">Full day</option>
+                    <option value="half">Half day</option>
+                  </select>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Choose half day when the final day of leave only requires a half-day deduction.
+                  </p>
+                </div>
+                <div class="space-y-2 md:col-span-2">
+                  <label for="standardLeaveTaken" class="form-label">Leave already taken this year (days)</label>
+                  <input
+                    type="number"
+                    id="standardLeaveTaken"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.5"
+                    min="0"
+                  />
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Used to work out the remaining allowance available for this request.
+                  </p>
+                </div>
               </form>
               <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4" data-standard-preview>
                 <p class="text-sm text-gray-600 dark:text-gray-400" data-standard-preview-message>
                   Enter a start and end date to see the leave requirements.
                 </p>
                 <div class="space-y-3" data-standard-preview-results hidden>
-                  <div class="grid gap-3 sm:grid-cols-3">
+                  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <div class="stat-card" data-standard-preview-needed>
                       <p class="stat-card__label">Leave days needed</p>
                       <p class="stat-card__value">0 days</p>
@@ -552,7 +576,16 @@
                       <p class="stat-card__label">Accrued leave by end date</p>
                       <p class="stat-card__value">0 days</p>
                     </div>
+                    <div class="stat-card" data-standard-preview-balance>
+                      <p class="stat-card__label">Balance after request</p>
+                      <p class="stat-card__value">0 days</p>
+                    </div>
                   </div>
+                  <p
+                    class="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                    data-standard-preview-coverage
+                    hidden
+                  ></p>
                   <div class="space-y-2" data-standard-preview-bank-holiday-details hidden>
                     <p class="font-semibold text-gray-900 dark:text-gray-100" data-standard-preview-bank-holidays-label></p>
                     <ul
