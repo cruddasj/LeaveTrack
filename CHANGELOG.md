@@ -2,6 +2,9 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [0.0.16] - 2025-10-15
+- Leave start date inputs now begin empty so new users can enter the correct join date themselves.
+
 ## [0.0.15] - 2025-10-16
 - Default the organisational working year to run from 1 April to 31 March for new users.
 

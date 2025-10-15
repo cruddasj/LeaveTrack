@@ -1,4 +1,11 @@
 [{
+    "version": "0.0.16",
+    "date": "2025-10-15",
+    "changes": [
+      "Leave start date inputs now begin empty so new users can enter the correct join date themselves."
+    ]
+  },
+  {
     "version": "0.0.15",
     "date": "2025-10-16",
     "changes": [
