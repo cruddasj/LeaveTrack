@@ -2964,10 +2964,6 @@
     if (elements) {
       const { start, core, longService, carryOver, purchased, bankHolidays } = elements;
 
-      if (start && !start.value) {
-        start.value = formatDateForInput(new Date());
-      }
-
       const handleAllowanceChange = () => {
         updateStandardWeekAccrualDefault();
         updateStandardWeekSummary();
@@ -3090,10 +3086,6 @@
     const { start, core, longService, carryOver, purchased, bankHolidays } = elements;
     const bookerDaySelect = booker ? booker.daySelect : null;
 
-    if (start && !start.value) {
-      start.value = formatDateForInput(new Date());
-    }
-
     const handleInputChange = () => {
       updateFourDayWeekSummary();
     };
@@ -3139,14 +3131,6 @@
 
     const { start, core, longService, carryOver, purchased, bankHolidays } = elements;
     const bookerStartInput = booker ? booker.startDate : null;
-
-    if (start && !start.value) {
-      start.value = formatDateForInput(new Date());
-    }
-
-    if (bookerStartInput && !bookerStartInput.value) {
-      bookerStartInput.value = formatDateForInput(new Date());
-    }
 
     const handleInputChange = () => {
       updateNineDayFortnightSummary();
