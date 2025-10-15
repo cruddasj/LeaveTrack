@@ -2,6 +2,9 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [0.0.13] - 2025-10-15
+- Add a Print to PDF card to the Standard week calculator so you can export those allowances.
+
 ## [0.0.12] - 2025-10-16
 - Default the monthly accrual rate to core plus long service leave divided by 12 while keeping the field editable.
 - Highlight whether a proposed leave period is covered by the remaining allowance, including half-day end support and a field for leave already taken.

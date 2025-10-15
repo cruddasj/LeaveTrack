@@ -1865,17 +1865,27 @@
       )
       .join('');
 
-    const totalsRows = [
+    const includeCompressed =
+      Number.isFinite(compressedDayHours) && compressedDayHours > 0 && !!compressedLabel;
+
+    const totalsRowsParts = [
       `<tr><th scope="row">Total standard leave</th><td class="value-cell">${escapeHtml(
         formatDaysDisplay(payload.totalDaysValue)
       )}</td></tr>`,
       `<tr><th scope="row">Total allowance</th><td class="value-cell">${escapeHtml(
         formatHoursDisplay(payload.totalHoursValue)
       )}</td></tr>`,
-      `<tr><th scope="row">${escapeHtml(compressedLabel)}</th><td class="value-cell">${escapeHtml(
-        formatDaysDisplay(payload.compressedAllowanceValue)
-      )}</td></tr>`,
-    ].join('');
+    ];
+
+    if (includeCompressed) {
+      totalsRowsParts.push(
+        `<tr><th scope="row">${escapeHtml(compressedLabel)}</th><td class="value-cell">${escapeHtml(
+          formatDaysDisplay(payload.compressedAllowanceValue)
+        )}</td></tr>`
+      );
+    }
+
+    const totalsRows = totalsRowsParts.join('');
 
     const includedComponents = payload.components.filter((component) => component.value);
     const allowancesDetailSource = includedComponents.length
@@ -1888,17 +1898,25 @@
       .join(' + ');
 
     const standardHoursFormatted = formatNumberWithPrecision(getStandardDayHours(), 2);
-    const compressedHoursFormatted = formatNumberWithPrecision(compressedDayHours, 2);
     const totalDaysFormatted = formatNumberWithPrecision(payload.totalDaysValue, 2);
     const totalHoursFormatted = formatNumberWithPrecision(payload.totalHoursValue, 2);
-    const compressedFormatted = formatNumberWithPrecision(payload.compressedAllowanceValue, 2);
 
-    const calculationItems = [
+    const calculationItemsParts = [
       `Total standard leave (days) = ${allowancesDetail || '0'}.`,
       `Total allowance (hours) = ${totalDaysFormatted} × ${standardHoursFormatted} = ${totalHoursFormatted} hours.`,
-      `Compressed allowance (days) = ${totalHoursFormatted} ÷ ${compressedHoursFormatted} = ${compressedFormatted} days.`,
-      'Purchased leave and bank holidays are treated as whole days.',
-    ]
+    ];
+
+    if (includeCompressed) {
+      const compressedHoursFormatted = formatNumberWithPrecision(compressedDayHours, 2);
+      const compressedFormatted = formatNumberWithPrecision(payload.compressedAllowanceValue, 2);
+      calculationItemsParts.push(
+        `${compressedLabel} = ${totalHoursFormatted} ÷ ${compressedHoursFormatted} = ${compressedFormatted} days.`
+      );
+    }
+
+    calculationItemsParts.push('Purchased leave and bank holidays are treated as whole days.');
+
+    const calculationItems = calculationItemsParts
       .map((item) => `<li>${escapeHtml(item)}</li>`)
       .join('');
 
@@ -4087,6 +4105,23 @@
         case 'close-modal':
           closeModal();
           break;
+        case 'print-standard-week': {
+          const elements = getStandardWeekElements();
+          if (!elements) return;
+          const bankHolidayNote = buildBankHolidayReportNote({
+            overridden: standardWeekState.userOverriddenBankHolidays,
+            lastDefault: standardWeekState.lastDefault,
+          });
+          handleLeaveReportPrint({
+            elements,
+            title: 'Standard week leave entitlement',
+            scheduleLabel: 'Standard week',
+            compressedDayHours: null,
+            compressedLabel: null,
+            bankHolidayNote,
+          });
+          break;
+        }
         case 'print-four-day': {
           const elements = getFourDayWeekElements();
           if (!elements) return;
