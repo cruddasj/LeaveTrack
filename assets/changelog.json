@@ -1,4 +1,11 @@
 [{
+    "version": "0.0.19",
+    "date": "2025-10-16",
+    "changes": [
+      "Show the Standard week accrual card at the leave start and surface the remaining accrued leave after a proposed request."
+    ]
+  },
+  {
     "version": "0.0.17",
     "date": "2025-10-15",
     "changes": [
