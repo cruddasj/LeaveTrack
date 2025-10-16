@@ -2587,15 +2587,26 @@
         ? 'prorata'
         : 'start';
 
-    let accruedDays = 0;
-    const accrualLimit = endDate.getTime() < rangeEnd.getTime() ? endDate : rangeEnd;
-    if (accrualEnabled && accrualRate > 0 && accrualLimit.getTime() >= rangeStart.getTime()) {
-      if (accrualMode === 'prorata') {
-        accruedDays = computeProrataAccrual(rangeStart, rangeEnd, accrualLimit, accrualRate);
-      } else {
-        accruedDays = computeMonthlyAccrual(rangeStart, rangeEnd, accrualLimit, accrualRate);
-      }
-    }
+    const computeAccruedUpTo = (limitCandidate) => {
+      if (!accrualEnabled) return 0;
+      if (!(limitCandidate instanceof Date)) return 0;
+      const limitTime = limitCandidate.getTime();
+      if (Number.isNaN(limitTime)) return 0;
+      const boundedLimit = limitTime < rangeEnd.getTime() ? limitCandidate : rangeEnd;
+      if (boundedLimit.getTime() < rangeStart.getTime()) return 0;
+      if (!(accrualRate > 0)) return 0;
+      return accrualMode === 'prorata'
+        ? computeProrataAccrual(rangeStart, rangeEnd, boundedLimit, accrualRate)
+        : computeMonthlyAccrual(rangeStart, rangeEnd, boundedLimit, accrualRate);
+    };
+
+    const accrualLimitEnd = endDate.getTime() < rangeEnd.getTime() ? endDate : rangeEnd;
+    const accrualLimitStart = accrualMode === 'prorata'
+      ? new Date(startDate.getTime() - MS_PER_DAY)
+      : new Date(startDate.getTime());
+
+    const accruedDaysByEnd = computeAccruedUpTo(accrualLimitEnd);
+    const accruedDaysByStart = computeAccruedUpTo(accrualLimitStart);
 
     const leaveElements = getStandardWeekElements();
     const { components: allowanceComponents, coreProrata } = getStandardWeekAllowanceComponents(leaveElements);
@@ -2605,6 +2616,7 @@
     const leaveTakenValue = getNumericInputValue(taken);
     const availableDays = totalAllowanceDays - leaveTakenValue;
     const remainingAfterRequest = availableDays - leaveDaysNeeded;
+    const accruedBalanceDays = accrualEnabled ? accruedDaysByEnd - leaveTakenValue - leaveDaysNeeded : 0;
 
     if (results) results.hidden = false;
     const startLabel = formatHumanDate(startDate);
@@ -2618,13 +2630,20 @@
     );
 
     if (accrualEnabled) {
-      setStatCardValue(accrued, `${formatNumberWithPrecision(accruedDays)} days`);
+      setStatCardValue(accrued, `${formatNumberWithPrecision(accruedDaysByStart)} days`);
     } else {
       setStatCardValue(accrued, 'Accrual disabled');
     }
 
     if (balance) {
-      if (hasAllowanceValues) {
+      const labelEl = balance.querySelector('.stat-card__label');
+      if (labelEl) {
+        labelEl.textContent = accrualEnabled ? 'Remaining accrued leave' : 'Remaining balance after request';
+      }
+
+      if (accrualEnabled) {
+        setStatCardValue(balance, formatDaysDisplay(accruedBalanceDays));
+      } else if (hasAllowanceValues) {
         setStatCardValue(balance, formatDaysDisplay(remainingAfterRequest));
       } else {
         setStatCardValue(balance, '—');
@@ -2633,6 +2652,7 @@
 
     let coverageMessage = '';
     let coverageStatus = 'neutral';
+    let balanceStatus = 'neutral';
 
     if (!hasAllowanceValues) {
       coverageMessage = leaveTakenValue > 0
@@ -2671,13 +2691,25 @@
       }
     }
 
+    if (accrualEnabled) {
+      if (accruedBalanceDays > 0) {
+        balanceStatus = 'positive';
+      } else if (accruedBalanceDays < 0) {
+        balanceStatus = 'negative';
+      } else {
+        balanceStatus = 'warning';
+      }
+    } else {
+      balanceStatus = coverageStatus;
+    }
+
     if (balance) {
       balance.classList.remove(...balanceStatusClasses);
-      if (coverageStatus === 'positive') {
+      if (balanceStatus === 'positive') {
         balance.classList.add('border-emerald-500', 'dark:border-emerald-400', 'bg-emerald-50', 'dark:bg-emerald-500/10');
-      } else if (coverageStatus === 'negative') {
+      } else if (balanceStatus === 'negative') {
         balance.classList.add('border-red-500', 'dark:border-red-500', 'bg-red-50', 'dark:bg-red-500/10');
-      } else if (coverageStatus === 'warning') {
+      } else if (balanceStatus === 'warning') {
         balance.classList.add('border-amber-500', 'dark:border-amber-400', 'bg-amber-50', 'dark:bg-amber-500/10');
       }
     }
@@ -2743,6 +2775,14 @@
         );
       } else {
         notes.push('Accrual enabled with a 0 day monthly rate.');
+      }
+
+      if (accruedBalanceDays > 0) {
+        notes.push(`${formatDaysDisplay(accruedBalanceDays)} of accrued leave would remain after this request.`);
+      } else if (accruedBalanceDays < 0) {
+        notes.push(`Accrued leave would fall short by ${formatDaysDisplay(Math.abs(accruedBalanceDays))} for this request.`);
+      } else {
+        notes.push('Accrued leave would be fully used by this request.');
       }
     } else {
       notes.push('Enable accrual to compare the allowance against forecasted entitlement.');
