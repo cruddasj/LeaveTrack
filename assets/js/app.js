@@ -762,21 +762,25 @@
 
   function computeFinancialYearBankHolidayDefault(startDate) {
     if (!bankHolidayState.events.length) return null;
-    const range = getFinancialYearRange(startDate);
-    if (!range) return null;
-
     const startNormalized = toStartOfDay(startDate);
     if (!startNormalized) return null;
+
+    const range = getFinancialYearRange(startNormalized);
+    if (!range) return null;
 
     const rangeStart = toStartOfDay(range.start);
     const rangeEnd = new Date(range.end.getTime());
     rangeEnd.setHours(23, 59, 59, 999);
 
+    const clampedStart = startNormalized < rangeStart ? rangeStart : startNormalized;
     const today = toStartOfDay(new Date());
-    let effectiveStart = startNormalized < rangeStart ? rangeStart : startNormalized;
 
-    if (today && today >= rangeStart && today <= rangeEnd && today > effectiveStart) {
+    let effectiveStart = clampedStart;
+    let adjustedForToday = false;
+
+    if (today && today >= clampedStart && today <= rangeEnd && today > clampedStart) {
       effectiveStart = today;
+      adjustedForToday = true;
     }
 
     if (effectiveStart > rangeEnd) {
@@ -785,6 +789,9 @@
         rangeStart,
         rangeEnd,
         effectiveStart,
+        requestedStart: startNormalized,
+        adjustedForToday,
+        adjustedForRangeStart: startNormalized < rangeStart,
       };
     }
 
@@ -800,7 +807,46 @@
       rangeStart,
       rangeEnd,
       effectiveStart,
+      requestedStart: startNormalized,
+      adjustedForToday,
+      adjustedForRangeStart: startNormalized < rangeStart,
     };
+  }
+
+  function buildBankHolidayDefaultMessage(details) {
+    if (!details || typeof details !== 'object') return '';
+    const {
+      count,
+      rangeEnd,
+      effectiveStart,
+      requestedStart,
+      adjustedForToday,
+      adjustedForRangeStart,
+    } = details;
+
+    const primaryStart = requestedStart instanceof Date ? requestedStart : effectiveStart;
+    const startLabel = formatHumanDate(primaryStart);
+    const effectiveLabel = formatHumanDate(effectiveStart);
+    const endLabel = formatHumanDate(rangeEnd);
+    const total = Number.isFinite(count) ? count : 0;
+
+    if (!endLabel) return '';
+
+    const parts = [
+      `Counting ${total} bank holidays remaining between ${startLabel || effectiveLabel} and ${endLabel} in this organisational working year.`,
+    ];
+
+    if (requestedStart && effectiveStart && requestedStart.getTime() !== effectiveStart.getTime()) {
+      if (adjustedForToday && effectiveLabel) {
+        parts.push(`Bank holidays before ${effectiveLabel} have already taken place.`);
+      } else if (adjustedForRangeStart && effectiveLabel) {
+        parts.push(
+          `Start date adjusted to ${effectiveLabel} because it falls before the organisational working year begins.`,
+        );
+      }
+    }
+
+    return parts.join(' ');
   }
 
   function computeCurrentLeaveYearBankHolidayTotal() {
@@ -1599,13 +1645,32 @@
       return 'Bank holidays value entered manually.';
     }
     if (lastDefault && typeof lastDefault === 'object') {
-      const { count, effectiveStart, rangeEnd } = lastDefault;
+      const {
+        count,
+        effectiveStart,
+        rangeEnd,
+        requestedStart,
+        adjustedForToday,
+        adjustedForRangeStart,
+      } = lastDefault;
       const countText = Number.isFinite(count) ? ` (${count} days)` : '';
-      if (effectiveStart && rangeEnd) {
-        const startLabel = formatHumanDate(effectiveStart);
+      if (rangeEnd) {
+        const displayStart = requestedStart || effectiveStart;
+        const startLabel = formatHumanDate(displayStart);
         const endLabel = formatHumanDate(rangeEnd);
         if (startLabel && endLabel) {
-          return `Bank holidays automatically calculated${countText} between ${startLabel} and ${endLabel} in the configured organisational working year based on the selected start date.`;
+          const segments = [
+            `Bank holidays automatically calculated${countText} between ${startLabel} and ${endLabel} in the configured organisational working year based on the selected start date.`,
+          ];
+          if (requestedStart && effectiveStart && requestedStart.getTime() !== effectiveStart.getTime()) {
+            const effectiveLabel = formatHumanDate(effectiveStart);
+            if (adjustedForToday && effectiveLabel) {
+              segments.push(`Bank holidays before ${effectiveLabel} have already taken place.`);
+            } else if (adjustedForRangeStart && effectiveLabel) {
+              segments.push(`Start date adjusted to ${effectiveLabel} because it falls before the organisational working year begins.`);
+            }
+          }
+          return segments.join(' ');
         }
       }
       if (Number.isFinite(count)) {
@@ -2279,6 +2344,9 @@
         ? {
             ...currentYearDefault,
             effectiveStart: currentYearDefault.rangeStart,
+            requestedStart: currentYearDefault.rangeStart,
+            adjustedForToday: false,
+            adjustedForRangeStart: false,
           }
         : null;
 
@@ -2325,10 +2393,9 @@
       } else if (!computed) {
         bankHolidayHelp.textContent = 'Unable to determine the organisational working year for the selected start date.';
       } else {
-        const { count, effectiveStart, rangeEnd } = computed;
-        const startLabel = formatHumanDate(effectiveStart);
-        const endLabel = formatHumanDate(rangeEnd);
-        bankHolidayHelp.textContent = `Counting ${count} bank holidays remaining between ${startLabel} and ${endLabel} in this organisational working year.`;
+        const message = buildBankHolidayDefaultMessage(computed);
+        bankHolidayHelp.textContent =
+          message || 'Bank holidays automatically calculated using the selected start date.';
       }
     }
   }
@@ -2845,10 +2912,9 @@
       } else if (!computed) {
         bankHolidayHelp.textContent = 'Unable to determine the organisational working year for the selected start date.';
       } else {
-        const { count, effectiveStart, rangeEnd } = computed;
-        const startLabel = formatHumanDate(effectiveStart);
-        const endLabel = formatHumanDate(rangeEnd);
-        bankHolidayHelp.textContent = `Counting ${count} bank holidays remaining between ${startLabel} and ${endLabel} in this organisational working year.`;
+        const message = buildBankHolidayDefaultMessage(computed);
+        bankHolidayHelp.textContent =
+          message || 'Bank holidays automatically calculated using the selected start date.';
       }
     }
   }
@@ -2886,10 +2952,9 @@
       } else if (!computed) {
         bankHolidayHelp.textContent = 'Unable to determine the organisational working year for the selected start date.';
       } else {
-        const { count, effectiveStart, rangeEnd } = computed;
-        const startLabel = formatHumanDate(effectiveStart);
-        const endLabel = formatHumanDate(rangeEnd);
-        bankHolidayHelp.textContent = `Counting ${count} bank holidays remaining between ${startLabel} and ${endLabel} in this organisational working year.`;
+        const message = buildBankHolidayDefaultMessage(computed);
+        bankHolidayHelp.textContent =
+          message || 'Bank holidays automatically calculated using the selected start date.';
       }
     }
   }

@@ -2,6 +2,9 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [0.0.20] - 2025-10-17
+- Show the chosen start date in bank holiday auto-fill messages and clarify when earlier bank holidays have already passed.
+
 ## [0.0.19] - 2025-10-16
 - Show accrued leave as of the leave start and surface the remaining accrued entitlement when planning Standard week leave.
 
