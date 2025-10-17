@@ -1,4 +1,11 @@
 [{
+    "version": "0.0.20",
+    "date": "2025-10-17",
+    "changes": [
+      "Show the chosen start date in bank holiday auto-fill messages and clarify when earlier bank holidays have already passed."
+    ]
+  },
+  {
     "version": "0.0.19",
     "date": "2025-10-16",
     "changes": [
