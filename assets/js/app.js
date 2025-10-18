@@ -760,7 +760,8 @@
     return `${year}-${month}-${day}`;
   }
 
-  function computeFinancialYearBankHolidayDefault(startDate) {
+  function computeFinancialYearBankHolidayDefault(startDate, options = {}) {
+    const { includePast = false } = options;
     if (!bankHolidayState.events.length) return null;
     const startNormalized = toStartOfDay(startDate);
     if (!startNormalized) return null;
@@ -773,14 +774,16 @@
     rangeEnd.setHours(23, 59, 59, 999);
 
     const clampedStart = startNormalized < rangeStart ? rangeStart : startNormalized;
-    const today = toStartOfDay(new Date());
 
     let effectiveStart = clampedStart;
     let adjustedForToday = false;
 
-    if (today && today >= clampedStart && today <= rangeEnd && today > clampedStart) {
-      effectiveStart = today;
-      adjustedForToday = true;
+    if (!includePast) {
+      const today = toStartOfDay(new Date());
+      if (today && today >= clampedStart && today <= rangeEnd && today > clampedStart) {
+        effectiveStart = today;
+        adjustedForToday = true;
+      }
     }
 
     if (effectiveStart > rangeEnd) {
@@ -832,8 +835,9 @@
 
     if (!endLabel) return '';
 
+    const remainingText = adjustedForToday ? ' remaining' : '';
     const parts = [
-      `Counting ${total} bank holidays remaining between ${startLabel || effectiveLabel} and ${endLabel} in this organisational working year.`,
+      `Counting ${total} bank holidays${remainingText} between ${startLabel || effectiveLabel} and ${endLabel} in this organisational working year.`,
     ];
 
     if (requestedStart && effectiveStart && requestedStart.getTime() !== effectiveStart.getTime()) {
@@ -861,10 +865,29 @@
     if (Number.isNaN(rangeEnd.getTime())) return null;
     rangeEnd.setHours(23, 59, 59, 999);
 
+    const today = toStartOfDay(new Date());
+    if (today && today > rangeEnd) {
+      return {
+        count: 0,
+        rangeStart,
+        rangeEnd,
+        effectiveStart: rangeEnd,
+        adjustedForToday: true,
+      };
+    }
+
+    let effectiveStart = rangeStart;
+    let adjustedForToday = false;
+
+    if (today && today >= rangeStart && today <= rangeEnd && today > rangeStart) {
+      effectiveStart = today;
+      adjustedForToday = true;
+    }
+
     const count = bankHolidayState.events.reduce((total, event) => {
       const eventDate = toStartOfDay(event.date);
       if (!eventDate) return total;
-      if (eventDate < rangeStart || eventDate > rangeEnd) return total;
+      if (eventDate < effectiveStart || eventDate > rangeEnd) return total;
       return total + 1;
     }, 0);
 
@@ -872,6 +895,8 @@
       count,
       rangeStart,
       rangeEnd,
+      effectiveStart,
+      adjustedForToday,
     };
   }
 
@@ -1659,9 +1684,12 @@
         const startLabel = formatHumanDate(displayStart);
         const endLabel = formatHumanDate(rangeEnd);
         if (startLabel && endLabel) {
-          const segments = [
-            `Bank holidays automatically calculated${countText} between ${startLabel} and ${endLabel} in the configured organisational working year based on the selected start date.`,
-          ];
+          const hasRequestedStart = requestedStart instanceof Date;
+          const remainingText = adjustedForToday ? ' remaining' : '';
+          const baseMessage = hasRequestedStart
+            ? `Bank holidays automatically calculated${countText} between ${startLabel} and ${endLabel} in the configured organisational working year based on the selected start date.`
+            : `Bank holidays automatically calculated${countText}${remainingText} between ${startLabel} and ${endLabel} in the configured organisational working year.`;
+          const segments = [baseMessage];
           if (requestedStart && effectiveStart && requestedStart.getTime() !== effectiveStart.getTime()) {
             const effectiveLabel = formatHumanDate(effectiveStart);
             if (adjustedForToday && effectiveLabel) {
@@ -2343,9 +2371,9 @@
       standardWeekState.lastDefault = currentYearDefault
         ? {
             ...currentYearDefault,
-            effectiveStart: currentYearDefault.rangeStart,
-            requestedStart: currentYearDefault.rangeStart,
-            adjustedForToday: false,
+            effectiveStart: currentYearDefault.effectiveStart || currentYearDefault.rangeStart,
+            requestedStart: null,
+            adjustedForToday: !!currentYearDefault.adjustedForToday,
             adjustedForRangeStart: false,
           }
         : null;
@@ -2359,11 +2387,15 @@
           bankHolidayHelp.textContent =
             'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.';
         } else if (currentYearDefault) {
-          const { count, rangeStart, rangeEnd } = currentYearDefault;
-          const startLabel = formatHumanDate(rangeStart);
+          const { count, rangeStart, rangeEnd, effectiveStart, adjustedForToday } = currentYearDefault;
+          const startReference = effectiveStart || rangeStart;
+          const startLabel = formatHumanDate(startReference);
           const endLabel = formatHumanDate(rangeEnd);
           if (startLabel && endLabel) {
-            bankHolidayHelp.textContent = `Defaulting to ${count} bank holidays in the current organisational working year (${startLabel} to ${endLabel}). Adjust if needed.`;
+            const hasAdjustedStart = !!adjustedForToday;
+            const rangeText = `between ${startLabel} and ${endLabel}`;
+            const qualifier = hasAdjustedStart ? `remaining ${rangeText}` : rangeText;
+            bankHolidayHelp.textContent = `Defaulting to ${count} bank holidays ${qualifier} in the current organisational working year. Adjust if needed.`;
           } else {
             bankHolidayHelp.textContent =
               'Defaulting to the current organisational working year bank holiday total. Adjust if needed.';
@@ -2377,7 +2409,7 @@
       return;
     }
 
-    const computed = computeFinancialYearBankHolidayDefault(new Date(startValue));
+    const computed = computeFinancialYearBankHolidayDefault(new Date(startValue), { includePast: true });
     standardWeekState.lastDefault = computed;
 
     if ((!standardWeekState.userOverriddenBankHolidays || force) && computed) {
@@ -2897,7 +2929,7 @@
       return;
     }
 
-    const computed = computeFinancialYearBankHolidayDefault(new Date(startValue));
+    const computed = computeFinancialYearBankHolidayDefault(new Date(startValue), { includePast: true });
     fourDayWeekState.lastDefault = computed;
 
     if ((!fourDayWeekState.userOverriddenBankHolidays || force) && computed) {
@@ -2936,7 +2968,7 @@
       return;
     }
 
-    const computed = computeFinancialYearBankHolidayDefault(new Date(startValue));
+    const computed = computeFinancialYearBankHolidayDefault(new Date(startValue), { includePast: true });
     nineDayFortnightState.lastDefault = computed;
 
     if ((!nineDayFortnightState.userOverriddenBankHolidays || force) && computed) {
