@@ -19,6 +19,58 @@
   const root = document.documentElement;
   const body = document.body;
 
+  const utils = globalThis.LeaveTrackUtils || {};
+  const DEFAULT_WEEKLY_HOURS =
+    Number.isFinite(utils.DEFAULT_WEEKLY_HOURS) && utils.DEFAULT_WEEKLY_HOURS > 0
+      ? utils.DEFAULT_WEEKLY_HOURS
+      : 37;
+
+  const roundToTwoDecimals =
+    typeof utils.roundToTwoDecimals === 'function'
+      ? utils.roundToTwoDecimals
+      : (value) => {
+          const numeric = Number.parseFloat(value);
+          if (!Number.isFinite(numeric)) return 0;
+          return Math.round(numeric * 100) / 100;
+        };
+
+  const sanitizeWeeklyHours =
+    typeof utils.sanitizeWeeklyHours === 'function'
+      ? utils.sanitizeWeeklyHours
+      : (hours) => {
+          const parsed = Number.parseFloat(hours);
+          return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_WEEKLY_HOURS;
+        };
+
+  const deriveStandardDayHoursFromWeekly =
+    typeof utils.deriveStandardDayHoursFromWeekly === 'function'
+      ? utils.deriveStandardDayHoursFromWeekly
+      : (hours) => roundToTwoDecimals(sanitizeWeeklyHours(hours) / 5);
+
+  const deriveFourDayWeekHoursFromWeekly =
+    typeof utils.deriveFourDayWeekHoursFromWeekly === 'function'
+      ? utils.deriveFourDayWeekHoursFromWeekly
+      : (hours) => roundToTwoDecimals(sanitizeWeeklyHours(hours) / 4);
+
+  const deriveNineDayFortnightHoursFromWeekly =
+    typeof utils.deriveNineDayFortnightHoursFromWeekly === 'function'
+      ? utils.deriveNineDayFortnightHoursFromWeekly
+      : (hours) => roundToTwoDecimals((sanitizeWeeklyHours(hours) * 2) / 9);
+
+  const normalizeThemeChoice =
+    typeof utils.normalizeThemeChoice === 'function'
+      ? utils.normalizeThemeChoice
+      : (choice) => (['default', 'inverted', 'glass'].includes(choice) ? choice : 'default');
+
+  const getScrollPaddingOffset =
+    typeof utils.getScrollPaddingOffset === 'function'
+      ? utils.getScrollPaddingOffset
+      : ({ mobileHeaderOffset = 0, extraOffset = 16 } = {}) => {
+          const headerOffset = Number.parseFloat(mobileHeaderOffset);
+          const safeHeaderOffset = Number.isFinite(headerOffset) ? Math.max(headerOffset, 0) : 0;
+          return safeHeaderOffset + extraOffset;
+        };
+
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
@@ -100,34 +152,6 @@
 
   let welcomeHiddenState = false;
 
-  const DEFAULT_WEEKLY_HOURS = 37;
-
-  function roundToTwoDecimals(value) {
-    const numeric = Number.parseFloat(value);
-    if (!Number.isFinite(numeric)) return 0;
-    return Math.round(numeric * 100) / 100;
-  }
-
-  function sanitizeWeeklyHours(hours) {
-    const parsed = Number.parseFloat(hours);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_WEEKLY_HOURS;
-  }
-
-  function deriveStandardDayHoursFromWeekly(hours) {
-    const weekly = sanitizeWeeklyHours(hours);
-    return roundToTwoDecimals(weekly / 5);
-  }
-
-  function deriveFourDayWeekHoursFromWeekly(hours) {
-    const weekly = sanitizeWeeklyHours(hours);
-    return roundToTwoDecimals(weekly / 4);
-  }
-
-  function deriveNineDayFortnightHoursFromWeekly(hours) {
-    const weekly = sanitizeWeeklyHours(hours);
-    return roundToTwoDecimals((weekly * 2) / 9);
-  }
-
   const DEFAULT_STANDARD_DAY_HOURS = deriveStandardDayHoursFromWeekly(DEFAULT_WEEKLY_HOURS);
   const DEFAULT_FOUR_DAY_COMPRESSED_HOURS = deriveFourDayWeekHoursFromWeekly(DEFAULT_WEEKLY_HOURS);
   const DEFAULT_NINE_DAY_COMPRESSED_HOURS = deriveNineDayFortnightHoursFromWeekly(DEFAULT_WEEKLY_HOURS);
@@ -160,9 +184,7 @@
   }
 
   function applyThemeChoice(choice, { persist = true } = {}) {
-    const normalized = ['default', 'inverted', 'glass'].includes(choice)
-      ? choice
-      : 'default';
+    const normalized = normalizeThemeChoice(choice);
     root.classList.remove('theme-inverted', 'theme-glass');
     if (normalized === 'inverted') root.classList.add('theme-inverted');
     if (normalized === 'glass') root.classList.add('theme-glass');
@@ -4204,6 +4226,15 @@
       btn.setAttribute('aria-current', isActive ? 'page' : 'false');
     });
     safeSet(LS_KEYS.view, targetId);
+
+    const prefersReducedMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mobileHeaderOffset = getComputedStyle(body).getPropertyValue('--mobile-header-offset');
+    const offset = getScrollPaddingOffset({ mobileHeaderOffset });
+    const top = Math.max(section.getBoundingClientRect().top + window.scrollY - offset, 0);
+    window.scrollTo({ top, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+
     if (window.innerWidth < 768) setSidebarOpen(false);
   }
 
