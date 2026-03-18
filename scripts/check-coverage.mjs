@@ -29,16 +29,22 @@ const parts = summaryLine
   .split('|')
   .map((part) => part.trim())
   .filter(Boolean);
+
 const lineCoverage = Number.parseFloat(parts[1]);
+const branchCoverage = Number.parseFloat(parts[2]);
 
-if (!Number.isFinite(lineCoverage)) {
-  console.error('Unable to parse line coverage from summary:', summaryLine);
+if (!Number.isFinite(lineCoverage) || !Number.isFinite(branchCoverage)) {
+  console.error('Unable to parse line/branch coverage from summary:', summaryLine);
   process.exit(1);
 }
 
-if (lineCoverage < threshold) {
-  console.error(`Coverage check failed: ${lineCoverage}% < ${threshold}% lines.`);
+if (lineCoverage < threshold || branchCoverage < threshold) {
+  console.error(
+    `Coverage check failed: lines ${lineCoverage}% and branches ${branchCoverage}% require at least ${threshold}%.`,
+  );
   process.exit(1);
 }
 
-console.log(`Coverage check passed: ${lineCoverage}% >= ${threshold}% lines.`);
+console.log(
+  `Coverage check passed: lines ${lineCoverage}% and branches ${branchCoverage}% are both >= ${threshold}%.`,
+);

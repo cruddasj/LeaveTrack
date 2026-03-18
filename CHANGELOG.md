@@ -2,6 +2,11 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+- Sync AGENTS.md with the upstream PWA template instructions and contribution workflow.
+- Sync GitHub CI and automation metadata with the upstream template, including Dependabot configuration.
+
+
 ## [0.0.22] - 2026-03-18
 - Add CI quality checks for linting, CSS consistency, and unit tests with an 80% line-coverage gate.
 - Improve mobile section navigation scrolling and highlight active navigation items in dark mode.
