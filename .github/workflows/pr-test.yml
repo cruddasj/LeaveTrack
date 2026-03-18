@@ -1,0 +1,30 @@
+name: PR Test Coverage
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  pull-requests: write
+  checks: write
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm install
+      - run: npm test -- --coverage
+
+      - uses: artiomtr/jest-coverage-report-action@262a7bb0b20c4d1d6b6b026af0f008f78da72788 # v2.3.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          threshold: 0

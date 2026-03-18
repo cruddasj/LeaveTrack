@@ -10,7 +10,11 @@
     "build:icons": "node ./scripts/generate-icons.mjs",
     "test:unit": "node --test",
     "lint": "node ./scripts/lint.mjs",
-    "check:ci": "npm run lint && npm test && npm run build:css"
+    "check:ci": "npm run lint && npm test && npm run build:css",
+    "lint:js": "node ./scripts/lint.mjs",
+    "lint:md": "echo 'markdown lint not configured in LeaveTrack'",
+    "test:e2e": "playwright test",
+    "ci": "npm run check:ci"
   },
   "repository": {
     "type": "git",
@@ -24,7 +28,20 @@
   },
   "homepage": "https://github.com/cruddasj/LeaveTrack#readme",
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.5.0",
+    "eslint": "^10.0.3",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "eslint-plugin-yml": "^3.3.1",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
+    "markdownlint-cli2": "^0.21.0",
     "sharp": "^0.33.4",
-    "tailwindcss": "^3.4.14"
+    "tailwindcss": "^3.4.19",
+    "yaml-eslint-parser": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
   }
 }
