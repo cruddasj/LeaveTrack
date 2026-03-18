@@ -3,6 +3,8 @@
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
 ## [NEXT_VERSION] - [NEXT_DATE]
+- Update development dependency versions to match the AppTemplate baseline.
+- Align GitHub workflows with the AppTemplate repository structure and automation flow.
 - Sync AGENTS.md with the upstream PWA template instructions and contribution workflow.
 - Sync GitHub CI and automation metadata with the upstream template, including Dependabot configuration.
 
