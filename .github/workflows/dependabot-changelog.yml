@@ -44,7 +44,7 @@ jobs:
                 const nextLineIndex = mdContent.indexOf('\n', insertIndex);
                 mdContent = mdContent.slice(0, nextLineIndex + 1) + `- ${prTitle}\n` + mdContent.slice(nextLineIndex + 1);
               } else {
-                const newEntry = `## [[NEXT_VERSION]] - [NEXT_DATE]\n- ${prTitle}\n\n`;
+                const newEntry = `## [NEXT_VERSION] - [NEXT_DATE]\n- ${prTitle}\n\n`;
                 mdContent = mdContent.slice(0, insertIndex) + newEntry + mdContent.slice(insertIndex);
               }
               fs.writeFileSync('CHANGELOG.md', mdContent);
