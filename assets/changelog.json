@@ -6,7 +6,8 @@
       "Sync AGENTS.md with the upstream PWA template instructions and contribution workflow.",
       "Sync GitHub CI and automation metadata with the upstream template, including Dependabot configuration.",
       "Align GitHub workflows with the AppTemplate repository structure and automation flow.",
-      "Update development dependency versions to match the AppTemplate baseline."
+      "Update development dependency versions to match the AppTemplate baseline.",
+      "Add an npm `ci` command alias so GitHub Actions and local CI calls to `npm run ci` work consistently."
     ]
   },
   {

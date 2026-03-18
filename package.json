@@ -13,7 +13,8 @@
     "check:ci": "npm run lint && npm test && npm run build:css",
     "lint:js": "node ./scripts/lint.mjs",
     "lint:md": "echo 'markdown lint not configured in LeaveTrack'",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "ci": "npm run check:ci"
   },
   "repository": {
     "type": "git",
