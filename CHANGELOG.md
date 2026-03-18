@@ -2,7 +2,7 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.24 - 2026-03-18
 - Switch GitHub Actions install steps to `npm install` so CI no longer fails when lockfile sync differs during dependency updates.
 - Add an npm `ci` command alias so GitHub Actions and local CI calls to `npm run ci` work consistently.
 - Update development dependency versions to match the AppTemplate baseline.
