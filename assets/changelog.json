@@ -1,4 +1,14 @@
-[{
+[
+  {
+    "version": "0.0.22",
+    "date": "2026-03-18",
+    "changes": [
+      "Add CI quality checks for linting, CSS consistency, and unit tests with an 80% line-coverage gate.",
+      "Improve mobile section navigation scrolling and highlight active navigation items in dark mode.",
+      "Sync shared utility helpers for weekly-hour conversions and theme selection to support maintainable tests."
+    ]
+  },
+  {
     "version": "0.0.21",
     "date": "2025-10-18",
     "changes": [

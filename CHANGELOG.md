@@ -2,6 +2,11 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [0.0.22] - 2026-03-18
+- Add CI quality checks for linting, CSS consistency, and unit tests with an 80% line-coverage gate.
+- Improve mobile section navigation scrolling and highlight active navigation items in dark mode.
+- Sync shared utility helpers for weekly-hour conversions and theme selection to support maintainable tests.
+
 ## [0.0.21] - 2025-10-18
 - Count auto-filled bank holidays from the employee's start date through the working year, or from today when no start date is provided.
 

@@ -4,10 +4,13 @@
   "description": "LeaveTrack is a lightweight Progressive Web App that helps you stay on top of updates, manage appearance preferences, and review key timelines from one place.",
   "main": "service-worker.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node ./scripts/check-coverage.mjs",
     "build:css": "tailwindcss -i ./src/styles.css -o ./assets/styles.css --minify",
     "watch:css": "tailwindcss -i ./src/styles.css -o ./assets/styles.css --watch",
-    "build:icons": "node ./scripts/generate-icons.mjs"
+    "build:icons": "node ./scripts/generate-icons.mjs",
+    "test:unit": "node --test",
+    "lint": "node ./scripts/lint.mjs",
+    "check:ci": "npm run lint && npm test && npm run build:css"
   },
   "repository": {
     "type": "git",

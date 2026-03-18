@@ -116,6 +116,10 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
+      - name: Run lint checks
+        run: npm run lint
+      - name: Run unit tests with coverage gate
+        run: npm test
       - name: Build icons
         run: npm run build:icons
       - name: Build CSS
