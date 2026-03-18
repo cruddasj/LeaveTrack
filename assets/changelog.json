@@ -1,5 +1,12 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Sync AGENTS.md with the upstream PWA template instructions and contribution workflow."
+    ]
+  },
+  {
     "version": "0.0.22",
     "date": "2026-03-18",
     "changes": [
