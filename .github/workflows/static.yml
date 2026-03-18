@@ -78,7 +78,7 @@ jobs:
           body: "Automated release for ${{ steps.version.outputs.version }}"
       - name: Prune old releases
         if: steps.create_release.outcome == 'success'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
