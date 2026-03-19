@@ -1,5 +1,12 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Expand Jest coverage tests to exercise key planning, entitlement, and update flows so all global 80% coverage gates (including branches) pass."
+    ]
+  },
+  {
     "version": "0.0.25",
     "date": "2026-03-18",
     "changes": [
