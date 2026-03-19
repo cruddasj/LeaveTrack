@@ -1,7 +1,7 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.33",
+    "date": "2026-03-19",
     "changes": [
       "Remove the yellow warning background from the Standard week remaining balance card so the section keeps a neutral surface."
     ]
