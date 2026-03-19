@@ -2,7 +2,7 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.27 - 2026-03-19
 
 - Expand Jest coverage tests to exercise key planning, entitlement, and update flows so all global 80% coverage gates (including branches) pass.
 
