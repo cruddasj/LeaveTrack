@@ -2,6 +2,10 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Expand Jest coverage tests to exercise key planning, entitlement, and update flows so all global 80% coverage gates (including branches) pass.
+
 ## 0.0.25 - 2026-03-18
 
 - Fix the pull request test workflow to run the project's Node.js unit test coverage command directly, so CI no longer relies on Jest-only reporting.

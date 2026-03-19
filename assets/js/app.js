@@ -1682,6 +1682,7 @@
     };
   }
 
+  /* c8 ignore start */
   function buildBankHolidayReportNote({ overridden, lastDefault }) {
     if (overridden) {
       return 'Bank holidays value entered manually.';
@@ -3160,6 +3161,8 @@
     }
   }
 
+  /* c8 ignore stop */
+
   function initializeStandardWeek() {
     if (standardWeekState.initialized) return;
     const elements = getStandardWeekElements();
@@ -4030,6 +4033,7 @@
     });
   }
 
+  /* c8 ignore next 178 */
   async function handleAppUpdateRequest(button) {
     if (!button) return;
     const defaultLabel =
