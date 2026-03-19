@@ -2,6 +2,10 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Remove the yellow warning background from the Standard week remaining balance card so the section keeps a neutral surface.
+
 ## 0.0.30 - 2026-03-19
 
 - Reset the app styles to the AppTemplate baseline so the interface uses the shared design system consistently.
