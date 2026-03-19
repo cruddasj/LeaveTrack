@@ -6,7 +6,7 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 
 - Reset the app styles to the AppTemplate baseline so the interface uses the shared design system consistently.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.32 - 2026-03-19
 
 - Soften and blur the mobile navigation backdrop in light mode so opening the menu no longer blacks out the page behind it.
 
