@@ -6,6 +6,10 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 
 - Reset the app styles to the AppTemplate baseline so the interface uses the shared design system consistently.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Reconnect Tailwind's shared config in the stylesheet build so the Light and Inverted theme toggles follow app settings again.
+
 ## 0.0.29 - 2026-03-19
 
 - Update the Tailwind stylesheet entrypoint to match Tailwind CSS v4 so GitHub Pages deployments can build CSS successfully.
