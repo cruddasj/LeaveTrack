@@ -2,6 +2,11 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Mirror the latest AppTemplate dark-mode styling updates for more consistent contrast across cards, sidebar, and overlays.
+- Prevent background page scrolling while the mobile navigation panel is open so menu interactions stay focused.
+
 ## 0.0.27 - 2026-03-19
 
 - Expand Jest coverage tests to exercise key planning, entitlement, and update flows so all global 80% coverage gates (including branches) pass.

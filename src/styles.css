@@ -7,7 +7,7 @@
   html {
     overflow-x: hidden;
     overscroll-behavior-x: none;
-    overscroll-behavior-y: contain;
+    overscroll-behavior-y: auto;
     height: 100%;
   }
 
@@ -43,6 +43,16 @@
   body.mobile-nav-open #mobileHeader {
     opacity: 0;
     pointer-events: none;
+  }
+
+
+  body.mobile-nav-open {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  body.mobile-nav-open main {
+    overflow-y: hidden;
   }
 
   /* Ensure the main scroll area always covers the viewport
@@ -429,6 +439,66 @@
 .dark {
   --card-bg: #1f2937;
   --card-border: #374151;
+}
+
+/* True dark canvas for the default theme (exclude themed variants). */
+html.dark:not(.theme-inverted):not(.theme-glass) {
+  --card-bg: var(--dark-surface-1);
+  --card-border: var(--dark-border-1);
+  background-color: var(--dark-canvas);
+}
+html.dark:not(.theme-inverted):not(.theme-glass) body,
+html.dark:not(.theme-inverted):not(.theme-glass) main {
+  background-color: var(--dark-canvas);
+}
+html.dark:not(.theme-inverted):not(.theme-glass) #sidebar,
+html.dark:not(.theme-inverted):not(.theme-glass) #mobileHeader {
+  background-color: var(--dark-canvas) !important;
+  border-color: var(--dark-border-1) !important;
+  box-shadow: none;
+}
+html.dark:not(.theme-inverted):not(.theme-glass) #mobileHeader {
+  border-bottom: 1px solid var(--dark-border-1);
+}
+html.dark:not(.theme-inverted):not(.theme-glass) .dark\:bg-gray-900 {
+  background-color: var(--dark-canvas);
+}
+html.dark:not(.theme-inverted):not(.theme-glass) .dark\:bg-gray-800 {
+  background-color: var(--dark-surface-1);
+}
+html.dark:not(.theme-inverted):not(.theme-glass) .dark\:bg-gray-700 {
+  background-color: var(--dark-surface-2);
+}
+html.dark:not(.theme-inverted):not(.theme-glass) .dark\:bg-gray-600 {
+  background-color: var(--dark-surface-3);
+}
+html.dark:not(.theme-inverted):not(.theme-glass) .dark\:border-gray-700 {
+  border-color: var(--dark-border-1);
+}
+html.dark:not(.theme-inverted):not(.theme-glass) .dark\:border-gray-600 {
+  border-color: var(--dark-border-2);
+}
+html.dark:not(.theme-inverted):not(.theme-glass) #sidebar .nav-btn:hover {
+  background-color: var(--dark-surface-2);
+}
+html.dark:not(.theme-inverted):not(.theme-glass) .guidance-card {
+  background-color: var(--dark-surface-1) !important;
+  border-color: var(--dark-border-1) !important;
+}
+html.dark:not(.theme-inverted):not(.theme-glass) .card.is-collapsible.collapsed {
+  background-color: var(--dark-surface-2) !important;
+}
+html.dark:not(.theme-inverted):not(.theme-glass) .stat-box {
+  background-color: var(--dark-surface-2) !important;
+  border-color: var(--dark-border-1) !important;
+}
+html.dark:not(.theme-inverted):not(.theme-glass) .modal-panel {
+  background: var(--dark-surface-1) !important;
+  border: 1px solid var(--dark-border-1);
+}
+html.dark:not(.theme-inverted):not(.theme-glass) .input-field {
+  background-color: var(--dark-surface-2) !important;
+  border: 1px solid var(--dark-border-1);
 }
 
 /* Theme: Inverted (based on pastel)
