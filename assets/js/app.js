@@ -2615,8 +2615,6 @@
       'dark:bg-emerald-500/10',
       'border-amber-500',
       'dark:border-amber-400',
-      'bg-amber-50',
-      'dark:bg-amber-500/10',
       'border-red-500',
       'dark:border-red-500',
       'bg-red-50',
@@ -2827,7 +2825,7 @@
       } else if (balanceStatus === 'negative') {
         balance.classList.add('border-red-500', 'dark:border-red-500', 'bg-red-50', 'dark:bg-red-500/10');
       } else if (balanceStatus === 'warning') {
-        balance.classList.add('border-amber-500', 'dark:border-amber-400', 'bg-amber-50', 'dark:bg-amber-500/10');
+        balance.classList.add('border-amber-500', 'dark:border-amber-400');
       }
     }
 
