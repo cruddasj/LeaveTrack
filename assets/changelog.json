@@ -1,7 +1,7 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.31",
+    "date": "2026-03-19",
     "changes": [
       "Reconnect Tailwind's shared config in the stylesheet build so the Light and Inverted theme toggles follow app settings again."
     ]
