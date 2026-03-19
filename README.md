@@ -73,6 +73,7 @@ npm run watch:css
 ```
 
 Notes:
+
 - Edit styles in `src/styles.css` (uses `@tailwind`/`@layer`/`@apply`).
 - Do not edit `assets/styles.css` by hand; it is generated.
 - If you add new HTML/JS files that include Tailwind classes, update `tailwind.config.js` `content` globs so the classes are included in the build.

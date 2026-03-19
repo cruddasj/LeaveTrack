@@ -3,9 +3,11 @@
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
 ## 0.0.25 - 2026-03-18
+
 - Fix the pull request test workflow to run the project's Node.js unit test coverage command directly, so CI no longer relies on Jest-only reporting.
 
 ## 0.0.24 - 2026-03-18
+
 - Switch GitHub Actions install steps to `npm install` so CI no longer fails when lockfile sync differs during dependency updates.
 - Add an npm `ci` command alias so GitHub Actions and local CI calls to `npm run ci` work consistently.
 - Update development dependency versions to match the AppTemplate baseline.
@@ -13,51 +15,63 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 - Sync AGENTS.md with the upstream LeaveTrack instructions and contribution workflow.
 - Sync GitHub CI and automation metadata with the upstream template, including Dependabot configuration.
 
-
 ## [0.0.22] - 2026-03-18
+
 - Add CI quality checks for linting, CSS consistency, and unit tests with an 80% line-coverage gate.
 - Improve mobile section navigation scrolling and highlight active navigation items in dark mode.
 - Sync shared utility helpers for weekly-hour conversions and theme selection to support maintainable tests.
 
 ## [0.0.21] - 2025-10-18
+
 - Count auto-filled bank holidays from the employee's start date through the working year, or from today when no start date is provided.
 
 ## [0.0.20] - 2025-10-17
+
 - Show the chosen start date in bank holiday auto-fill messages and clarify when earlier bank holidays have already passed.
 
 ## [0.0.19] - 2025-10-16
+
 - Show accrued leave as of the leave start and surface the remaining accrued entitlement when planning Standard week leave.
 
 ## [0.0.17] - 2025-10-15
+
 - Clearly label the Standard week accrual settings as optional and keep the monthly rate editable while typing.
 - Pre-fill the Standard week bank holidays field with the current working year total, still allowing manual overrides.
 
 ## [0.0.16] - 2025-10-15
+
 - Leave start date inputs now begin empty so new users can enter the correct join date themselves.
 
 ## [0.0.15] - 2025-10-16
+
 - Default the organisational working year to run from 1 April to 31 March for new users.
 
 ## [0.0.14] - 2025-10-15
+
 - Clarify that the Standard week start date is optional for mid-year joiners and rename the remaining balance label.
 - Automatically pro-rate the core allowance for mid-year joiners when a start date is provided on the Standard week card.
 
 ## [0.0.13] - 2025-10-15
+
 - Add a Print to PDF card to the Standard week calculator so you can export those allowances.
 
 ## [0.0.12] - 2025-10-16
+
 - Default the monthly accrual rate to core plus long service leave divided by 12 while keeping the field editable.
 - Highlight whether a proposed leave period is covered by the remaining allowance, including half-day end support and a field for leave already taken.
 
 ## [0.0.11] - 2025-10-15
+
 - Replace the "How accrual is applied" chooser with a dropdown for easier use on smaller screens.
 - Show the detailed bank holidays that fall within the proposed leave period instead of only the count.
 
 ## [0.0.10] - 2025-10-14
+
 - Let you override the auto-calculated organisational working year end date directly from Settings.
 - Add a Standard week view with annual leave inputs, monthly accrual options, and a leave period planner that accounts for bank holidays.
 
 ## [0.0.9] - 2025-10-13
+
 - Allow configuring the organisational working year and show the selected date range across the bank holiday tools.
 - Add Settings controls to customise standard and compressed-day hour conversions used by the calculators.
 - Let Settings derive the default conversion hours from a configurable weekly total and display the formulas behind them.
@@ -66,28 +80,36 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 - Make the organisational working year finish exactly one year minus one day after the selected start date.
 
 ## [0.0.8] - 2025-10-13
+
 - Group the Bank Holidays view by financial year so each option spans 1 April to 31 March.
 
 ## [0.0.7] - 2025-10-12
+
 - Hide the Bank holiday booker section in exported PDFs until the required selections are provided.
 - Left-align empty Bank holiday booker list messages in PDF exports for improved readability.
 
 ## [0.0.6] - 2025-10-12
+
 - Reposition the Print to PDF button so it sits below its description on larger screens for improved alignment.
 
 ## [0.0.5] - 2025-10-12
+
 - Ensure the Bank holiday booker report sections always start on a fresh page when printing PDFs so content isn't clipped.
 
 ## [0.0.3] - 2025-10-12
+
 - Add print-to-PDF reports for the 4-day week and 9-day fortnight calculators, including bank holiday booker details in the export.
 - Move the print controls into dedicated report cards and generate PDFs in-page so pop-up blockers no longer interfere.
 - Remove browser header and footer details from exported PDFs so reports focus solely on calculator content.
 
 ## [0.0.2] - 2025-10-12
+
 - Update the welcome page and documentation to highlight the compressed-week calculators.
 
 ## [0.0.1] - 2025-10-11
+
 - Add initial functionality for 4-day week and 9-day fortnight.
 
 ## [0.0.0] - 2025-10-11
+
 - Create base Progressive Web app.
