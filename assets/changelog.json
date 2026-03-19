@@ -10,7 +10,7 @@
     "version": "0.0.24",
     "date": "2026-03-18",
     "changes": [
-      "Sync AGENTS.md with the upstream PWA template instructions and contribution workflow.",
+      "Sync AGENTS.md with the upstream LeaveTrack instructions and contribution workflow.",
       "Sync GitHub CI and automation metadata with the upstream template, including Dependabot configuration.",
       "Align GitHub workflows with the AppTemplate repository structure and automation flow.",
       "Update development dependency versions to match the AppTemplate baseline.",

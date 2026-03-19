@@ -33,7 +33,6 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-
       - name: Determine Next Version
         id: determine_version
         run: |
@@ -41,7 +40,6 @@ jobs:
           NEXT_VERSION=$(node ./scripts/determine-next-version.cjs "$LATEST_TAG")
           echo "version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$NEXT_VERSION" >> "$GITHUB_OUTPUT"
-
       - name: Replace Placeholders
         run: |
           NEXT_VERSION="${{ steps.determine_version.outputs.version }}"
@@ -68,7 +66,6 @@ jobs:
           if [ -f "package.json" ]; then
             jq ".version = \"$NEXT_VERSION\"" package.json > tmp_pkg.json && mv tmp_pkg.json package.json
           fi
-
       - name: Commit and Push Bumped Version
         id: commit_version
         run: |
@@ -83,7 +80,6 @@ jobs:
             git push origin HEAD:${{ github.ref }}
             echo "commitish=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
-
       - name: Check existing tag
         id: tagcheck
         run: |
@@ -93,7 +89,6 @@ jobs:
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
-
       - name: Create tag and release
         if: |
           github.event_name == 'push' &&
@@ -109,7 +104,6 @@ jobs:
           release_name: ${{ steps.determine_version.outputs.tag }}
           body: "Automated release for ${{ steps.determine_version.outputs.version }}"
           commitish: ${{ steps.commit_version.outputs.commitish }}
-
       - name: Prune old releases
         if: steps.create_release.outcome == 'success'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
@@ -143,31 +137,24 @@ jobs:
                 }
               }
             }
-
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: '20'
           cache: 'npm'
-
       - name: Install dependencies
-        run: npm install
-
+        run: npm ci
       - name: Build icons
         run: npm run build:icons
-
       - name: Build CSS
         run: npm run build:css
-
       - name: Setup Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
           # Upload entire repository
           path: '.'
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

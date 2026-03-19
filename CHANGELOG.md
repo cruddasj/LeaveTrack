@@ -10,7 +10,7 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 - Add an npm `ci` command alias so GitHub Actions and local CI calls to `npm run ci` work consistently.
 - Update development dependency versions to match the AppTemplate baseline.
 - Align GitHub workflows with the AppTemplate repository structure and automation flow.
-- Sync AGENTS.md with the upstream PWA template instructions and contribution workflow.
+- Sync AGENTS.md with the upstream LeaveTrack instructions and contribution workflow.
 - Sync GitHub CI and automation metadata with the upstream template, including Dependabot configuration.
 
 

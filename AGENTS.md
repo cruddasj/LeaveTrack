@@ -1,9 +1,9 @@
-Agent Guidelines for PWA Template
+Agent Guidelines for LeaveTrack
 
 Scope: This file applies to the entire repository.
 
 Overview
-- PWA Template is a static SPA (no backend). It uses Tailwind CSS (CLI v4) with a small custom stylesheet. The compiled CSS is committed for GitHub Pages deployment.
+- LeaveTrack is a static SPA (no backend). It uses Tailwind CSS (CLI v4) with a small custom stylesheet. The compiled CSS is committed for GitHub Pages deployment.
 - Icon PNG assets are generated during the CI/CD pipeline; do not commit regenerated binaries.
 
 Do
