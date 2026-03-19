@@ -2,7 +2,7 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.29 - 2026-03-19
 
 - Update the Tailwind stylesheet entrypoint to match Tailwind CSS v4 so GitHub Pages deployments can build CSS successfully.
 
