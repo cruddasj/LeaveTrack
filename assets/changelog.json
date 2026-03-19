@@ -1,5 +1,13 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Mirror the latest AppTemplate dark-mode styling updates for more consistent contrast across cards, sidebar, and overlays.",
+      "Prevent background page scrolling while the mobile navigation panel is open so menu interactions stay focused."
+    ]
+  },
+  {
     "version": "0.0.27",
     "date": "2026-03-19",
     "changes": [
