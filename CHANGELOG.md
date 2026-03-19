@@ -2,7 +2,7 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.28 - 2026-03-19
 
 - Mirror the latest AppTemplate dark-mode styling updates for more consistent contrast across cards, sidebar, and overlays.
 - Prevent background page scrolling while the mobile navigation panel is open so menu interactions stay focused.
