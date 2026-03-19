@@ -1,12 +1,14 @@
-Agent Guidelines for PWA Template
+Agent Guidelines for LeaveTrack
 
 Scope: This file applies to the entire repository.
 
 Overview
-- PWA Template is a static SPA (no backend). It uses Tailwind CSS (CLI v4) with a small custom stylesheet. The compiled CSS is committed for GitHub Pages deployment.
+
+- LeaveTrack is a static SPA (no backend). It uses Tailwind CSS (CLI v4) with a small custom stylesheet. The compiled CSS is committed for GitHub Pages deployment.
 - Icon PNG assets are generated during the CI/CD pipeline; do not commit regenerated binaries.
 
 Do
+
 - Check for any minor or patch updates to npm libraries and apply them if they are found before making any further changes.
 - For any new code developed, tests should be included, and before committing changes, all tests must pass.
 - Keep `assets/js/app.js` in Jest coverage collection/reporting at all times; never remove it from `collectCoverageFrom` when adjusting test coverage settings.
@@ -28,13 +30,16 @@ Do
 - Pin actions to a commit SHA when creating or editing GitHub actions.
 
 Don't
+
 - Don't reintroduce Tailwind via the CDN in `index.html`. The app now relies on the compiled stylesheet `assets/styles.css`.
 - Don't edit `assets/styles.css` manually. It is a build artifact.
 - Don't add bundlers or frameworks unless explicitly requested.
 
 Environment
+
 - Requires Node.js 20+ and npm 10+.
 - Tailwind CLI: v4 (configured via `tailwind.config.js`).
 
 Deployment
+
 - GitHub Pages workflow uploads the repository as-is and does not run a build step. Always commit the updated `assets/styles.css` when changing styles so Pages reflects the latest CSS.

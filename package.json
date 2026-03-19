@@ -4,17 +4,14 @@
   "description": "LeaveTrack is a lightweight Progressive Web App that helps you stay on top of updates, manage appearance preferences, and review key timelines from one place.",
   "main": "service-worker.js",
   "scripts": {
-    "test": "node ./scripts/check-coverage.mjs",
+    "test": "jest",
+    "test:e2e": "playwright test",
+    "lint": "npm run lint:js && npm run lint:md",
+    "lint:js": "eslint .",
+    "lint:md": "markdownlint-cli2",
     "build:css": "tailwindcss -i ./src/styles.css -o ./assets/styles.css --minify",
     "watch:css": "tailwindcss -i ./src/styles.css -o ./assets/styles.css --watch",
-    "build:icons": "node ./scripts/generate-icons.mjs",
-    "test:unit": "node --test",
-    "lint": "node ./scripts/lint.mjs",
-    "check:ci": "npm run lint && npm test && npm run build:css",
-    "lint:js": "node ./scripts/lint.mjs",
-    "lint:md": "echo 'markdown lint not configured in LeaveTrack'",
-    "test:e2e": "playwright test",
-    "ci": "npm run check:ci"
+    "build:icons": "node ./scripts/generate-icons.mjs"
   },
   "repository": {
     "type": "git",
@@ -29,6 +26,7 @@
   "homepage": "https://github.com/cruddasj/LeaveTrack#readme",
   "devDependencies": {
     "@playwright/test": "^1.58.2",
+    "@tailwindcss/cli": "^4.2.1",
     "@types/node": "^25.5.0",
     "eslint": "^10.0.3",
     "eslint-plugin-unused-imports": "^4.4.1",
@@ -36,8 +34,8 @@
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
     "markdownlint-cli2": "^0.21.0",
-    "sharp": "^0.33.4",
-    "tailwindcss": "^3.4.19",
+    "sharp": "^0.34.5",
+    "tailwindcss": "^4.2.1",
     "yaml-eslint-parser": "^2.0.0"
   },
   "engines": {

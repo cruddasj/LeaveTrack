@@ -1505,7 +1505,7 @@
   function updateFourDayWeekSummary() {
     const elements = getFourDayWeekElements();
     if (!elements) return;
-    const { core, longService, carryOver, purchased, bankHolidays, breakdown, totals, totalDays, totalHours, totalCompressed, equation, summaryIntro } = elements;
+    const { breakdown, totals, totalDays, totalHours, totalCompressed, equation, summaryIntro } = elements;
     const setStatValue = (wrapper, value) => {
       if (!wrapper) return;
       const valueEl = wrapper.querySelector('.stat-card__value');
@@ -1580,11 +1580,6 @@
     const elements = getNineDayFortnightElements();
     if (!elements) return;
     const {
-      core,
-      longService,
-      carryOver,
-      purchased,
-      bankHolidays,
       breakdown,
       totals,
       totalDays,
