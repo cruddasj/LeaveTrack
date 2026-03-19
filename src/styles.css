@@ -5,7 +5,7 @@
   html {
     overflow-x: hidden;
     overscroll-behavior-x: none;
-    overscroll-behavior-y: auto;
+    overscroll-behavior-y: contain;
     height: 100%;
   }
 
@@ -43,16 +43,6 @@
     pointer-events: none;
   }
 
-
-  body.mobile-nav-open {
-    overflow: hidden;
-    touch-action: none;
-  }
-
-  body.mobile-nav-open main {
-    overflow-y: hidden;
-  }
-
   /* Ensure the main scroll area always covers the viewport
      to avoid a visible gap when sections are short/collapsed. */
   main {
@@ -61,7 +51,7 @@
     min-height: calc(100dvh - var(--mobile-header-offset));
     overflow-x: hidden;
     overscroll-behavior-x: contain;
-    overscroll-behavior-y: contain;
+    overscroll-behavior-y: auto;
     /* Keep the scroll container aligned with the page theme so any
        overscroll bounce (vertical or horizontal) doesn't flash white. */
     background-color: inherit;
@@ -101,24 +91,6 @@
 @supports (top: env(safe-area-inset-top)) {
   body {
     --mobile-safe-area-top: env(safe-area-inset-top);
-  }
-}
-
-@media print {
-  @page {
-    size: auto;
-    margin: 0;
-  }
-
-  body {
-    margin: 0 !important;
-  }
-
-  #bankHolidayBookerCard,
-  #nineDayFortnightBookerCard {
-    /* Keep the bank holiday bookers on their own page to avoid clipping */
-    break-before: page;
-    page-break-before: always;
   }
 }
 
@@ -195,15 +167,6 @@
     overflow-wrap: anywhere;
     word-break: break-word;
     @apply border border-gray-200 dark:border-gray-600;
-  }
-  .stat-card {
-    @apply flex flex-col items-center justify-center gap-1 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 px-4 py-3 text-center shadow-sm;
-  }
-  .stat-card__label {
-    @apply text-sm font-medium text-gray-700 dark:text-gray-300;
-  }
-  .stat-card__value {
-    @apply text-xl font-semibold text-gray-900 dark:text-gray-100;
   }
   .stat-box .text-3xl,
   .stat-box .text-2xl,
@@ -329,11 +292,6 @@
     @apply w-full text-left px-4 py-3 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition duration-300 mb-2;
   }
 
-  .nav-btn.active-nav-button {
-    @apply bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200;
-  }
-
-
   /* tabs */
   .tab-btn {
     @apply px-4 py-2 font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600;
@@ -411,7 +369,6 @@
 }
 .content-section {
   display: none;
-  scroll-margin-top: calc(var(--mobile-header-offset) + 1rem);
   /* Guard against any child overflows producing page-level x-scroll */
   overflow-x: hidden;
 }
@@ -433,6 +390,12 @@
   --card-bg: #ffffff;
   --card-border: #e5e7eb;
   --card-filter: none;
+  --dark-canvas: #000000;
+  --dark-surface-1: #0b0b0b;
+  --dark-surface-2: #171717;
+  --dark-surface-3: #262626;
+  --dark-border-1: #262626;
+  --dark-border-2: #333333;
 }
 .dark {
   --card-bg: #1f2937;
