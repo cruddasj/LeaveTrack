@@ -1,5 +1,12 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Update the Tailwind stylesheet entrypoint to match Tailwind CSS v4 so GitHub Pages deployments can build CSS successfully."
+    ]
+  },
+  {
     "version": "0.0.28",
     "date": "2026-03-19",
     "changes": [
