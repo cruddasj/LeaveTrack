@@ -128,6 +128,53 @@ describe('app coverage interactions', () => {
   });
 
   test('exercises major leave-calculation flows and print/update actions', async () => {
+    const renderedPrintHtml = [];
+    const originalCreateElement = document.createElement.bind(document);
+    const originalAppendChild = document.body.appendChild.bind(document.body);
+    const originalRemoveChild = document.body.removeChild.bind(document.body);
+
+    jest.spyOn(document, 'createElement').mockImplementation((tagName, options) => {
+      if (String(tagName).toLowerCase() === 'iframe') {
+        const iframe = {
+          style: {},
+          tabIndex: -1,
+          parentNode: null,
+          setAttribute: jest.fn(),
+          contentDocument: {
+            open: jest.fn(),
+            write: jest.fn((html) => renderedPrintHtml.push(String(html))),
+            close: jest.fn(),
+            title: '',
+            readyState: 'complete',
+            addEventListener: jest.fn(),
+          },
+          contentWindow: {
+            focus: jest.fn(),
+            print: jest.fn(),
+            addEventListener: jest.fn(),
+          },
+        };
+        return iframe;
+      }
+      return originalCreateElement(tagName, options);
+    });
+
+    jest.spyOn(document.body, 'appendChild').mockImplementation((node) => {
+      if (node && node.contentDocument && node.contentWindow) {
+        node.parentNode = document.body;
+        return node;
+      }
+      return originalAppendChild(node);
+    });
+
+    jest.spyOn(document.body, 'removeChild').mockImplementation((node) => {
+      if (node && node.contentDocument && node.contentWindow) {
+        node.parentNode = null;
+        return node;
+      }
+      return originalRemoveChild(node);
+    });
+
     const swListeners = new Map();
     const workerListeners = new Map();
     const worker = {
@@ -250,6 +297,9 @@ describe('app coverage interactions', () => {
     expect(document.querySelector('[data-existing-nine-day-summary-intro]').textContent).toContain(
       'forthcoming leave year',
     );
+    expect(renderedPrintHtml.some((html) => html.includes('Calculated at 10 hours'))).toBe(true);
+    expect(renderedPrintHtml.some((html) => html.includes('Calculated at 8.5 hours'))).toBe(true);
+    expect(renderedPrintHtml.some((html) => html.includes('equivalent to') && html.includes('standard days'))).toBe(true);
 
     fuzzAllControls();
 
