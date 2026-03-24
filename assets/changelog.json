@@ -1,5 +1,13 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Add an \"Existing 4-day week\" page that mirrors the 4-day week inputs and applies carry-over leave using the configured 4-day day-hours conversion, with clearer breakdown wording.",
+      "Update development dependencies to the latest available minor/patch releases for ESLint and markdownlint-cli2."
+    ]
+  },
+  {
     "version": "0.0.33",
     "date": "2026-03-19",
     "changes": [

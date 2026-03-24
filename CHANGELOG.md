@@ -2,6 +2,11 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Add an "Existing 4-day week" page that mirrors the 4-day week inputs and applies carry-over leave using the configured 4-day day-hours conversion, with clearer breakdown wording.
+- Update development dependencies to the latest available minor/patch releases for ESLint and markdownlint-cli2.
+
 ## 0.0.33 - 2026-03-19
 
 - Remove the yellow warning background from the Standard week remaining balance card so the section keeps a neutral surface.

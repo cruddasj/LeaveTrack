@@ -165,6 +165,12 @@
             4-day week
           </span>
         </button>
+        <button class="nav-btn" data-target="existing-four-day-week">
+          <span class="flex items-center">
+            <i class="fa-solid fa-business-time h-5 w-5 mr-3"></i>
+            Existing 4-day week
+          </span>
+        </button>
         <button class="nav-btn" data-target="nine-day-fortnight">
           <span class="flex items-center">
             <i class="fa-solid fa-calendar-check h-5 w-5 mr-3"></i>
@@ -858,6 +864,152 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div id="existing-four-day-week" class="content-section">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          Existing 4-day week leave entitlement
+        </h2>
+        <div class="space-y-6">
+          <div
+            class="card is-collapsible"
+            id="existingFourDayWeekCard"
+            data-collapsible
+            data-collapsible-id="existing-four-day-week-annual"
+          >
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <button
+                type="button"
+                class="card-toggle"
+                data-collapsible-trigger
+                aria-expanded="true"
+                aria-controls="existing-four-day-week-annual-content"
+              >
+                <span>Annual leave inputs</span>
+                <svg
+                  class="chev"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 8l4 4 4-4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </h3>
+            <div
+              id="existing-four-day-week-annual-content"
+              class="card-body space-y-6"
+              data-collapsible-content
+            >
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Enter the individual's allowances to see the total standard leave available in hours for an existing
+                4-day working week.
+              </p>
+              <form class="grid gap-6 md:grid-cols-2" novalidate>
+                <div class="space-y-2">
+                  <label for="existingFourDayStartDate" class="form-label">Start date</label>
+                  <input type="date" id="existingFourDayStartDate" class="input-field" />
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-leave-year-start-note>
+                    Used to determine the organisational working year and remaining bank holidays.
+                  </p>
+                </div>
+                <div class="space-y-2">
+                  <label for="existingFourDayCoreLeave" class="form-label">Core annual leave allowance (days)</label>
+                  <input
+                    type="number"
+                    id="existingFourDayCoreLeave"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="existingFourDayLongService" class="form-label">Long service leave (days)</label>
+                  <input
+                    type="number"
+                    id="existingFourDayLongService"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="existingFourDayCarryOver" class="form-label">Carry over leave (days)</label>
+                  <input
+                    type="number"
+                    id="existingFourDayCarryOver"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="existingFourDayPurchased" class="form-label">Purchased leave (days)</label>
+                  <input
+                    type="number"
+                    id="existingFourDayPurchased"
+                    class="input-field"
+                    inputmode="numeric"
+                    step="1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="existingFourDayBankHolidays" class="form-label">Bank holidays (days)</label>
+                  <input
+                    type="number"
+                    id="existingFourDayBankHolidays"
+                    class="input-field"
+                    inputmode="numeric"
+                    step="1"
+                    min="0"
+                  />
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-existing-four-day-bankholidays-help>
+                    Default determined by GOV.UK bank holiday data.
+                  </p>
+                </div>
+              </form>
+              <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4" data-existing-four-day-summary>
+                <p class="text-sm text-gray-600 dark:text-gray-400" data-existing-four-day-summary-intro>
+                  Enter values above to see a detailed breakdown of the individual's allowance.
+                </p>
+                <dl
+                  class="grid gap-2 text-sm text-gray-700 dark:text-gray-300"
+                  data-existing-four-day-breakdown
+                  hidden
+                ></dl>
+                <div class="space-y-3" data-existing-four-day-totals hidden>
+                  <div class="grid gap-3 sm:grid-cols-3">
+                    <div class="stat-card" data-existing-four-day-total-days>
+                      <p class="stat-card__label">Total standard leave in days</p>
+                      <p class="stat-card__value">0 days</p>
+                    </div>
+                    <div class="stat-card" data-existing-four-day-total-hours>
+                      <p class="stat-card__label">Total allowance in hours</p>
+                      <p class="stat-card__value">0 hours</p>
+                    </div>
+                    <div class="stat-card" data-existing-four-day-total-compressed>
+                      <p class="stat-card__label">Compressed allowance in days</p>
+                      <p class="stat-card__value">0 days</p>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 text-center" data-existing-four-day-equation></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
 
     <div id="nine-day-fortnight" class="content-section">
