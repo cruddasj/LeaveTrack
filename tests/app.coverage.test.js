@@ -205,6 +205,7 @@ describe('app coverage interactions', () => {
     dispatchInput('existingFourDayCarryOver', '1');
     dispatchInput('existingFourDayPurchased', '2');
     dispatchInput('existingFourDayBankHolidays', '6');
+    dispatchInput('existingBankHolidayBookerDay', 'monday');
 
     dispatchInput('nineDayStartDate', '2026-04-01');
     dispatchInput('nineDayCoreLeave', '18');
