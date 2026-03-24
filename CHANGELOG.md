@@ -2,7 +2,7 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.34 - 2026-03-24
 
 - Add existing 4-day week page.
 
