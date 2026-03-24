@@ -1,7 +1,7 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.36",
+    "date": "2026-03-24",
     "changes": [
       "Show the updated carry-over leave wording and standard-day conversion text in PDF exports for Existing 4-day week and Existing 9-day fortnight reports.",
       "Update development dependencies to the latest patch/minor releases for eslint and markdownlint-cli2."
