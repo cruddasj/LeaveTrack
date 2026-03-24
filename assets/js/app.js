@@ -1624,6 +1624,10 @@
     const carryOverComponent = components.find((component) => component.id === 'carryOver');
     const fourDayHours = getFourDayCompressedHours();
     const standardHours = getStandardDayHours();
+    const carryOverHours =
+      carryOverComponent && carryOverComponent.value > 0
+        ? carryOverComponent.value * fourDayHours
+        : 0;
     const convertedCarryOverDays =
       carryOverComponent && standardHours > 0
         ? (carryOverComponent.value * fourDayHours) / standardHours
@@ -1636,6 +1640,7 @@
         ...component,
         label: `Carry over leave (Calculated at ${carryOverLabelHours} hours)`,
         value: convertedCarryOverDays,
+        displayValue: `${formatHoursDisplay(carryOverHours)} (equivalent to ${formatDaysDisplay(convertedCarryOverDays)})`,
       };
     });
 
@@ -1674,7 +1679,7 @@
         term.textContent = component.label;
         const definition = document.createElement('dd');
         definition.className = 'text-right text-gray-700 dark:text-gray-300';
-        definition.textContent = formatDaysDisplay(component.value);
+        definition.textContent = component.displayValue || formatDaysDisplay(component.value);
         wrapper.appendChild(term);
         wrapper.appendChild(definition);
         breakdown.appendChild(wrapper);
@@ -1694,7 +1699,8 @@
     }
 
     if (summaryIntro) {
-      summaryIntro.textContent = "Breakdown of the individual's existing 4-day week leave allowance:";
+      summaryIntro.textContent =
+        "Breakdown of the individual's leave allowance for the forthcoming leave year:";
     }
   }
 

@@ -221,6 +221,13 @@ describe('app coverage interactions', () => {
 
     document.querySelector('[data-action="update-app"]').click();
 
+    expect(document.querySelector('[data-existing-four-day-breakdown]').textContent).toContain(
+      'equivalent to',
+    );
+    expect(document.querySelector('[data-existing-four-day-summary-intro]').textContent).toContain(
+      'forthcoming leave year',
+    );
+
     fuzzAllControls();
 
     await new Promise((resolve) => setTimeout(resolve, 0));
