@@ -2869,7 +2869,7 @@
       .map(
         (component) =>
           `<tr><td>${escapeHtml(component.label)}</td><td class="value-cell">${escapeHtml(
-            formatDaysDisplay(component.value)
+            component.displayValue || formatDaysDisplay(component.value)
           )}</td></tr>`
       )
       .join('');
