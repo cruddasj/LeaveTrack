@@ -2,6 +2,10 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Add an Existing 9-day fortnight page with matched cards and carry-over leave converted using the 9-day fortnight day-hours setting.
+
 ## 0.0.34 - 2026-03-24
 
 - Add existing 4-day week page.

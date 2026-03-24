@@ -158,6 +158,14 @@
     lastDefault: null,
   };
 
+  const existingNineDayFortnightState = {
+    elements: null,
+    bookerElements: null,
+    initialized: false,
+    userOverriddenBankHolidays: false,
+    lastDefault: null,
+  };
+
   let welcomeHiddenState = false;
 
   const DEFAULT_STANDARD_DAY_HOURS = deriveStandardDayHoursFromWeekly(DEFAULT_WEEKLY_HOURS);
@@ -1075,6 +1083,32 @@
     return elements;
   }
 
+  function getExistingNineDayFortnightElements() {
+    if (existingNineDayFortnightState.elements) return existingNineDayFortnightState.elements;
+    const card = document.getElementById('existingNineDayFortnightCard');
+    if (!card) return null;
+    const elements = {
+      card,
+      start: card.querySelector('#existingNineDayStartDate'),
+      core: card.querySelector('#existingNineDayCoreLeave'),
+      longService: card.querySelector('#existingNineDayLongService'),
+      carryOver: card.querySelector('#existingNineDayCarryOver'),
+      purchased: card.querySelector('#existingNineDayPurchased'),
+      bankHolidays: card.querySelector('#existingNineDayBankHolidays'),
+      summary: card.querySelector('[data-existing-nine-day-summary]'),
+      summaryIntro: card.querySelector('[data-existing-nine-day-summary-intro]'),
+      breakdown: card.querySelector('[data-existing-nine-day-breakdown]'),
+      totals: card.querySelector('[data-existing-nine-day-totals]'),
+      totalDays: card.querySelector('[data-existing-nine-day-total-days]'),
+      totalHours: card.querySelector('[data-existing-nine-day-total-hours]'),
+      totalCompressed: card.querySelector('[data-existing-nine-day-total-compressed]'),
+      equation: card.querySelector('[data-existing-nine-day-equation]'),
+      bankHolidayHelp: card.querySelector('[data-existing-nine-day-bankholidays-help]'),
+    };
+    existingNineDayFortnightState.elements = elements;
+    return elements;
+  }
+
   function getBankHolidayBookerElements() {
     if (fourDayWeekState.bookerElements) return fourDayWeekState.bookerElements;
     const card = document.getElementById('bankHolidayBookerCard');
@@ -1126,6 +1160,24 @@
       nonMatchesList: card.querySelector('[data-nine-day-booker-non-matches-list]'),
     };
     nineDayFortnightState.bookerElements = elements;
+    return elements;
+  }
+
+  function getExistingNineDayFortnightBookerElements() {
+    if (existingNineDayFortnightState.bookerElements) return existingNineDayFortnightState.bookerElements;
+    const card = document.getElementById('existingNineDayFortnightBookerCard');
+    if (!card) return null;
+    const elements = {
+      card,
+      startDate: card.querySelector('#existingNineDayBookerStartDate'),
+      message: card.querySelector('[data-existing-nine-day-booker-message]'),
+      results: card.querySelector('[data-existing-nine-day-booker-results]'),
+      matchesLabel: card.querySelector('[data-existing-nine-day-booker-matches-label]'),
+      matchesList: card.querySelector('[data-existing-nine-day-booker-matches-list]'),
+      nonMatchesLabel: card.querySelector('[data-existing-nine-day-booker-non-matches-label]'),
+      nonMatchesList: card.querySelector('[data-existing-nine-day-booker-non-matches-list]'),
+    };
+    existingNineDayFortnightState.bookerElements = elements;
     return elements;
   }
 
@@ -1993,6 +2045,110 @@
     }
   }
 
+  function getExistingNineDayAdjustedComponents(elements) {
+    const components = getLeaveComponents(elements);
+    const carryOverComponent = components.find((component) => component.id === 'carryOver');
+    const nineDayHours = getNineDayCompressedHours();
+    const standardHours = getStandardDayHours();
+    const carryOverHours =
+      carryOverComponent && carryOverComponent.value > 0 ? carryOverComponent.value * nineDayHours : 0;
+    const convertedCarryOverDays =
+      carryOverComponent && standardHours > 0
+        ? (carryOverComponent.value * nineDayHours) / standardHours
+        : 0;
+    const carryOverLabelHours = formatNumberWithPrecision(nineDayHours, 2);
+
+    const adjustedComponents = components.map((component) => {
+      if (component.id !== 'carryOver') return component;
+      return {
+        ...component,
+        label: `Carry over leave (Calculated at ${carryOverLabelHours} hours)`,
+        value: convertedCarryOverDays,
+        displayValue: `${formatHoursDisplay(carryOverHours)} (equivalent to ${formatNumberWithPrecision(convertedCarryOverDays)} standard days)`,
+      };
+    });
+
+    return {
+      components,
+      adjustedComponents,
+    };
+  }
+
+  function updateExistingNineDayFortnightSummary() {
+    const elements = getExistingNineDayFortnightElements();
+    if (!elements) return;
+    const { breakdown, totals, totalDays, totalHours, totalCompressed, equation, summaryIntro } = elements;
+    const setStatValue = (wrapper, value) => {
+      if (!wrapper) return;
+      const valueEl = wrapper.querySelector('.stat-card__value');
+      if (!valueEl) return;
+      valueEl.textContent = value;
+    };
+
+    const { components, adjustedComponents } = getExistingNineDayAdjustedComponents(elements);
+    const nineDayHours = getNineDayCompressedHours();
+    const standardHours = getStandardDayHours();
+
+    const hasValues = components.some((component) => component.value);
+
+    if (!hasValues) {
+      if (breakdown) {
+        breakdown.innerHTML = '';
+        breakdown.hidden = true;
+      }
+      if (totals) totals.hidden = true;
+      if (equation) {
+        equation.textContent = '';
+        equation.hidden = true;
+      }
+      if (summaryIntro) {
+        summaryIntro.textContent =
+          "Enter values above to see a detailed breakdown of the individual's allowance.";
+      }
+      setStatValue(totalDays, formatDaysDisplay(0));
+      setStatValue(totalHours, formatHoursDisplay(0));
+      setStatValue(totalCompressed, formatDaysDisplay(0));
+      return;
+    }
+
+    const totalDaysValue = adjustedComponents.reduce((sum, component) => sum + component.value, 0);
+    const totalHoursValue = totalDaysValue * standardHours;
+
+    if (breakdown) {
+      breakdown.innerHTML = '';
+      adjustedComponents.forEach((component) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex items-start justify-between gap-4';
+        const term = document.createElement('dt');
+        term.className = 'font-medium text-gray-900 dark:text-gray-100';
+        term.textContent = component.label;
+        const definition = document.createElement('dd');
+        definition.className = 'text-right text-gray-700 dark:text-gray-300';
+        definition.textContent = component.displayValue || formatDaysDisplay(component.value);
+        wrapper.appendChild(term);
+        wrapper.appendChild(definition);
+        breakdown.appendChild(wrapper);
+      });
+      breakdown.hidden = false;
+    }
+
+    const compressedAllowanceValue = nineDayHours > 0 ? totalHoursValue / nineDayHours : 0;
+
+    if (totals && totalDays && totalHours && equation) {
+      totals.hidden = false;
+      setStatValue(totalDays, formatDaysDisplay(totalDaysValue));
+      setStatValue(totalHours, formatHoursDisplay(totalHoursValue));
+      setStatValue(totalCompressed, formatDaysDisplay(compressedAllowanceValue));
+      equation.textContent = '';
+      equation.hidden = true;
+    }
+
+    if (summaryIntro) {
+      summaryIntro.textContent =
+        "Breakdown of the individual's leave allowance for the forthcoming leave year:";
+    }
+  }
+
   function createLeaveReportPayload(elements, compressedDayHours, componentsOverride = null) {
     const components = Array.isArray(componentsOverride)
       ? componentsOverride
@@ -2401,6 +2557,128 @@
 
   function getNineDayBookerReportData() {
     const booker = getNineDayFortnightBookerElements();
+    if (!booker) return null;
+
+    const base = {
+      title: 'Bank holiday booker',
+      message: '',
+      matchesLabel: '',
+      matches: [],
+      matchesEmptyLabel: 'None in this window.',
+      nonMatchesLabel: '',
+      nonMatches: [],
+      nonMatchesEmptyLabel: 'None in this window.',
+    };
+
+    if (!bankHolidayState.events.length) {
+      return {
+        ...base,
+        message:
+          'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.',
+      };
+    }
+
+    const { startDate } = booker;
+    const startValue = startDate ? startDate.value : '';
+    if (!startValue) {
+      return null;
+    }
+
+    const start = toStartOfDay(startValue);
+    if (!start) {
+      return {
+        ...base,
+        message: 'Enter a valid first non-working day to continue.',
+      };
+    }
+
+    const range = getFinancialYearRange(start);
+    if (!range) {
+      return {
+        ...base,
+        message: 'Unable to determine the organisational working year for the selected date.',
+      };
+    }
+
+    const windowEnd = new Date(range.end.getTime());
+    if (start.getTime() > windowEnd.getTime()) {
+      return {
+        ...base,
+        message: 'No dates in range.',
+      };
+    }
+
+    const patternDates = new Set();
+    for (
+      let cursor = new Date(start.getTime());
+      cursor.getTime() <= windowEnd.getTime();
+      cursor.setDate(cursor.getDate() + 14)
+    ) {
+      patternDates.add(toDateKey(cursor));
+    }
+
+    const eventsInWindow = bankHolidayState.events
+      .map((event) => {
+        const eventDate = toStartOfDay(event.date);
+        if (!eventDate) return null;
+        return {
+          title: event.title || 'Bank holiday',
+          notes: event.notes || '',
+          date: eventDate,
+          key: toDateKey(eventDate),
+        };
+      })
+      .filter(
+        (event) =>
+          event &&
+          event.date.getTime() >= start.getTime() &&
+          event.date.getTime() <= windowEnd.getTime()
+      )
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    const matches = [];
+    const nonMatches = [];
+
+    eventsInWindow.forEach((event) => {
+      if (patternDates.has(event.key)) {
+        matches.push(event);
+      } else {
+        nonMatches.push(event);
+      }
+    });
+
+    const startLabel = formatHumanDate(start);
+    const endLabel = formatHumanDate(windowEnd);
+
+    let message;
+    if (matches.length) {
+      message = `Found ${matches.length} bank holidays on the every other week pattern between ${startLabel} and ${endLabel} in this organisational working year.`;
+    } else if (eventsInWindow.length) {
+      message = `No bank holidays align with this every other week pattern between ${startLabel} and ${endLabel} in this organisational working year. Showing other bank holidays for reference.`;
+    } else {
+      message = `No bank holidays fall between ${startLabel} and ${endLabel} in this organisational working year.`;
+    }
+
+    return {
+      ...base,
+      message,
+      matchesLabel: `Bank holidays on non-working days (${matches.length})`,
+      nonMatchesLabel: `Other bank holidays in range (${nonMatches.length})`,
+      matches: matches.map((event) => ({
+        title: event.title || 'Bank holiday',
+        date: formatBankHolidayDate(event.date),
+        notes: event.notes || '',
+      })),
+      nonMatches: nonMatches.map((event) => ({
+        title: event.title || 'Bank holiday',
+        date: formatBankHolidayDate(event.date),
+        notes: event.notes || '',
+      })),
+    };
+  }
+
+  function getExistingNineDayBookerReportData() {
+    const booker = getExistingNineDayFortnightBookerElements();
     if (!booker) return null;
 
     const base = {
@@ -3517,8 +3795,201 @@
     }
   }
 
+  function updateExistingNineDayFortnightBankHolidayDefault({ force = false } = {}) {
+    const elements = getExistingNineDayFortnightElements();
+    if (!elements) return;
+    const { start, bankHolidays, bankHolidayHelp } = elements;
+    if (!start || !bankHolidays) return;
+
+    const startValue = start.value;
+    if (!startValue) {
+      existingNineDayFortnightState.lastDefault = null;
+      if (!existingNineDayFortnightState.userOverriddenBankHolidays || force) {
+        bankHolidays.value = '';
+      }
+      if (bankHolidayHelp) {
+        bankHolidayHelp.textContent = 'Select a start date to automatically calculate bank holidays.';
+      }
+      return;
+    }
+
+    const computed = computeFinancialYearBankHolidayDefault(new Date(startValue), { includePast: true });
+    existingNineDayFortnightState.lastDefault = computed;
+
+    if ((!existingNineDayFortnightState.userOverriddenBankHolidays || force) && computed) {
+      bankHolidays.value = String(computed.count);
+    } else if (!computed && (force || !existingNineDayFortnightState.userOverriddenBankHolidays)) {
+      bankHolidays.value = '';
+    }
+
+    if (bankHolidayHelp) {
+      if (!bankHolidayState.events.length) {
+        bankHolidayHelp.textContent =
+          'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.';
+      } else if (!computed) {
+        bankHolidayHelp.textContent = 'Unable to determine the organisational working year for the selected start date.';
+      } else {
+        const message = buildBankHolidayDefaultMessage(computed);
+        bankHolidayHelp.textContent =
+          message || 'Bank holidays automatically calculated using the selected start date.';
+      }
+    }
+  }
+
   function updateNineDayFortnightBooker() {
     const booker = getNineDayFortnightBookerElements();
+    if (!booker) return;
+    const {
+      startDate,
+      message,
+      results,
+      matchesLabel,
+      matchesList,
+      nonMatchesLabel,
+      nonMatchesList,
+    } = booker;
+
+    if (matchesList) matchesList.innerHTML = '';
+    if (nonMatchesList) nonMatchesList.innerHTML = '';
+    if (results) results.hidden = true;
+
+    if (!bankHolidayState.events.length) {
+      if (message) {
+        message.textContent =
+          'Bank holiday data is unavailable. Refresh from the Bank Holidays page to load the latest information.';
+      }
+      return;
+    }
+
+    const startValue = startDate ? startDate.value : '';
+    if (!startValue) {
+      if (message) {
+        message.textContent = 'Pick the first non-working day to begin the every other week pattern.';
+      }
+      return;
+    }
+
+    const start = toStartOfDay(startValue);
+    if (!start) {
+      if (message) {
+        message.textContent = 'Enter a valid first non-working day to continue.';
+      }
+      return;
+    }
+
+    const range = getFinancialYearRange(start);
+    if (!range) {
+      if (message) {
+        message.textContent = 'Unable to determine the organisational working year for the selected date.';
+      }
+      return;
+    }
+
+    const windowEnd = new Date(range.end.getTime());
+    if (start.getTime() > windowEnd.getTime()) {
+      if (message) {
+        message.textContent = 'No dates in range.';
+      }
+      return;
+    }
+
+    const patternDates = new Set();
+    for (let cursor = new Date(start.getTime()); cursor.getTime() <= windowEnd.getTime(); cursor.setDate(cursor.getDate() + 14)) {
+      patternDates.add(toDateKey(cursor));
+    }
+
+    const eventsInWindow = bankHolidayState.events
+      .map((event) => {
+        const eventDate = toStartOfDay(event.date);
+        if (!eventDate) return null;
+        return {
+          title: event.title,
+          notes: event.notes,
+          date: eventDate,
+          key: toDateKey(eventDate),
+        };
+      })
+      .filter(
+        (event) =>
+          event &&
+          event.date.getTime() >= start.getTime() &&
+          event.date.getTime() <= windowEnd.getTime()
+      )
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    const matches = [];
+    const nonMatches = [];
+
+    eventsInWindow.forEach((event) => {
+      if (patternDates.has(event.key)) {
+        matches.push(event);
+      } else {
+        nonMatches.push(event);
+      }
+    });
+
+    const renderList = (listEl, items) => {
+      if (!listEl) return;
+      listEl.innerHTML = '';
+      if (!items.length) {
+        const emptyItem = document.createElement('li');
+        emptyItem.className = 'text-sm text-gray-500 dark:text-gray-400';
+        emptyItem.textContent = 'None in this window.';
+        listEl.appendChild(emptyItem);
+        return;
+      }
+
+      items.forEach((item) => {
+        const entry = document.createElement('li');
+        entry.className =
+          'rounded-lg bg-gray-50 dark:bg-gray-900/40 p-3 space-y-1 border border-gray-200 dark:border-gray-700';
+        const title = document.createElement('p');
+        title.className = 'font-medium text-gray-900 dark:text-gray-100';
+        title.textContent = item.title || 'Bank holiday';
+        entry.appendChild(title);
+        const dateLine = document.createElement('p');
+        dateLine.className = 'text-xs text-gray-600 dark:text-gray-400';
+        dateLine.textContent = formatBankHolidayDate(item.date);
+        entry.appendChild(dateLine);
+        if (item.notes) {
+          const notes = document.createElement('p');
+          notes.className = 'text-xs text-gray-500 dark:text-gray-400';
+          notes.textContent = item.notes;
+          entry.appendChild(notes);
+        }
+        listEl.appendChild(entry);
+      });
+    };
+
+    if (matchesLabel) {
+      matchesLabel.textContent = `Bank holidays on non-working days (${matches.length})`;
+    }
+    if (nonMatchesLabel) {
+      nonMatchesLabel.textContent = `Other bank holidays in range (${nonMatches.length})`;
+    }
+
+    renderList(matchesList, matches);
+    renderList(nonMatchesList, nonMatches);
+
+    if (message) {
+      const startLabel = formatHumanDate(start);
+      const endLabel = formatHumanDate(windowEnd);
+      if (matches.length) {
+        message.textContent = `Found ${matches.length} bank holidays on the every other week pattern between ${startLabel} and ${endLabel}.`;
+      } else if (eventsInWindow.length) {
+        message.textContent = `No bank holidays align with this every other week pattern between ${startLabel} and ${endLabel}. Showing other bank holidays for reference.`;
+      } else {
+        message.textContent = `No bank holidays fall between ${startLabel} and ${endLabel}.`;
+      }
+    }
+
+    if (results) {
+      results.hidden = false;
+    }
+  }
+
+  function updateExistingNineDayFortnightBooker() {
+    const booker = getExistingNineDayFortnightBookerElements();
     if (!booker) return;
     const {
       startDate,
@@ -3929,6 +4400,51 @@
     updateNineDayFortnightBooker();
   }
 
+  function initializeExistingNineDayFortnight() {
+    if (existingNineDayFortnightState.initialized) return;
+    const elements = getExistingNineDayFortnightElements();
+    if (!elements) return;
+    const booker = getExistingNineDayFortnightBookerElements();
+
+    const { start, core, longService, carryOver, purchased, bankHolidays } = elements;
+    const bookerStartInput = booker ? booker.startDate : null;
+
+    const handleInputChange = () => {
+      updateExistingNineDayFortnightSummary();
+    };
+
+    [core, longService, carryOver, purchased].forEach((input) => {
+      if (!input) return;
+      input.addEventListener('input', handleInputChange);
+    });
+
+    if (bankHolidays) {
+      bankHolidays.addEventListener('input', () => {
+        existingNineDayFortnightState.userOverriddenBankHolidays = true;
+        updateExistingNineDayFortnightSummary();
+      });
+    }
+
+    if (start) {
+      start.addEventListener('change', () => {
+        existingNineDayFortnightState.userOverriddenBankHolidays = false;
+        updateExistingNineDayFortnightBankHolidayDefault({ force: true });
+        updateExistingNineDayFortnightSummary();
+      });
+    }
+
+    if (bookerStartInput) {
+      bookerStartInput.addEventListener('change', () => {
+        updateExistingNineDayFortnightBooker();
+      });
+    }
+
+    existingNineDayFortnightState.initialized = true;
+    updateExistingNineDayFortnightBankHolidayDefault({ force: true });
+    updateExistingNineDayFortnightSummary();
+    updateExistingNineDayFortnightBooker();
+  }
+
   function getLeaveYearRangeForAnchor(anchorDate) {
     const anchor = toStartOfDay(anchorDate);
     if (!anchor) return null;
@@ -4082,6 +4598,7 @@
         fourDayWeekState.userOverriddenBankHolidays = false;
         existingFourDayWeekState.userOverriddenBankHolidays = false;
         nineDayFortnightState.userOverriddenBankHolidays = false;
+        existingNineDayFortnightState.userOverriddenBankHolidays = false;
         updateStandardWeekBankHolidayDefault({ force: true });
         updateStandardWeekSummary();
         updateStandardWeekLeavePreview();
@@ -4094,6 +4611,9 @@
         updateNineDayFortnightBankHolidayDefault({ force: true });
         updateNineDayFortnightSummary();
         updateNineDayFortnightBooker();
+        updateExistingNineDayFortnightBankHolidayDefault({ force: true });
+        updateExistingNineDayFortnightSummary();
+        updateExistingNineDayFortnightBooker();
       });
     }
 
@@ -4115,6 +4635,7 @@
         fourDayWeekState.userOverriddenBankHolidays = false;
         existingFourDayWeekState.userOverriddenBankHolidays = false;
         nineDayFortnightState.userOverriddenBankHolidays = false;
+        existingNineDayFortnightState.userOverriddenBankHolidays = false;
         updateStandardWeekBankHolidayDefault({ force: true });
         updateStandardWeekSummary();
         updateStandardWeekLeavePreview();
@@ -4127,6 +4648,9 @@
         updateNineDayFortnightBankHolidayDefault({ force: true });
         updateNineDayFortnightSummary();
         updateNineDayFortnightBooker();
+        updateExistingNineDayFortnightBankHolidayDefault({ force: true });
+        updateExistingNineDayFortnightSummary();
+        updateExistingNineDayFortnightBooker();
       });
     }
 
@@ -4159,6 +4683,7 @@
         updateFourDayWeekSummary();
         updateExistingFourDayWeekSummary();
         updateNineDayFortnightSummary();
+        updateExistingNineDayFortnightSummary();
       }
     );
 
@@ -4180,6 +4705,7 @@
       () => {
         updateHourConversionExplainers();
         updateNineDayFortnightSummary();
+        updateExistingNineDayFortnightSummary();
       }
     );
 
@@ -4198,6 +4724,7 @@
         updateFourDayWeekSummary();
         updateExistingFourDayWeekSummary();
         updateNineDayFortnightSummary();
+        updateExistingNineDayFortnightSummary();
       });
       weeklyHoursInput.addEventListener('blur', writeWeekly);
     }
@@ -4316,6 +4843,9 @@
       updateNineDayFortnightBankHolidayDefault();
       updateNineDayFortnightSummary();
       updateNineDayFortnightBooker();
+      updateExistingNineDayFortnightBankHolidayDefault();
+      updateExistingNineDayFortnightSummary();
+      updateExistingNineDayFortnightBooker();
       return;
     }
 
@@ -4354,6 +4884,9 @@
     updateNineDayFortnightBankHolidayDefault();
     updateNineDayFortnightSummary();
     updateNineDayFortnightBooker();
+    updateExistingNineDayFortnightBankHolidayDefault();
+    updateExistingNineDayFortnightSummary();
+    updateExistingNineDayFortnightBooker();
   }
 
   async function refreshBankHolidays({ showConfirmationOnSuccess = false } = {}) {
@@ -4977,6 +5510,7 @@
     initializeFourDayWeek();
     initializeExistingFourDayWeek();
     initializeNineDayFortnight();
+    initializeExistingNineDayFortnight();
 
     const storedView = safeGet(LS_KEYS.view);
     const welcomeHidden = welcomeHiddenState;
@@ -5096,6 +5630,26 @@
             compressedLabel: '9-day fortnight allowance (days)',
             bankHolidayNote,
             bookerReport: getNineDayBookerReportData(),
+          });
+          break;
+        }
+        case 'print-existing-nine-day': {
+          const elements = getExistingNineDayFortnightElements();
+          if (!elements) return;
+          const bankHolidayNote = buildBankHolidayReportNote({
+            overridden: existingNineDayFortnightState.userOverriddenBankHolidays,
+            lastDefault: existingNineDayFortnightState.lastDefault,
+          });
+          const { adjustedComponents } = getExistingNineDayAdjustedComponents(elements);
+          handleLeaveReportPrint({
+            elements,
+            title: 'Existing 9-day fortnight leave entitlement',
+            scheduleLabel: 'Existing 9-day fortnight',
+            compressedDayHours: getNineDayCompressedHours(),
+            compressedLabel: '9-day fortnight allowance (days)',
+            bankHolidayNote,
+            componentsOverride: adjustedComponents,
+            bookerReport: getExistingNineDayBookerReportData(),
           });
           break;
         }

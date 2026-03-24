@@ -177,6 +177,12 @@
             9-day fortnight
           </span>
         </button>
+        <button class="nav-btn" data-target="existing-nine-day-fortnight">
+          <span class="flex items-center">
+            <i class="fa-solid fa-business-time h-5 w-5 mr-3"></i>
+            Existing 9-day fortnight
+          </span>
+        </button>
         <button class="nav-btn" data-target="settings">
           <span class="flex items-center">
             <i class="fa-solid fa-sliders-h h-5 w-5 mr-3"></i>
@@ -1330,6 +1336,245 @@
               type="button"
               class="btn btn-gray w-full sm:w-auto sm:self-start flex items-center justify-center gap-2"
               data-action="print-nine-day"
+            >
+              <i class="fa-solid fa-file-pdf"></i>
+              <span>Print to PDF</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="existing-nine-day-fortnight" class="content-section">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          Existing 9-day fortnight leave entitlement
+        </h2>
+        <div class="space-y-6">
+          <div
+            class="card is-collapsible"
+            id="existingNineDayFortnightCard"
+            data-collapsible
+            data-collapsible-id="existing-nine-day-fortnight-annual"
+          >
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <button
+                type="button"
+                class="card-toggle"
+                data-collapsible-trigger
+                aria-expanded="true"
+                aria-controls="existing-nine-day-fortnight-annual-content"
+              >
+                <span>Annual leave inputs</span>
+                <svg
+                  class="chev"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 8l4 4 4-4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </h3>
+            <div
+              id="existing-nine-day-fortnight-annual-content"
+              class="card-body space-y-6"
+              data-collapsible-content
+            >
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Enter the individual's allowances to see the total standard leave available in hours for an existing
+                9-day fortnight working pattern.
+              </p>
+              <form class="grid gap-6 md:grid-cols-2" novalidate>
+                <div class="space-y-2">
+                  <label for="existingNineDayStartDate" class="form-label">Start date</label>
+                  <input type="date" id="existingNineDayStartDate" class="input-field" />
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-leave-year-start-note>
+                    Used to determine the organisational working year and remaining bank holidays.
+                  </p>
+                </div>
+                <div class="space-y-2">
+                  <label for="existingNineDayCoreLeave" class="form-label">Core annual leave allowance (days)</label>
+                  <input
+                    type="number"
+                    id="existingNineDayCoreLeave"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="existingNineDayLongService" class="form-label">Long service leave (days)</label>
+                  <input
+                    type="number"
+                    id="existingNineDayLongService"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="existingNineDayCarryOver" class="form-label">Carry over leave (days)</label>
+                  <input
+                    type="number"
+                    id="existingNineDayCarryOver"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="existingNineDayPurchased" class="form-label">Purchased leave (days)</label>
+                  <input
+                    type="number"
+                    id="existingNineDayPurchased"
+                    class="input-field"
+                    inputmode="numeric"
+                    step="1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="existingNineDayBankHolidays" class="form-label">Bank holidays (days)</label>
+                  <input
+                    type="number"
+                    id="existingNineDayBankHolidays"
+                    class="input-field"
+                    inputmode="numeric"
+                    step="1"
+                    min="0"
+                  />
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-existing-nine-day-bankholidays-help>
+                    Default determined by GOV.UK bank holiday data.
+                  </p>
+                </div>
+              </form>
+              <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4" data-existing-nine-day-summary>
+                <p class="text-sm text-gray-600 dark:text-gray-400" data-existing-nine-day-summary-intro>
+                  Enter values above to see a detailed breakdown of the individual's allowance.
+                </p>
+                <dl
+                  class="grid gap-2 text-sm text-gray-700 dark:text-gray-300"
+                  data-existing-nine-day-breakdown
+                  hidden
+                ></dl>
+                <div class="space-y-3" data-existing-nine-day-totals hidden>
+                  <div class="grid gap-3 sm:grid-cols-3">
+                    <div class="stat-card" data-existing-nine-day-total-days>
+                      <p class="stat-card__label">Total standard leave in days</p>
+                      <p class="stat-card__value">0 days</p>
+                    </div>
+                    <div class="stat-card" data-existing-nine-day-total-hours>
+                      <p class="stat-card__label">Total allowance in hours</p>
+                      <p class="stat-card__value">0 hours</p>
+                    </div>
+                    <div class="stat-card" data-existing-nine-day-total-compressed>
+                      <p class="stat-card__label">Compressed allowance in days</p>
+                      <p class="stat-card__value">0 days</p>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 text-center" data-existing-nine-day-equation></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="card is-collapsible"
+            id="existingNineDayFortnightBookerCard"
+            data-collapsible
+            data-collapsible-id="existing-nine-day-fortnight-booker"
+          >
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <button
+                type="button"
+                class="card-toggle"
+                data-collapsible-trigger
+                aria-expanded="true"
+                aria-controls="existing-nine-day-fortnight-booker-content"
+              >
+                <span>Bank holiday booker</span>
+                <svg
+                  class="chev"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 8l4 4 4-4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </h3>
+            <div
+              id="existing-nine-day-fortnight-booker-content"
+              class="card-body space-y-6"
+              data-collapsible-content
+            >
+              <p class="text-sm text-gray-600 dark:text-gray-400" data-leave-year-nine-booker-intro>
+                Choose the first non-working day in your every other week pattern to spot overlapping bank holidays.
+              </p>
+              <div class="space-y-4">
+                <div class="space-y-2">
+                  <label for="existingNineDayBookerStartDate" class="form-label">First non-working day</label>
+                  <input type="date" id="existingNineDayBookerStartDate" class="input-field" />
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-leave-year-nine-booker-hint>
+                    We'll use the configured organisational working year to work out the matching range.
+                  </p>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400" data-existing-nine-day-booker-message>
+                  Pick the first non-working day to highlight matching bank holidays.
+                </p>
+                <div class="space-y-4" data-existing-nine-day-booker-results hidden>
+                  <div class="space-y-2">
+                    <p class="font-semibold text-gray-900 dark:text-gray-100" data-existing-nine-day-booker-matches-label></p>
+                    <ul
+                      class="space-y-2 text-sm text-gray-700 dark:text-gray-300"
+                      data-existing-nine-day-booker-matches-list
+                    ></ul>
+                  </div>
+                  <div class="space-y-2">
+                    <p class="font-semibold text-gray-900 dark:text-gray-100" data-existing-nine-day-booker-non-matches-label></p>
+                    <ul
+                      class="space-y-2 text-sm text-gray-700 dark:text-gray-300"
+                      data-existing-nine-day-booker-non-matches-list
+                    ></ul>
+                  </div>
+                </div>
+              </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body flex flex-col gap-4 items-start">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Print PDF
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Export the allowance breakdown and bank holiday details as a printable PDF.
+              </p>
+            </div>
+            <button
+              type="button"
+              class="btn btn-gray w-full sm:w-auto sm:self-start flex items-center justify-center gap-2"
+              data-action="print-existing-nine-day"
             >
               <i class="fa-solid fa-file-pdf"></i>
               <span>Print to PDF</span>

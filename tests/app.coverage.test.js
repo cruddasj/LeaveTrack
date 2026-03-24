@@ -215,10 +215,19 @@ describe('app coverage interactions', () => {
     dispatchInput('nineDayBankHolidays', '6');
     dispatchInput('nineDayBookerStartDate', '2026-01-05');
 
+    dispatchInput('existingNineDayStartDate', '2026-04-01');
+    dispatchInput('existingNineDayCoreLeave', '18');
+    dispatchInput('existingNineDayLongService', '1');
+    dispatchInput('existingNineDayCarryOver', '2');
+    dispatchInput('existingNineDayPurchased', '1');
+    dispatchInput('existingNineDayBankHolidays', '6');
+    dispatchInput('existingNineDayBookerStartDate', '2026-01-05');
+
     document.querySelector('[data-action="print-standard-week"]').click();
     document.querySelector('[data-action="print-four-day"]').click();
     document.querySelector('[data-action="print-existing-four-day"]').click();
     document.querySelector('[data-action="print-nine-day"]').click();
+    document.querySelector('[data-action="print-existing-nine-day"]').click();
     document.querySelector('[data-action="refresh-bank-holidays"]').click();
 
     document.querySelector('[data-action="update-app"]').click();
@@ -232,6 +241,15 @@ describe('app coverage interactions', () => {
     expect(document.querySelector('[data-existing-four-day-summary-intro]').textContent).toContain(
       'forthcoming leave year',
     );
+    expect(document.querySelector('[data-existing-nine-day-breakdown]').textContent).toContain(
+      'equivalent to',
+    );
+    expect(document.querySelector('[data-existing-nine-day-breakdown]').textContent).toContain(
+      'standard days',
+    );
+    expect(document.querySelector('[data-existing-nine-day-summary-intro]').textContent).toContain(
+      'forthcoming leave year',
+    );
 
     fuzzAllControls();
 
@@ -241,6 +259,7 @@ describe('app coverage interactions', () => {
     expect(document.querySelector('[data-four-day-total-days]').textContent).not.toEqual('');
     expect(document.querySelector('[data-existing-four-day-total-days]').textContent).not.toEqual('');
     expect(document.querySelector('[data-nine-day-total-days]').textContent).not.toEqual('');
+    expect(document.querySelector('[data-existing-nine-day-total-days]').textContent).not.toEqual('');
     expect(document.querySelector('[data-app-version]').textContent).toBe('9.9.9');
     expect(worker.postMessage).toHaveBeenCalledWith({ type: 'SKIP_WAITING' });
   });
@@ -271,6 +290,10 @@ describe('app coverage interactions', () => {
     dispatchInput('nineDayCoreLeave', '-9');
     dispatchInput('nineDayBankHolidays', '-4');
     dispatchInput('nineDayBookerStartDate', '');
+
+    dispatchInput('existingNineDayCoreLeave', '-9');
+    dispatchInput('existingNineDayBankHolidays', '-4');
+    dispatchInput('existingNineDayBookerStartDate', '');
 
     const welcomeToggle = document.getElementById('welcomeToggle');
     welcomeToggle.checked = false;
