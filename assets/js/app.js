@@ -1609,17 +1609,7 @@
     }
   }
 
-  function updateExistingFourDayWeekSummary() {
-    const elements = getExistingFourDayWeekElements();
-    if (!elements) return;
-    const { breakdown, totals, totalDays, totalHours, totalCompressed, equation, summaryIntro } = elements;
-    const setStatValue = (wrapper, value) => {
-      if (!wrapper) return;
-      const valueEl = wrapper.querySelector('.stat-card__value');
-      if (!valueEl) return;
-      valueEl.textContent = value;
-    };
-
+  function getExistingFourDayAdjustedComponents(elements) {
     const components = getLeaveComponents(elements);
     const carryOverComponent = components.find((component) => component.id === 'carryOver');
     const fourDayHours = getFourDayCompressedHours();
@@ -1643,6 +1633,27 @@
         displayValue: `${formatHoursDisplay(carryOverHours)} (equivalent to ${formatNumberWithPrecision(convertedCarryOverDays)} standard days)`,
       };
     });
+
+    return {
+      components,
+      adjustedComponents,
+    };
+  }
+
+  function updateExistingFourDayWeekSummary() {
+    const elements = getExistingFourDayWeekElements();
+    if (!elements) return;
+    const { breakdown, totals, totalDays, totalHours, totalCompressed, equation, summaryIntro } = elements;
+    const setStatValue = (wrapper, value) => {
+      if (!wrapper) return;
+      const valueEl = wrapper.querySelector('.stat-card__value');
+      if (!valueEl) return;
+      valueEl.textContent = value;
+    };
+
+    const { components, adjustedComponents } = getExistingFourDayAdjustedComponents(elements);
+    const fourDayHours = getFourDayCompressedHours();
+    const standardHours = getStandardDayHours();
 
     const hasValues = components.some((component) => component.value);
 
@@ -1787,8 +1798,10 @@
     }
   }
 
-  function createLeaveReportPayload(elements, compressedDayHours) {
-    const components = getLeaveComponents(elements);
+  function createLeaveReportPayload(elements, compressedDayHours, componentsOverride = null) {
+    const components = Array.isArray(componentsOverride)
+      ? componentsOverride
+      : getLeaveComponents(elements);
     const hasValues = components.some((component) => component.value);
     const totalDaysValue = components.reduce((sum, component) => sum + component.value, 0);
     const standardHours = getStandardDayHours();
@@ -2227,9 +2240,10 @@
     compressedLabel,
     bankHolidayNote,
     bookerReport,
+    componentsOverride,
   }) {
     if (!elements) return;
-    const payload = createLeaveReportPayload(elements, compressedDayHours);
+    const payload = createLeaveReportPayload(elements, compressedDayHours, componentsOverride);
     if (!payload.hasValues) {
       showAlert('Enter allowance values before creating a PDF report.');
       return;
@@ -4702,6 +4716,25 @@
             compressedLabel: 'Compressed allowance (days)',
             bankHolidayNote,
             bookerReport: getFourDayBookerReportData(),
+          });
+          break;
+        }
+        case 'print-existing-four-day': {
+          const elements = getExistingFourDayWeekElements();
+          if (!elements) return;
+          const bankHolidayNote = buildBankHolidayReportNote({
+            overridden: existingFourDayWeekState.userOverriddenBankHolidays,
+            lastDefault: existingFourDayWeekState.lastDefault,
+          });
+          const { adjustedComponents } = getExistingFourDayAdjustedComponents(elements);
+          handleLeaveReportPrint({
+            elements,
+            title: 'Existing 4-day week leave entitlement',
+            scheduleLabel: 'Existing 4-day week',
+            compressedDayHours: getFourDayCompressedHours(),
+            compressedLabel: 'Compressed allowance (days)',
+            bankHolidayNote,
+            componentsOverride: adjustedComponents,
           });
           break;
         }

@@ -216,6 +216,7 @@ describe('app coverage interactions', () => {
 
     document.querySelector('[data-action="print-standard-week"]').click();
     document.querySelector('[data-action="print-four-day"]').click();
+    document.querySelector('[data-action="print-existing-four-day"]').click();
     document.querySelector('[data-action="print-nine-day"]').click();
     document.querySelector('[data-action="refresh-bank-holidays"]').click();
 
