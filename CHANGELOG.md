@@ -5,6 +5,7 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 ## [NEXT_VERSION] - [NEXT_DATE]
 
 - Add an Existing 9-day fortnight page with matched cards and carry-over leave converted using the 9-day fortnight day-hours setting.
+- Keep start-date guidance on the existing compressed-week pages focused on bank-holiday timing instead of joiner-specific optional messaging.
 
 ## 0.0.34 - 2026-03-24
 

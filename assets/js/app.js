@@ -4485,6 +4485,12 @@
       el.textContent = startMessage;
     });
 
+    const existingStartMessage =
+      'Used to determine the organisational working year and remaining bank holidays.';
+    $$('[data-leave-year-existing-start-note]').forEach((el) => {
+      el.textContent = existingStartMessage;
+    });
+
     const bookerIntroMessage = fullRange
       ? `Pick the regular non-working day to see which bank holidays still fall on it before the end of the organisational working year (${fullRange}).`
       : 'Pick the regular non-working day to see which bank holidays still fall on it before the end of the organisational working year.';
