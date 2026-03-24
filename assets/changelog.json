@@ -3,12 +3,7 @@
     "version": "[NEXT_VERSION]",
     "date": "[NEXT_DATE]",
     "changes": [
-      "Add an \"Existing 4-day week\" page that mirrors the 4-day week inputs and applies carry-over leave using the configured 4-day day-hours conversion, with clearer breakdown wording.",
-      "Show Existing 4-day week carry-over values as hours with their equivalent standard-day amount and update the summary wording for the forthcoming leave year.",
-      "Clarify the Existing 4-day week carry-over breakdown text so it explicitly says \"standard days\".",
-      "Add the missing Print PDF card and export action to the Existing 4-day week page.",
-      "Add the missing Bank holiday booker section to the Existing 4-day week page and include its details in PDF exports.",
-      "Update development dependencies to the latest available minor/patch releases for ESLint and markdownlint-cli2."
+      "Add existing 4-day week page."
     ]
   },
   {
