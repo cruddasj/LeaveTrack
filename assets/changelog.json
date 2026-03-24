@@ -1,5 +1,12 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Add existing 4-day week page."
+    ]
+  },
+  {
     "version": "0.0.33",
     "date": "2026-03-19",
     "changes": [

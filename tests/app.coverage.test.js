@@ -199,6 +199,14 @@ describe('app coverage interactions', () => {
 
     dispatchInput('bankHolidayBookerDay', 'monday');
 
+    dispatchInput('existingFourDayStartDate', '2026-04-01');
+    dispatchInput('existingFourDayCoreLeave', '20');
+    dispatchInput('existingFourDayLongService', '2');
+    dispatchInput('existingFourDayCarryOver', '1');
+    dispatchInput('existingFourDayPurchased', '2');
+    dispatchInput('existingFourDayBankHolidays', '6');
+    dispatchInput('existingBankHolidayBookerDay', 'monday');
+
     dispatchInput('nineDayStartDate', '2026-04-01');
     dispatchInput('nineDayCoreLeave', '18');
     dispatchInput('nineDayLongService', '1');
@@ -209,10 +217,21 @@ describe('app coverage interactions', () => {
 
     document.querySelector('[data-action="print-standard-week"]').click();
     document.querySelector('[data-action="print-four-day"]').click();
+    document.querySelector('[data-action="print-existing-four-day"]').click();
     document.querySelector('[data-action="print-nine-day"]').click();
     document.querySelector('[data-action="refresh-bank-holidays"]').click();
 
     document.querySelector('[data-action="update-app"]').click();
+
+    expect(document.querySelector('[data-existing-four-day-breakdown]').textContent).toContain(
+      'equivalent to',
+    );
+    expect(document.querySelector('[data-existing-four-day-breakdown]').textContent).toContain(
+      'standard days',
+    );
+    expect(document.querySelector('[data-existing-four-day-summary-intro]').textContent).toContain(
+      'forthcoming leave year',
+    );
 
     fuzzAllControls();
 
@@ -220,6 +239,7 @@ describe('app coverage interactions', () => {
 
     expect(document.querySelector('[data-standard-total-days]').textContent).not.toEqual('');
     expect(document.querySelector('[data-four-day-total-days]').textContent).not.toEqual('');
+    expect(document.querySelector('[data-existing-four-day-total-days]').textContent).not.toEqual('');
     expect(document.querySelector('[data-nine-day-total-days]').textContent).not.toEqual('');
     expect(document.querySelector('[data-app-version]').textContent).toBe('9.9.9');
     expect(worker.postMessage).toHaveBeenCalledWith({ type: 'SKIP_WAITING' });
@@ -244,6 +264,9 @@ describe('app coverage interactions', () => {
     dispatchInput('fourDayCoreLeave', '-10');
     dispatchInput('fourDayBankHolidays', '-2');
     dispatchInput('bankHolidayBookerDay', 'friday');
+
+    dispatchInput('existingFourDayCoreLeave', '-10');
+    dispatchInput('existingFourDayBankHolidays', '-2');
 
     dispatchInput('nineDayCoreLeave', '-9');
     dispatchInput('nineDayBankHolidays', '-4');
