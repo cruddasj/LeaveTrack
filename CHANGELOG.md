@@ -6,6 +6,7 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 
 - Add an "Existing 4-day week" page that mirrors the 4-day week inputs and applies carry-over leave using the configured 4-day day-hours conversion, with clearer breakdown wording.
 - Show Existing 4-day week carry-over values as hours with their equivalent standard-day amount and update the summary wording for the forthcoming leave year.
+- Clarify the Existing 4-day week carry-over breakdown text so it explicitly says "standard days".
 - Update development dependencies to the latest available minor/patch releases for ESLint and markdownlint-cli2.
 
 ## 0.0.33 - 2026-03-19

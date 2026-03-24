@@ -1640,7 +1640,7 @@
         ...component,
         label: `Carry over leave (Calculated at ${carryOverLabelHours} hours)`,
         value: convertedCarryOverDays,
-        displayValue: `${formatHoursDisplay(carryOverHours)} (equivalent to ${formatDaysDisplay(convertedCarryOverDays)})`,
+        displayValue: `${formatHoursDisplay(carryOverHours)} (equivalent to ${formatNumberWithPrecision(convertedCarryOverDays)} standard days)`,
       };
     });
 

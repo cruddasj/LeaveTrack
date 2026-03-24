@@ -224,6 +224,9 @@ describe('app coverage interactions', () => {
     expect(document.querySelector('[data-existing-four-day-breakdown]').textContent).toContain(
       'equivalent to',
     );
+    expect(document.querySelector('[data-existing-four-day-breakdown]').textContent).toContain(
+      'standard days',
+    );
     expect(document.querySelector('[data-existing-four-day-summary-intro]').textContent).toContain(
       'forthcoming leave year',
     );
