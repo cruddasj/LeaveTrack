@@ -58,6 +58,9 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 - Sync AGENTS.md with the upstream LeaveTrack instructions and contribution workflow.
 - Sync GitHub CI and automation metadata with the upstream template, including Dependabot configuration.
 
+## [[NEXT_VERSION]] - [NEXT_DATE]
+- Update application software dependencies
+
 ## [0.0.22] - 2026-03-18
 
 - Add CI quality checks for linting, CSS consistency, and unit tests with an 80% line-coverage gate.
