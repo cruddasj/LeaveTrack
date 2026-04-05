@@ -359,4 +359,19 @@ describe('app coverage interactions', () => {
     expect(document.querySelector('[data-bank-holidays-error]').classList.contains('hidden')).toBe(false);
     expect(document.querySelector('[data-standard-preview-message]').textContent.length).toBeGreaterThan(0);
   });
+
+  test('uses entered start date (not today) for four-day bank holiday period messaging', async () => {
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    dispatchInput('leaveYearStartInput', '2026-04-01');
+    dispatchInput('leaveYearEndInput', '2027-03-31');
+    dispatchInput('fourDayStartDate', '2026-04-01');
+    dispatchInput('bankHolidayBookerDay', 'monday');
+
+    const message = document.querySelector('#bankHolidayBookerCard [data-booker-message]');
+    expect(message.textContent).toContain('between April 1, 2026 and March 31, 2027');
+    expect(message.textContent).toContain('organisational working year');
+  });
 });
