@@ -1233,7 +1233,7 @@
       return;
     }
 
-    const computed = computeFinancialYearBankHolidayDefault(startDate);
+    const computed = computeFinancialYearBankHolidayDefault(startDate, { includePast: true });
     if (!computed) {
       if (message) {
         message.textContent = 'Unable to determine the organisational working year for the selected start date.';
@@ -1276,7 +1276,7 @@
       if (message) {
         const startLabel = formatHumanDate(effectiveStart);
         const endLabel = formatHumanDate(rangeEnd);
-        message.textContent = `No remaining bank holidays between ${startLabel} and ${endLabel} in this organisational working year.`;
+        message.textContent = `No bank holidays fall between ${startLabel} and ${endLabel} in this organisational working year.`;
       }
       return;
     }
@@ -1409,7 +1409,7 @@
       return;
     }
 
-    const computed = computeFinancialYearBankHolidayDefault(startDate);
+    const computed = computeFinancialYearBankHolidayDefault(startDate, { includePast: true });
     if (!computed) {
       if (message) {
         message.textContent = 'Unable to determine the organisational working year for the selected start date.';
@@ -1452,7 +1452,7 @@
       if (message) {
         const startLabel = formatHumanDate(effectiveStart);
         const endLabel = formatHumanDate(rangeEnd);
-        message.textContent = `No remaining bank holidays between ${startLabel} and ${endLabel} in this organisational working year.`;
+        message.textContent = `No bank holidays fall between ${startLabel} and ${endLabel} in this organisational working year.`;
       }
       return;
     }
@@ -2334,7 +2334,7 @@
       };
     }
 
-    const computed = computeFinancialYearBankHolidayDefault(startDate);
+    const computed = computeFinancialYearBankHolidayDefault(startDate, { includePast: true });
     if (!computed) {
       return {
         ...base,
@@ -2376,7 +2376,7 @@
       const endLabel = formatHumanDate(rangeEnd);
       return {
         ...base,
-        message: `No remaining bank holidays between ${startLabel} and ${endLabel} in this organisational working year.`,
+        message: `No bank holidays fall between ${startLabel} and ${endLabel} in this organisational working year.`,
       };
     }
 
@@ -2467,7 +2467,7 @@
       };
     }
 
-    const computed = computeFinancialYearBankHolidayDefault(startDate);
+    const computed = computeFinancialYearBankHolidayDefault(startDate, { includePast: true });
     if (!computed) {
       return {
         ...base,
@@ -2509,7 +2509,7 @@
       const endLabel = formatHumanDate(rangeEnd);
       return {
         ...base,
-        message: `No remaining bank holidays between ${startLabel} and ${endLabel} in this organisational working year.`,
+        message: `No bank holidays fall between ${startLabel} and ${endLabel} in this organisational working year.`,
       };
     }
 

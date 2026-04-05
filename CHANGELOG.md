@@ -2,6 +2,11 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Calculate bank holiday period summaries from the entered start date so past dates in the selected working year are included when reviewing matching days.
+- Update development dependencies to the latest patch/minor releases for Playwright, Node type definitions, and ESLint.
+
 ## 0.0.36 - 2026-03-24
 
 - Show the updated carry-over leave wording and standard-day conversion text in PDF exports for Existing 4-day week and Existing 9-day fortnight reports.
