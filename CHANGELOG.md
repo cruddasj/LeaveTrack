@@ -2,7 +2,7 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.38 - 2026-04-05
 
 - Existing 9-day fortnight bank-holiday matching now reviews the full organisational working year from its start date while still using the selected first non-working day to determine every-other-week matches.
 - Update development dependencies to the latest patch/minor releases for Playwright, Node type definitions, and ESLint.
