@@ -1,7 +1,7 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.37",
+    "date": "2026-04-05",
     "changes": [
       "Calculate bank holiday period summaries from the entered start date so past dates in the selected working year are included when reviewing matching days.",
       "Update development dependencies to the latest patch/minor releases for Playwright, Node type definitions, and ESLint."
