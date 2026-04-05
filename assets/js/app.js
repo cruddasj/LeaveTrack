@@ -2722,8 +2722,9 @@
       };
     }
 
+    const windowStart = new Date(range.start.getTime());
     const windowEnd = new Date(range.end.getTime());
-    if (start.getTime() > windowEnd.getTime()) {
+    if (windowStart.getTime() > windowEnd.getTime()) {
       return {
         ...base,
         message: 'No dates in range.',
@@ -2731,12 +2732,18 @@
     }
 
     const patternDates = new Set();
+    const patternWindowStart = new Date(start.getTime());
+    while (patternWindowStart.getTime() > windowStart.getTime()) {
+      patternWindowStart.setDate(patternWindowStart.getDate() - 14);
+    }
     for (
-      let cursor = new Date(start.getTime());
+      let cursor = new Date(patternWindowStart.getTime());
       cursor.getTime() <= windowEnd.getTime();
       cursor.setDate(cursor.getDate() + 14)
     ) {
-      patternDates.add(toDateKey(cursor));
+      if (cursor.getTime() >= windowStart.getTime()) {
+        patternDates.add(toDateKey(cursor));
+      }
     }
 
     const eventsInWindow = bankHolidayState.events
@@ -2753,7 +2760,7 @@
       .filter(
         (event) =>
           event &&
-          event.date.getTime() >= start.getTime() &&
+          event.date.getTime() >= windowStart.getTime() &&
           event.date.getTime() <= windowEnd.getTime()
       )
       .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -2769,7 +2776,7 @@
       }
     });
 
-    const startLabel = formatHumanDate(start);
+    const startLabel = formatHumanDate(windowStart);
     const endLabel = formatHumanDate(windowEnd);
 
     let message;
@@ -3885,8 +3892,9 @@
       return;
     }
 
+    const windowStart = new Date(range.start.getTime());
     const windowEnd = new Date(range.end.getTime());
-    if (start.getTime() > windowEnd.getTime()) {
+    if (windowStart.getTime() > windowEnd.getTime()) {
       if (message) {
         message.textContent = 'No dates in range.';
       }
@@ -3894,8 +3902,18 @@
     }
 
     const patternDates = new Set();
-    for (let cursor = new Date(start.getTime()); cursor.getTime() <= windowEnd.getTime(); cursor.setDate(cursor.getDate() + 14)) {
-      patternDates.add(toDateKey(cursor));
+    const patternWindowStart = new Date(start.getTime());
+    while (patternWindowStart.getTime() > windowStart.getTime()) {
+      patternWindowStart.setDate(patternWindowStart.getDate() - 14);
+    }
+    for (
+      let cursor = new Date(patternWindowStart.getTime());
+      cursor.getTime() <= windowEnd.getTime();
+      cursor.setDate(cursor.getDate() + 14)
+    ) {
+      if (cursor.getTime() >= windowStart.getTime()) {
+        patternDates.add(toDateKey(cursor));
+      }
     }
 
     const eventsInWindow = bankHolidayState.events
@@ -3912,7 +3930,7 @@
       .filter(
         (event) =>
           event &&
-          event.date.getTime() >= start.getTime() &&
+          event.date.getTime() >= windowStart.getTime() &&
           event.date.getTime() <= windowEnd.getTime()
       )
       .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -3972,7 +3990,7 @@
     renderList(nonMatchesList, nonMatches);
 
     if (message) {
-      const startLabel = formatHumanDate(start);
+      const startLabel = formatHumanDate(windowStart);
       const endLabel = formatHumanDate(windowEnd);
       if (matches.length) {
         message.textContent = `Found ${matches.length} bank holidays on the every other week pattern between ${startLabel} and ${endLabel}.`;
@@ -4037,8 +4055,9 @@
       return;
     }
 
+    const windowStart = new Date(range.start.getTime());
     const windowEnd = new Date(range.end.getTime());
-    if (start.getTime() > windowEnd.getTime()) {
+    if (windowStart.getTime() > windowEnd.getTime()) {
       if (message) {
         message.textContent = 'No dates in range.';
       }
@@ -4046,8 +4065,18 @@
     }
 
     const patternDates = new Set();
-    for (let cursor = new Date(start.getTime()); cursor.getTime() <= windowEnd.getTime(); cursor.setDate(cursor.getDate() + 14)) {
-      patternDates.add(toDateKey(cursor));
+    const patternWindowStart = new Date(start.getTime());
+    while (patternWindowStart.getTime() > windowStart.getTime()) {
+      patternWindowStart.setDate(patternWindowStart.getDate() - 14);
+    }
+    for (
+      let cursor = new Date(patternWindowStart.getTime());
+      cursor.getTime() <= windowEnd.getTime();
+      cursor.setDate(cursor.getDate() + 14)
+    ) {
+      if (cursor.getTime() >= windowStart.getTime()) {
+        patternDates.add(toDateKey(cursor));
+      }
     }
 
     const eventsInWindow = bankHolidayState.events
@@ -4064,7 +4093,7 @@
       .filter(
         (event) =>
           event &&
-          event.date.getTime() >= start.getTime() &&
+          event.date.getTime() >= windowStart.getTime() &&
           event.date.getTime() <= windowEnd.getTime()
       )
       .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -4124,7 +4153,7 @@
     renderList(nonMatchesList, nonMatches);
 
     if (message) {
-      const startLabel = formatHumanDate(start);
+      const startLabel = formatHumanDate(windowStart);
       const endLabel = formatHumanDate(windowEnd);
       if (matches.length) {
         message.textContent = `Found ${matches.length} bank holidays on the every other week pattern between ${startLabel} and ${endLabel}.`;

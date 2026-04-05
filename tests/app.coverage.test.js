@@ -374,4 +374,22 @@ describe('app coverage interactions', () => {
     expect(message.textContent).toContain('between April 1, 2026 and March 31, 2027');
     expect(message.textContent).toContain('organisational working year');
   });
+
+  test('existing 9-day fortnight uses organisational year start while retaining first non-working day pattern', async () => {
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    dispatchInput('leaveYearStartInput', '2025-04-01');
+    dispatchInput('leaveYearEndInput', '2026-03-31');
+    dispatchInput('existingNineDayBookerStartDate', '2026-01-05');
+
+    const message = document.querySelector('[data-existing-nine-day-booker-message]');
+    const nonMatchesLabel = document.querySelector('[data-existing-nine-day-booker-non-matches-label]');
+    const nonMatchesList = document.querySelector('[data-existing-nine-day-booker-non-matches-list]');
+
+    expect(message.textContent).toContain('between April 1, 2025 and March 31, 2026');
+    expect(nonMatchesLabel.textContent).toContain('(1)');
+    expect(nonMatchesList.textContent).toContain("New Year's Day");
+  });
 });
