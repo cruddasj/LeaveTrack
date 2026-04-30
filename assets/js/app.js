@@ -1019,22 +1019,22 @@
       'text-amber-700',
       'dark:text-amber-300',
       'font-medium',
-      'rounded-md',
+      'rounded-xl',
       'bg-amber-100',
-      'dark:bg-amber-900/40',
-      'px-3',
-      'py-2'
+      'dark:bg-amber-900/50',
+      'px-4',
+      'py-3'
     );
     if (tone === 'warning') {
       message.classList.add(
-        'text-amber-700',
-        'dark:text-amber-300',
+        'text-amber-800',
+        'dark:text-amber-200',
         'font-medium',
-        'rounded-md',
+        'rounded-xl',
         'bg-amber-100',
-        'dark:bg-amber-900/40',
-        'px-3',
-        'py-2'
+        'dark:bg-amber-900/50',
+        'px-4',
+        'py-3'
       );
       if (messageIcon) messageIcon.classList.remove('hidden');
     } else {

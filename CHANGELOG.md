@@ -4,8 +4,7 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 
 ## [NEXT_VERSION] - [NEXT_DATE]
 
-- Change the Standard week date-order warning so the whole message box uses an orange background instead of only orange text.
-- Update npm dependencies to the latest available minor and patch releases.
+- Restyle the Standard week date-order warning to a softer rounded alert box with warmer amber colours that better matches the app design.
 
 ## 0.0.39 - 2026-04-30
 

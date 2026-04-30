@@ -3,8 +3,7 @@
     "version": "[NEXT_VERSION]",
     "date": "[NEXT_DATE]",
     "changes": [
-      "Change the Standard week date-order warning so the whole message box uses an orange background instead of only orange text.",
-      "Update npm dependencies to the latest available minor and patch releases."
+      "Restyle the Standard week date-order warning to a softer rounded alert box with warmer amber colours that better matches the app design."
     ]
   },
   {
