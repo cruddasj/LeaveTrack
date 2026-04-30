@@ -1,5 +1,13 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Show Standard week date-order warnings inside an orange highlighted message box so errors are easier to spot.",
+      "Update npm dependencies to the latest available minor and patch releases."
+    ]
+  },
+  {
     "version": "0.0.39",
     "date": "2026-04-30",
     "changes": [

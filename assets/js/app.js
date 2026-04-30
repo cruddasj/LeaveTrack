@@ -1017,11 +1017,31 @@
       'text-gray-600',
       'dark:text-gray-400',
       'text-amber-700',
-      'dark:text-amber-300',
-      'font-medium'
+      'dark:text-amber-200',
+      'font-medium',
+      'bg-amber-100',
+      'dark:bg-amber-900/40',
+      'border',
+      'border-amber-300',
+      'dark:border-amber-700',
+      'rounded-md',
+      'px-3',
+      'py-2'
     );
     if (tone === 'warning') {
-      message.classList.add('text-amber-700', 'dark:text-amber-300', 'font-medium');
+      message.classList.add(
+        'text-amber-700',
+        'dark:text-amber-200',
+        'font-medium',
+        'bg-amber-100',
+        'dark:bg-amber-900/40',
+        'border',
+        'border-amber-300',
+        'dark:border-amber-700',
+        'rounded-md',
+        'px-3',
+        'py-2'
+      );
       if (messageIcon) messageIcon.classList.remove('hidden');
     } else {
       message.classList.add('text-gray-600', 'dark:text-gray-400');
