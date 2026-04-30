@@ -1,5 +1,12 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Simplify the Standard week date-order warning by removing the information icon and using bold orange text only."
+    ]
+  },
+  {
     "version": "0.0.41",
     "date": "2026-04-30",
     "changes": [
