@@ -990,7 +990,6 @@
       endPortion: card.querySelector('#standardLeaveEndPortion'),
       taken: card.querySelector('#standardLeaveTaken'),
       message: card.querySelector('[data-standard-preview-message]'),
-      messageIcon: card.querySelector('[data-standard-preview-message-icon]'),
       messageText: card.querySelector('[data-standard-preview-message-text]'),
       results: card.querySelector('[data-standard-preview-results]'),
       needed: card.querySelector('[data-standard-preview-needed]'),
@@ -1009,7 +1008,7 @@
 
   function setStandardPreviewMessage(preview, text, tone = 'neutral') {
     if (!preview || !preview.message) return;
-    const { message, messageIcon, messageText } = preview;
+    const { message, messageText } = preview;
     const textTarget = messageText || message;
     textTarget.textContent = text;
 
@@ -1022,10 +1021,8 @@
     );
     if (tone === 'warning') {
       message.classList.add('text-amber-700', 'dark:text-amber-300', 'font-medium');
-      if (messageIcon) messageIcon.classList.remove('hidden');
     } else {
       message.classList.add('text-gray-600', 'dark:text-gray-400');
-      if (messageIcon) messageIcon.classList.add('hidden');
     }
   }
 
