@@ -2,6 +2,11 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Change the Standard week date-order warning so the whole message box uses an orange background instead of only orange text.
+- Update npm dependencies to the latest available minor and patch releases.
+
 ## 0.0.39 - 2026-04-30
 
 - Make the Standard week leave date-order warning use an orange information style with an icon so it stands out more clearly.

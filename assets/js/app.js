@@ -1018,10 +1018,24 @@
       'dark:text-gray-400',
       'text-amber-700',
       'dark:text-amber-300',
-      'font-medium'
+      'font-medium',
+      'rounded-md',
+      'bg-amber-100',
+      'dark:bg-amber-900/40',
+      'px-3',
+      'py-2'
     );
     if (tone === 'warning') {
-      message.classList.add('text-amber-700', 'dark:text-amber-300', 'font-medium');
+      message.classList.add(
+        'text-amber-700',
+        'dark:text-amber-300',
+        'font-medium',
+        'rounded-md',
+        'bg-amber-100',
+        'dark:bg-amber-900/40',
+        'px-3',
+        'py-2'
+      );
       if (messageIcon) messageIcon.classList.remove('hidden');
     } else {
       message.classList.add('text-gray-600', 'dark:text-gray-400');

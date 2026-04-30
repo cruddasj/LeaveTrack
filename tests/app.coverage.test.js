@@ -405,6 +405,7 @@ describe('app coverage interactions', () => {
     const icon = document.querySelector('[data-standard-preview-message-icon]');
     expect(message.textContent).toContain('Leave end must be on or after the start date.');
     expect(message.classList.contains('text-amber-700')).toBe(true);
+    expect(message.classList.contains('bg-amber-100')).toBe(true);
     expect(message.classList.contains('font-medium')).toBe(true);
     expect(icon.classList.contains('hidden')).toBe(false);
   });

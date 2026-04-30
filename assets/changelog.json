@@ -1,5 +1,13 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Change the Standard week date-order warning so the whole message box uses an orange background instead of only orange text.",
+      "Update npm dependencies to the latest available minor and patch releases."
+    ]
+  },
+  {
     "version": "0.0.39",
     "date": "2026-04-30",
     "changes": [
