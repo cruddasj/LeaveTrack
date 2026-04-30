@@ -1,7 +1,7 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.39",
+    "date": "2026-04-30",
     "changes": [
       "Make the Standard week leave date-order warning use an orange information style with an icon so it stands out more clearly.",
       "Update npm dependencies to the latest available minor and patch releases."
