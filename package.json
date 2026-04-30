@@ -1,6 +1,6 @@
 {
   "name": "LeaveTrack",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "description": "LeaveTrack is a lightweight Progressive Web App that helps you stay on top of updates, manage appearance preferences, and review key timelines from one place.",
   "main": "service-worker.js",
   "scripts": {
