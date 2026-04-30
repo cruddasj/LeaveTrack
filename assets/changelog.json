@@ -1,5 +1,12 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Keep the Standard week accrual toggle and related monthly accrual options saved after refreshing or reopening the app."
+    ]
+  },
+  {
     "version": "0.0.44",
     "date": "2026-04-30",
     "changes": [

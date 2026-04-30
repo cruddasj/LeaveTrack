@@ -406,4 +406,30 @@ describe('app coverage interactions', () => {
     expect(message.classList.contains('text-amber-700')).toBe(true);
     expect(message.classList.contains('font-medium')).toBe(true);
   });
+
+  test('persists standard-week accrual settings across reloads', async () => {
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const toggle = document.getElementById('standardAccrualToggle');
+    toggle.checked = true;
+    toggle.dispatchEvent(new Event('change', { bubbles: true }));
+    dispatchInput('standardAccrualRate', '2.25');
+    dispatchInput('standardAccrualMode', 'prorata');
+
+    expect(localStorage.getItem('standardAccrualEnabled')).toBe('1');
+    expect(localStorage.getItem('standardAccrualRate')).toBe('2.25');
+    expect(localStorage.getItem('standardAccrualMode')).toBe('prorata');
+
+    jest.resetModules();
+    document.body.innerHTML = loadIndexBody();
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(document.getElementById('standardAccrualToggle').checked).toBe(true);
+    expect(document.getElementById('standardAccrualRate').value).toBe('2.25');
+    expect(document.getElementById('standardAccrualMode').value).toBe('prorata');
+  });
 });
