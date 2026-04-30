@@ -709,3 +709,9 @@ html.dark:not(.theme-inverted):not(.theme-glass) .input-field {
     display: block;
   }
 }
+
+@media print {
+  [data-print-controls] {
+    display: none !important;
+  }
+}

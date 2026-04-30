@@ -1,9 +1,9 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.42",
+    "date": "2026-04-30",
     "changes": [
-      "Simplify the Standard week date-order warning by removing the information icon and using bold orange text only."
+      "Hide the Print PDF cards when printing pages so exported printouts only include the leave details."
     ]
   },
   {
