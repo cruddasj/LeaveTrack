@@ -1,7 +1,7 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.46",
+    "date": "2026-04-30",
     "changes": [
       "Add a Standard week accrual timing hint that suggests the earliest leave start date when a request would otherwise exceed accrued leave while keeping the selected leave period length, hide the accrued-start stat when accrual is disabled, keep this hint out of printed PDFs, and left-align the standard-hours calculation line."
     ]
