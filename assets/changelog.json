@@ -1,5 +1,12 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Clarify the Standard week remaining-balance message to say the annual entitlement remains after a request."
+    ]
+  },
+  {
     "version": "0.0.42",
     "date": "2026-04-30",
     "changes": [

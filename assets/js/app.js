@@ -3558,7 +3558,7 @@
       coverageMessage =
         remainingAfterRequest === 0
           ? 'This request uses the final days of your allowance.'
-          : `${formatDaysDisplay(remainingAfterRequest)} will remain after this request.`;
+          : `${formatDaysDisplay(remainingAfterRequest)} annual entitlement will remain after this request.`;
       coverageStatus = 'positive';
     } else {
       coverageMessage = `You need ${formatDaysDisplay(Math.abs(remainingAfterRequest))} more days to cover this request.`;
