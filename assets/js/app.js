@@ -3560,9 +3560,10 @@
     );
 
     if (accrualEnabled) {
+      if (accrued) accrued.hidden = false;
       setStatCardValue(accrued, `${formatNumberWithPrecision(accruedDaysByStart)} days`);
     } else {
-      setStatCardValue(accrued, 'Accrual disabled');
+      if (accrued) accrued.hidden = true;
     }
 
     if (balance) {

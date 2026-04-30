@@ -4,7 +4,7 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 
 ## [NEXT_VERSION] - [NEXT_DATE]
 
-- Add a Standard week accrual timing hint that suggests the earliest leave start date when a request would otherwise exceed accrued leave, keeps the selected leave period length, and keeps this hint out of printed PDFs.
+- Add a Standard week accrual timing hint that suggests the earliest leave start date when a request would otherwise exceed accrued leave, keeps the selected leave period length, hides the accrued-start stat when accrual is disabled, and keeps this hint out of printed PDFs.
 
 ## 0.0.42 - 2026-04-30
 
