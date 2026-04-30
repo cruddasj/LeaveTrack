@@ -14,6 +14,9 @@
     standardDayHours: 'standardDayHours',
     fourDayCompressedHours: 'fourDayCompressedHours',
     nineDayCompressedHours: 'nineDayCompressedHours',
+    standardAccrualEnabled: 'standardAccrualEnabled',
+    standardAccrualRate: 'standardAccrualRate',
+    standardAccrualMode: 'standardAccrualMode',
   };
 
   const root = document.documentElement;
@@ -3602,7 +3605,7 @@
       coverageMessage =
         remainingAfterRequest === 0
           ? 'This request uses the final days of your allowance.'
-          : `${formatDaysDisplay(remainingAfterRequest)} will remain after this request.`;
+          : `${formatDaysDisplay(remainingAfterRequest)} annual entitlement will remain after this request.`;
       coverageStatus = 'positive';
     } else {
       coverageMessage = `You need ${formatDaysDisplay(Math.abs(remainingAfterRequest))} more days to cover this request.`;
@@ -4289,8 +4292,25 @@
     if (accrual) {
       const { toggle, rate, mode } = accrual;
 
+      const storedAccrualEnabled = safeGet(LS_KEYS.standardAccrualEnabled);
+      if (toggle && storedAccrualEnabled !== null) {
+        toggle.checked = storedAccrualEnabled === '1';
+      }
+
+      const storedAccrualRate = safeGet(LS_KEYS.standardAccrualRate);
+      if (rate && storedAccrualRate !== null && storedAccrualRate.trim() !== '') {
+        rate.value = storedAccrualRate;
+        standardWeekState.userOverriddenAccrualRate = true;
+      }
+
+      const storedAccrualMode = safeGet(LS_KEYS.standardAccrualMode);
+      if (mode && (storedAccrualMode === 'days' || storedAccrualMode === 'prorata')) {
+        mode.value = storedAccrualMode;
+      }
+
       if (toggle) {
         toggle.addEventListener('change', () => {
+          safeSet(LS_KEYS.standardAccrualEnabled, toggle.checked ? '1' : '0');
           updateStandardWeekAccrualUI();
           updateStandardWeekLeavePreview();
         });
@@ -4300,15 +4320,18 @@
         rate.addEventListener('input', () => {
           if (rate.value.trim() !== '') {
             standardWeekState.userOverriddenAccrualRate = true;
+            safeSet(LS_KEYS.standardAccrualRate, rate.value.trim());
           }
           updateStandardWeekLeavePreview();
         });
         rate.addEventListener('change', () => {
           if (rate.value.trim() === '') {
             standardWeekState.userOverriddenAccrualRate = false;
-            updateStandardWeekAccrualDefault({ force: true });
+            safeSet(LS_KEYS.standardAccrualRate, '');
+            updateStandardWeekAccrualDefault({ force: !standardWeekState.userOverriddenAccrualRate });
           } else {
             standardWeekState.userOverriddenAccrualRate = true;
+            safeSet(LS_KEYS.standardAccrualRate, rate.value.trim());
           }
           updateStandardWeekLeavePreview();
         });
@@ -4316,9 +4339,11 @@
 
       if (mode) {
         mode.addEventListener('input', () => {
+          safeSet(LS_KEYS.standardAccrualMode, mode.value);
           updateStandardWeekLeavePreview();
         });
         mode.addEventListener('change', () => {
+          safeSet(LS_KEYS.standardAccrualMode, mode.value);
           updateStandardWeekLeavePreview();
         });
       }
@@ -4363,7 +4388,7 @@
 
     standardWeekState.initialized = true;
     updateStandardWeekBankHolidayDefault({ force: true });
-    updateStandardWeekAccrualDefault({ force: true });
+    updateStandardWeekAccrualDefault({ force: !standardWeekState.userOverriddenAccrualRate });
     updateStandardWeekSummary();
     updateStandardWeekAccrualUI();
     updateStandardWeekLeavePreview();
