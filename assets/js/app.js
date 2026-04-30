@@ -1000,6 +1000,8 @@
       accrued: card.querySelector('[data-standard-preview-accrued]'),
       balance: card.querySelector('[data-standard-preview-balance]'),
       coverage: card.querySelector('[data-standard-preview-coverage]'),
+      accrualAdvice: card.querySelector('[data-standard-preview-accrual-advice]'),
+      accrualAdviceText: card.querySelector('[data-standard-preview-accrual-advice-text]'),
       note: card.querySelector('[data-standard-preview-note]'),
     };
     standardWeekState.previewElements = elements;
@@ -3370,6 +3372,8 @@
       accrued,
       balance,
       coverage,
+      accrualAdvice,
+      accrualAdviceText,
       note,
       bankHolidayDetails,
       bankHolidayLabel,
@@ -3413,12 +3417,16 @@
       if (message)
         setStandardPreviewMessage(preview, 'Enter a start and end date to see the leave requirements.');
       if (note) note.textContent = '';
+      if (accrualAdvice) accrualAdvice.hidden = true;
+      if (accrualAdviceText) accrualAdviceText.textContent = '';
       return;
     }
 
     if (endDate.getTime() < startDate.getTime()) {
       setStandardPreviewMessage(preview, 'Leave end must be on or after the start date.', 'warning');
       if (note) note.textContent = '';
+      if (accrualAdvice) accrualAdvice.hidden = true;
+      if (accrualAdviceText) accrualAdviceText.textContent = '';
       return;
     }
 
@@ -3427,6 +3435,8 @@
       if (message)
         setStandardPreviewMessage(preview, 'Configure the organisational working year in Settings to continue.');
       if (note) note.textContent = '';
+      if (accrualAdvice) accrualAdvice.hidden = true;
+      if (accrualAdviceText) accrualAdviceText.textContent = '';
       return;
     }
 
@@ -3504,6 +3514,33 @@
     const availableDays = totalAllowanceDays - leaveTakenValue;
     const remainingAfterRequest = availableDays - leaveDaysNeeded;
     const accruedBalanceDays = accrualEnabled ? accruedDaysByEnd - leaveTakenValue - leaveDaysNeeded : 0;
+    let firstAccrualSafeStartDate = null;
+    if (accrualEnabled && accruedBalanceDays < 0) {
+      for (
+        let candidate = new Date(startDate.getTime());
+        candidate.getTime() <= rangeEnd.getTime();
+        candidate = new Date(candidate.getTime() + MS_PER_DAY)
+      ) {
+        const candidateWorkingDays = countWorkingDaysInclusive(candidate, endDate);
+        if (candidateWorkingDays <= 0) continue;
+        const candidateBankHolidayCount = hasBankHolidayData
+          ? matchingBankHolidays.filter((event) => event.date >= candidate && event.date <= endDate).length
+          : 0;
+        let candidateLeaveDaysNeeded = Math.max(candidateWorkingDays - candidateBankHolidayCount, 0);
+        if (endIsHalfDay && candidateLeaveDaysNeeded > 0) {
+          candidateLeaveDaysNeeded = Math.max(candidateLeaveDaysNeeded - 0.5, 0);
+        }
+        const candidateAccrualLimitStart = accrualMode === 'prorata'
+          ? new Date(candidate.getTime() - MS_PER_DAY)
+          : new Date(candidate.getTime());
+        const candidateAccruedByStart = computeAccruedUpTo(candidateAccrualLimitStart);
+        const candidateAccruedBalance = candidateAccruedByStart - leaveTakenValue - candidateLeaveDaysNeeded;
+        if (candidateAccruedBalance >= 0) {
+          firstAccrualSafeStartDate = candidate;
+          break;
+        }
+      }
+    }
 
     if (results) results.hidden = false;
     const startLabel = formatHumanDate(startDate);
@@ -3698,6 +3735,22 @@
     }
 
     if (note) note.textContent = notes.join(' ');
+
+    if (accrualAdvice && accrualAdviceText) {
+      if (accrualEnabled && accruedBalanceDays < 0) {
+        if (firstAccrualSafeStartDate) {
+          accrualAdviceText.textContent =
+            `To keep this request within accrued entitlement, the earliest suggested start date is ${formatHumanDate(firstAccrualSafeStartDate)}.`;
+        } else {
+          accrualAdviceText.textContent =
+            'No start date within this organisational working year keeps this request within accrued entitlement. Reduce the request length or expect unpaid leave.';
+        }
+        accrualAdvice.hidden = false;
+      } else {
+        accrualAdvice.hidden = true;
+        accrualAdviceText.textContent = '';
+      }
+    }
   }
 
   function updateFourDayWeekBankHolidayDefault({ force = false } = {}) {

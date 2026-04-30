@@ -406,4 +406,28 @@ describe('app coverage interactions', () => {
     expect(message.classList.contains('text-amber-700')).toBe(true);
     expect(message.classList.contains('font-medium')).toBe(true);
   });
+
+  test('shows accrual timing advice when request would overrun accrued entitlement', async () => {
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    dispatchInput('leaveYearStartInput', '2026-04-01');
+    dispatchInput('leaveYearEndInput', '2027-03-31');
+
+    const accrualToggle = document.getElementById('standardAccrualToggle');
+    accrualToggle.checked = true;
+    accrualToggle.dispatchEvent(new Event('change', { bubbles: true }));
+    dispatchInput('standardAccrualRate', '1.0');
+    dispatchInput('standardAccrualMode', 'days');
+
+    dispatchInput('standardLeaveTaken', '5');
+    dispatchInput('standardLeaveStart', '2026-05-01');
+    dispatchInput('standardLeaveEnd', '2026-05-15');
+
+    const advice = document.querySelector('[data-standard-preview-accrual-advice]');
+    const adviceText = document.querySelector('[data-standard-preview-accrual-advice-text]');
+    expect(advice.hidden).toBe(false);
+    expect(adviceText.textContent.length).toBeGreaterThan(20);
+  });
 });

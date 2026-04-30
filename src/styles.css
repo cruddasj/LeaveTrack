@@ -714,4 +714,8 @@ html.dark:not(.theme-inverted):not(.theme-glass) .input-field {
   [data-print-controls] {
     display: none !important;
   }
+
+  [data-print-exclude] {
+    display: none !important;
+  }
 }
