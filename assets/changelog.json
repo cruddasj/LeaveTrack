@@ -3,7 +3,7 @@
     "version": "[NEXT_VERSION]",
     "date": "[NEXT_DATE]",
     "changes": [
-      "Add a Standard week accrual timing hint that suggests the earliest leave start date when a request would otherwise exceed accrued leave, and keep this hint out of printed PDFs."
+      "Add a Standard week accrual timing hint that suggests the earliest leave start date when a request would otherwise exceed accrued leave while keeping the selected leave period length, and keep this hint out of printed PDFs."
     ]
   },
   {

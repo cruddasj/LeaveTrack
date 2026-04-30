@@ -3451,21 +3451,24 @@
 
     const workingDays = countWorkingDaysInclusive(startDate, endDate);
     const hasBankHolidayData = bankHolidayState.events.length > 0;
-    let matchingBankHolidays = [];
-
-    if (hasBankHolidayData) {
-      matchingBankHolidays = bankHolidayState.events
+    const weekdayBankHolidaysInYear = hasBankHolidayData
+      ? bankHolidayState.events
         .map((event) => ({
           ...event,
           date: toStartOfDay(event.date),
         }))
         .filter((event) => event.date && event.date >= rangeStart && event.date <= rangeEnd)
-        .filter((event) => event.date >= startDate && event.date <= endDate)
         .filter((event) => {
           const day = event.date.getDay();
           return day !== 0 && day !== 6;
         })
-        .sort((a, b) => a.date.getTime() - b.date.getTime());
+        .sort((a, b) => a.date.getTime() - b.date.getTime())
+      : [];
+    let matchingBankHolidays = [];
+
+    if (hasBankHolidayData) {
+      matchingBankHolidays = weekdayBankHolidaysInYear
+        .filter((event) => event.date >= startDate && event.date <= endDate);
     }
 
     const bankHolidayCount = matchingBankHolidays.length;
@@ -3516,15 +3519,18 @@
     const accruedBalanceDays = accrualEnabled ? accruedDaysByEnd - leaveTakenValue - leaveDaysNeeded : 0;
     let firstAccrualSafeStartDate = null;
     if (accrualEnabled && accruedBalanceDays < 0) {
+      const selectedRangeSpanDays = Math.floor((endDate.getTime() - startDate.getTime()) / MS_PER_DAY);
       for (
         let candidate = new Date(startDate.getTime());
         candidate.getTime() <= rangeEnd.getTime();
         candidate = new Date(candidate.getTime() + MS_PER_DAY)
       ) {
-        const candidateWorkingDays = countWorkingDaysInclusive(candidate, endDate);
+        const candidateEndDate = new Date(candidate.getTime() + selectedRangeSpanDays * MS_PER_DAY);
+        if (candidateEndDate.getTime() > rangeEnd.getTime()) break;
+        const candidateWorkingDays = countWorkingDaysInclusive(candidate, candidateEndDate);
         if (candidateWorkingDays <= 0) continue;
         const candidateBankHolidayCount = hasBankHolidayData
-          ? matchingBankHolidays.filter((event) => event.date >= candidate && event.date <= endDate).length
+          ? weekdayBankHolidaysInYear.filter((event) => event.date >= candidate && event.date <= candidateEndDate).length
           : 0;
         let candidateLeaveDaysNeeded = Math.max(candidateWorkingDays - candidateBankHolidayCount, 0);
         if (endIsHalfDay && candidateLeaveDaysNeeded > 0) {
