@@ -2,6 +2,10 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Add a Standard week accrual timing hint that suggests the earliest leave start date when a request would otherwise exceed accrued leave, keeps the selected leave period length, hides the accrued-start stat when accrual is disabled, keeps this hint out of printed PDFs, and left-aligns the standard-hours calculation line.
+
 ## 0.0.42 - 2026-04-30
 
 - Hide the Print PDF cards when printing pages so exported printouts only include the leave details.

@@ -1000,6 +1000,8 @@
       accrued: card.querySelector('[data-standard-preview-accrued]'),
       balance: card.querySelector('[data-standard-preview-balance]'),
       coverage: card.querySelector('[data-standard-preview-coverage]'),
+      accrualAdvice: card.querySelector('[data-standard-preview-accrual-advice]'),
+      accrualAdviceText: card.querySelector('[data-standard-preview-accrual-advice-text]'),
       note: card.querySelector('[data-standard-preview-note]'),
     };
     standardWeekState.previewElements = elements;
@@ -3370,6 +3372,8 @@
       accrued,
       balance,
       coverage,
+      accrualAdvice,
+      accrualAdviceText,
       note,
       bankHolidayDetails,
       bankHolidayLabel,
@@ -3413,12 +3417,16 @@
       if (message)
         setStandardPreviewMessage(preview, 'Enter a start and end date to see the leave requirements.');
       if (note) note.textContent = '';
+      if (accrualAdvice) accrualAdvice.hidden = true;
+      if (accrualAdviceText) accrualAdviceText.textContent = '';
       return;
     }
 
     if (endDate.getTime() < startDate.getTime()) {
       setStandardPreviewMessage(preview, 'Leave end must be on or after the start date.', 'warning');
       if (note) note.textContent = '';
+      if (accrualAdvice) accrualAdvice.hidden = true;
+      if (accrualAdviceText) accrualAdviceText.textContent = '';
       return;
     }
 
@@ -3427,6 +3435,8 @@
       if (message)
         setStandardPreviewMessage(preview, 'Configure the organisational working year in Settings to continue.');
       if (note) note.textContent = '';
+      if (accrualAdvice) accrualAdvice.hidden = true;
+      if (accrualAdviceText) accrualAdviceText.textContent = '';
       return;
     }
 
@@ -3441,21 +3451,24 @@
 
     const workingDays = countWorkingDaysInclusive(startDate, endDate);
     const hasBankHolidayData = bankHolidayState.events.length > 0;
-    let matchingBankHolidays = [];
-
-    if (hasBankHolidayData) {
-      matchingBankHolidays = bankHolidayState.events
+    const weekdayBankHolidaysInYear = hasBankHolidayData
+      ? bankHolidayState.events
         .map((event) => ({
           ...event,
           date: toStartOfDay(event.date),
         }))
         .filter((event) => event.date && event.date >= rangeStart && event.date <= rangeEnd)
-        .filter((event) => event.date >= startDate && event.date <= endDate)
         .filter((event) => {
           const day = event.date.getDay();
           return day !== 0 && day !== 6;
         })
-        .sort((a, b) => a.date.getTime() - b.date.getTime());
+        .sort((a, b) => a.date.getTime() - b.date.getTime())
+      : [];
+    let matchingBankHolidays = [];
+
+    if (hasBankHolidayData) {
+      matchingBankHolidays = weekdayBankHolidaysInYear
+        .filter((event) => event.date >= startDate && event.date <= endDate);
     }
 
     const bankHolidayCount = matchingBankHolidays.length;
@@ -3504,6 +3517,36 @@
     const availableDays = totalAllowanceDays - leaveTakenValue;
     const remainingAfterRequest = availableDays - leaveDaysNeeded;
     const accruedBalanceDays = accrualEnabled ? accruedDaysByEnd - leaveTakenValue - leaveDaysNeeded : 0;
+    let firstAccrualSafeStartDate = null;
+    if (accrualEnabled && accruedBalanceDays < 0) {
+      const selectedRangeSpanDays = Math.floor((endDate.getTime() - startDate.getTime()) / MS_PER_DAY);
+      for (
+        let candidate = new Date(startDate.getTime());
+        candidate.getTime() <= rangeEnd.getTime();
+        candidate = new Date(candidate.getTime() + MS_PER_DAY)
+      ) {
+        const candidateEndDate = new Date(candidate.getTime() + selectedRangeSpanDays * MS_PER_DAY);
+        if (candidateEndDate.getTime() > rangeEnd.getTime()) break;
+        const candidateWorkingDays = countWorkingDaysInclusive(candidate, candidateEndDate);
+        if (candidateWorkingDays <= 0) continue;
+        const candidateBankHolidayCount = hasBankHolidayData
+          ? weekdayBankHolidaysInYear.filter((event) => event.date >= candidate && event.date <= candidateEndDate).length
+          : 0;
+        let candidateLeaveDaysNeeded = Math.max(candidateWorkingDays - candidateBankHolidayCount, 0);
+        if (endIsHalfDay && candidateLeaveDaysNeeded > 0) {
+          candidateLeaveDaysNeeded = Math.max(candidateLeaveDaysNeeded - 0.5, 0);
+        }
+        const candidateAccrualLimitStart = accrualMode === 'prorata'
+          ? new Date(candidate.getTime() - MS_PER_DAY)
+          : new Date(candidate.getTime());
+        const candidateAccruedByStart = computeAccruedUpTo(candidateAccrualLimitStart);
+        const candidateAccruedBalance = candidateAccruedByStart - leaveTakenValue - candidateLeaveDaysNeeded;
+        if (candidateAccruedBalance >= 0) {
+          firstAccrualSafeStartDate = candidate;
+          break;
+        }
+      }
+    }
 
     if (results) results.hidden = false;
     const startLabel = formatHumanDate(startDate);
@@ -3517,9 +3560,10 @@
     );
 
     if (accrualEnabled) {
+      if (accrued) accrued.hidden = false;
       setStatCardValue(accrued, `${formatNumberWithPrecision(accruedDaysByStart)} days`);
     } else {
-      setStatCardValue(accrued, 'Accrual disabled');
+      if (accrued) accrued.hidden = true;
     }
 
     if (balance) {
@@ -3698,6 +3742,22 @@
     }
 
     if (note) note.textContent = notes.join(' ');
+
+    if (accrualAdvice && accrualAdviceText) {
+      if (accrualEnabled && accruedBalanceDays < 0) {
+        if (firstAccrualSafeStartDate) {
+          accrualAdviceText.textContent =
+            `To keep this request within accrued entitlement, the earliest suggested start date is ${formatHumanDate(firstAccrualSafeStartDate)}.`;
+        } else {
+          accrualAdviceText.textContent =
+            'No start date within this organisational working year keeps this request within accrued entitlement. Reduce the request length or expect unpaid leave.';
+        }
+        accrualAdvice.hidden = false;
+      } else {
+        accrualAdvice.hidden = true;
+        accrualAdviceText.textContent = '';
+      }
+    }
   }
 
   function updateFourDayWeekBankHolidayDefault({ force = false } = {}) {
