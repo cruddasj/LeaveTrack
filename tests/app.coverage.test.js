@@ -236,6 +236,9 @@ describe('app coverage interactions', () => {
     dispatchInput('standardLeaveEnd', '2026-08-12');
     dispatchInput('standardLeaveEndPortion', 'full');
     dispatchInput('standardLeaveTaken', '7');
+    expect(document.querySelector('[data-standard-preview-accrual-advice]').textContent).toContain(
+      'earliest suggested start date is',
+    );
 
     dispatchInput('fourDayStartDate', '2026-04-01');
     dispatchInput('fourDayCoreLeave', '20');

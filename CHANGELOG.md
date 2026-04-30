@@ -6,6 +6,10 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 
 - Hide the Print PDF cards when printing pages so exported printouts only include the leave details.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Add an accrual shortfall hint on the Standard week leave request preview showing the earliest suggested leave start date that avoids unpaid leave under current accrual settings, and keep that hint out of printed PDFs.
+
 ## 0.0.40 - 2026-04-30
 
 - Move the Standard week accrual settings into Settings so organisations can manage one shared policy configuration.

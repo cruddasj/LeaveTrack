@@ -1,5 +1,12 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Add an accrual shortfall hint on the Standard week leave request preview showing the earliest suggested leave start date that avoids unpaid leave under current accrual settings, and keep that hint out of printed PDFs."
+    ]
+  },
+  {
     "version": "0.0.42",
     "date": "2026-04-30",
     "changes": [

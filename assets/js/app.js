@@ -1000,6 +1000,7 @@
       accrued: card.querySelector('[data-standard-preview-accrued]'),
       balance: card.querySelector('[data-standard-preview-balance]'),
       coverage: card.querySelector('[data-standard-preview-coverage]'),
+      accrualAdvice: card.querySelector('[data-standard-preview-accrual-advice]'),
       note: card.querySelector('[data-standard-preview-note]'),
     };
     standardWeekState.previewElements = elements;
@@ -3370,6 +3371,7 @@
       accrued,
       balance,
       coverage,
+      accrualAdvice,
       note,
       bankHolidayDetails,
       bankHolidayLabel,
@@ -3398,6 +3400,10 @@
       coverage.hidden = true;
       coverage.textContent = '';
       coverage.classList.remove(...coverageStatusClasses);
+    }
+    if (accrualAdvice) {
+      accrualAdvice.hidden = true;
+      accrualAdvice.textContent = '';
     }
     if (balance) {
       balance.classList.remove(...balanceStatusClasses);
@@ -3504,6 +3510,58 @@
     const availableDays = totalAllowanceDays - leaveTakenValue;
     const remainingAfterRequest = availableDays - leaveDaysNeeded;
     const accruedBalanceDays = accrualEnabled ? accruedDaysByEnd - leaveTakenValue - leaveDaysNeeded : 0;
+
+    const computeRequestMetrics = (candidateStart, candidateEnd) => {
+      const workingDayCount = countWorkingDaysInclusive(candidateStart, candidateEnd);
+      const bankHolidayMatchCount = hasBankHolidayData
+        ? bankHolidayState.events
+            .map((event) => toStartOfDay(event.date))
+            .filter((eventDate) => eventDate && eventDate >= candidateStart && eventDate <= candidateEnd)
+            .filter((eventDate) => {
+              const day = eventDate.getDay();
+              return day !== 0 && day !== 6;
+            }).length
+        : 0;
+      let requestLeaveDays = Math.max(workingDayCount - bankHolidayMatchCount, 0);
+      if (endIsHalfDay && requestLeaveDays > 0) {
+        requestLeaveDays = Math.max(requestLeaveDays - 0.5, 0);
+      }
+      return { requestLeaveDays, bankHolidayMatchCount };
+    };
+
+    if (accrualEnabled && accruedBalanceDays < 0 && accrualAdvice) {
+      const periodSpanDays = Math.floor((endDate.getTime() - startDate.getTime()) / MS_PER_DAY);
+      let recommendedStart = null;
+      let recommendedEnd = null;
+      let attempts = 0;
+      const maxAttempts = 366 * 2;
+      let candidateStart = new Date(startDate.getTime());
+      let candidateEnd = new Date(endDate.getTime());
+
+      while (attempts <= maxAttempts && candidateStart <= rangeEnd && candidateEnd <= rangeEnd) {
+        const candidateAccruedByEnd = computeAccruedUpTo(candidateEnd);
+        const { requestLeaveDays } = computeRequestMetrics(candidateStart, candidateEnd);
+        const candidateBalance = candidateAccruedByEnd - leaveTakenValue - requestLeaveDays;
+        if (candidateBalance >= 0) {
+          recommendedStart = candidateStart;
+          recommendedEnd = candidateEnd;
+          break;
+        }
+        candidateStart = new Date(candidateStart.getTime() + MS_PER_DAY);
+        candidateEnd = new Date(candidateStart.getTime() + periodSpanDays * MS_PER_DAY);
+        attempts += 1;
+      }
+
+      if (recommendedStart && recommendedEnd) {
+        const { requestLeaveDays, bankHolidayMatchCount } = computeRequestMetrics(recommendedStart, recommendedEnd);
+        accrualAdvice.textContent =
+          `To avoid unpaid leave under the current accrual rate, the earliest suggested start date is ${formatHumanDate(recommendedStart)} (ending ${formatHumanDate(recommendedEnd)}). This keeps the request within accrued entitlement, including ${bankHolidayMatchCount} bank holiday${bankHolidayMatchCount === 1 ? '' : 's'} in that period and ${formatDaysDisplay(requestLeaveDays)} of leave required.`;
+      } else {
+        accrualAdvice.textContent =
+          'At the current accrual rate, this leave length cannot be fully covered within the current leave year. Consider shortening the period or reducing leave already taken.';
+      }
+      accrualAdvice.hidden = false;
+    }
 
     if (results) results.hidden = false;
     const startLabel = formatHumanDate(startDate);
