@@ -2,6 +2,11 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Make the Standard week leave date-order warning use an orange information style with an icon so it stands out more clearly.
+- Update npm dependencies to the latest available minor and patch releases.
+
 ## 0.0.38 - 2026-04-05
 
 - Existing 9-day fortnight bank-holiday matching now reviews the full organisational working year from its start date while still using the selected first non-working day to determine every-other-week matches.

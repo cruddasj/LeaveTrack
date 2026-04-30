@@ -990,6 +990,8 @@
       endPortion: card.querySelector('#standardLeaveEndPortion'),
       taken: card.querySelector('#standardLeaveTaken'),
       message: card.querySelector('[data-standard-preview-message]'),
+      messageIcon: card.querySelector('[data-standard-preview-message-icon]'),
+      messageText: card.querySelector('[data-standard-preview-message-text]'),
       results: card.querySelector('[data-standard-preview-results]'),
       needed: card.querySelector('[data-standard-preview-needed]'),
       bankHolidays: card.querySelector('[data-standard-preview-bank-holidays]'),
@@ -1003,6 +1005,28 @@
     };
     standardWeekState.previewElements = elements;
     return elements;
+  }
+
+  function setStandardPreviewMessage(preview, text, tone = 'neutral') {
+    if (!preview || !preview.message) return;
+    const { message, messageIcon, messageText } = preview;
+    const textTarget = messageText || message;
+    textTarget.textContent = text;
+
+    message.classList.remove(
+      'text-gray-600',
+      'dark:text-gray-400',
+      'text-amber-700',
+      'dark:text-amber-300',
+      'font-medium'
+    );
+    if (tone === 'warning') {
+      message.classList.add('text-amber-700', 'dark:text-amber-300', 'font-medium');
+      if (messageIcon) messageIcon.classList.remove('hidden');
+    } else {
+      message.classList.add('text-gray-600', 'dark:text-gray-400');
+      if (messageIcon) messageIcon.classList.add('hidden');
+    }
   }
 
   function getFourDayWeekElements() {
@@ -3394,13 +3418,13 @@
 
     if (!startDate || !endDate) {
       if (message)
-        message.textContent = 'Enter a start and end date to see the leave requirements.';
+        setStandardPreviewMessage(preview, 'Enter a start and end date to see the leave requirements.');
       if (note) note.textContent = '';
       return;
     }
 
     if (endDate.getTime() < startDate.getTime()) {
-      if (message) message.textContent = 'Leave end must be on or after the start date.';
+      setStandardPreviewMessage(preview, 'Leave end must be on or after the start date.', 'warning');
       if (note) note.textContent = '';
       return;
     }
@@ -3408,7 +3432,7 @@
     const leaveYearRange = getFinancialYearRange(startDate);
     if (!leaveYearRange) {
       if (message)
-        message.textContent = 'Configure the organisational working year in Settings to continue.';
+        setStandardPreviewMessage(preview, 'Configure the organisational working year in Settings to continue.');
       if (note) note.textContent = '';
       return;
     }
@@ -3417,7 +3441,7 @@
     const rangeEnd = toStartOfDay(leaveYearRange.end);
     if (!rangeStart || !rangeEnd) {
       if (message)
-        message.textContent = 'Configure the organisational working year in Settings to continue.';
+        setStandardPreviewMessage(preview, 'Configure the organisational working year in Settings to continue.');
       if (note) note.textContent = '';
       return;
     }
@@ -3491,7 +3515,7 @@
     if (results) results.hidden = false;
     const startLabel = formatHumanDate(startDate);
     const endLabel = formatHumanDate(endDate);
-    if (message) message.textContent = `Showing leave requirements for ${startLabel} to ${endLabel}.`;
+    setStandardPreviewMessage(preview, `Showing leave requirements for ${startLabel} to ${endLabel}.`);
 
     setStatCardValue(needed, formatDaysDisplay(leaveDaysNeeded));
     setStatCardValue(
