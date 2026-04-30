@@ -418,87 +418,6 @@
 
           <div
             class="card is-collapsible"
-            id="standardWeekAccrualCard"
-            data-collapsible
-            data-collapsible-id="standard-week-accrual"
-          >
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              <button
-                type="button"
-                class="card-toggle"
-                data-collapsible-trigger
-                aria-expanded="true"
-                aria-controls="standard-week-accrual-content"
-              >
-                <span>Accrual settings (optional)</span>
-                <svg
-                  class="chev"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M6 8l4 4 4-4"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </button>
-            </h3>
-            <div
-              id="standard-week-accrual-content"
-              class="card-body space-y-6"
-              data-collapsible-content
-            >
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                Decide whether leave accrues each month and how the entitlement is credited throughout the
-                organisational year.
-              </p>
-              <div class="space-y-4">
-                <label
-                  class="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-300"
-                  for="standardAccrualToggle"
-                >
-                  <input
-                    type="checkbox"
-                    id="standardAccrualToggle"
-                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded dark:border-gray-600"
-                  />
-                  <span>Use monthly accrual</span>
-                </label>
-                <div class="grid gap-6 md:grid-cols-2" data-standard-accrual-fields>
-                  <div class="space-y-2">
-                    <label for="standardAccrualRate" class="form-label">Accrual rate (days per month)</label>
-                    <input
-                      type="number"
-                      id="standardAccrualRate"
-                      class="input-field"
-                      inputmode="decimal"
-                      step="0.1"
-                      min="0"
-                    />
-                  </div>
-                  <div class="space-y-2">
-                    <label for="standardAccrualMode" class="form-label">How accrual is applied</label>
-                    <select id="standardAccrualMode" class="input-field">
-                      <option value="start">Credited at the start of each month</option>
-                      <option value="prorata">Accrued pro-rata throughout the month</option>
-                    </select>
-                  </div>
-                </div>
-                <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-accrual-help>
-                  Turn accrual on to forecast how much leave will have built up by a given date.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="card is-collapsible"
             id="standardWeekPreviewCard"
             data-collapsible
             data-collapsible-id="standard-week-preview"
@@ -1656,6 +1575,87 @@
               </button>
               <p class="text-xs text-gray-500 dark:text-gray-400">
                 Installs the latest version without clearing your saved preferences.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card is-collapsible"
+          id="standardWeekAccrualCard"
+          data-collapsible
+          data-collapsible-id="standard-week-accrual"
+        >
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <button
+              type="button"
+              class="card-toggle"
+              data-collapsible-trigger
+              aria-expanded="true"
+              aria-controls="standard-week-accrual-content"
+            >
+              <span>Standard week accrual settings (optional)</span>
+              <svg
+                class="chev"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M6 8l4 4 4-4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </h3>
+          <div
+            id="standard-week-accrual-content"
+            class="card-body space-y-6"
+            data-collapsible-content
+          >
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Decide whether Standard week leave accrues each month and how the entitlement is credited
+              throughout the organisational year.
+            </p>
+            <div class="space-y-4">
+              <label
+                class="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-300"
+                for="standardAccrualToggle"
+              >
+                <input
+                  type="checkbox"
+                  id="standardAccrualToggle"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded dark:border-gray-600"
+                />
+                <span>Use monthly accrual</span>
+              </label>
+              <div class="grid gap-6 md:grid-cols-2" data-standard-accrual-fields>
+                <div class="space-y-2">
+                  <label for="standardAccrualRate" class="form-label">Accrual rate (days per month)</label>
+                  <input
+                    type="number"
+                    id="standardAccrualRate"
+                    class="input-field"
+                    inputmode="decimal"
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label for="standardAccrualMode" class="form-label">How accrual is applied</label>
+                  <select id="standardAccrualMode" class="input-field">
+                    <option value="start">Credited at the start of each month</option>
+                    <option value="prorata">Accrued pro-rata throughout the month</option>
+                  </select>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-accrual-help>
+                Turn accrual on to forecast how much leave will have built up by a given date.
               </p>
             </div>
           </div>
