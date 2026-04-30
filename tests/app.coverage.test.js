@@ -392,4 +392,20 @@ describe('app coverage interactions', () => {
     expect(nonMatchesLabel.textContent).toContain('(1)');
     expect(nonMatchesList.textContent).toContain("New Year's Day");
   });
+
+  test('shows orange info warning style when leave end is before leave start', async () => {
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    dispatchInput('standardLeaveStart', '2026-08-12');
+    dispatchInput('standardLeaveEnd', '2026-08-01');
+
+    const message = document.querySelector('[data-standard-preview-message]');
+    const icon = document.querySelector('[data-standard-preview-message-icon]');
+    expect(message.textContent).toContain('Leave end must be on or after the start date.');
+    expect(message.classList.contains('text-amber-700')).toBe(true);
+    expect(message.classList.contains('font-medium')).toBe(true);
+    expect(icon.classList.contains('hidden')).toBe(false);
+  });
 });
