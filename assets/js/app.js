@@ -3388,16 +3388,10 @@
       'dark:text-red-400',
     ];
     const balanceStatusClasses = [
-      'border-emerald-500',
-      'dark:border-emerald-400',
-      'bg-emerald-50',
-      'dark:bg-emerald-500/10',
-      'border-amber-500',
-      'dark:border-amber-400',
-      'border-red-500',
-      'dark:border-red-500',
-      'bg-red-50',
-      'dark:bg-red-500/10',
+      'text-emerald-600',
+      'dark:text-emerald-400',
+      'text-red-600',
+      'dark:text-red-400',
     ];
 
     if (results) results.hidden = true;
@@ -3410,6 +3404,8 @@
     }
     if (balance) {
       balance.classList.remove(...balanceStatusClasses);
+      const valueEl = balance.querySelector('.stat-card__value');
+      if (valueEl) valueEl.classList.remove(...balanceStatusClasses);
       setStatCardValue(balance, '—');
     }
 
@@ -3599,12 +3595,12 @@
 
     if (balance) {
       balance.classList.remove(...balanceStatusClasses);
+      const valueEl = balance.querySelector('.stat-card__value');
+      if (valueEl) valueEl.classList.remove(...balanceStatusClasses);
       if (balanceStatus === 'positive') {
-        balance.classList.add('border-emerald-500', 'dark:border-emerald-400', 'bg-emerald-50', 'dark:bg-emerald-500/10');
+        if (valueEl) valueEl.classList.add('text-emerald-600', 'dark:text-emerald-400');
       } else if (balanceStatus === 'negative') {
-        balance.classList.add('border-red-500', 'dark:border-red-500', 'bg-red-50', 'dark:bg-red-500/10');
-      } else if (balanceStatus === 'warning') {
-        balance.classList.add('border-amber-500', 'dark:border-amber-400');
+        if (valueEl) valueEl.classList.add('text-red-600', 'dark:text-red-400');
       }
     }
 

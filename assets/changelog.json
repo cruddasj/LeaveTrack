@@ -1,5 +1,12 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Reorder Settings so the organisational working year appears before accrual settings, clarify that accrual settings are only used by the Standard week page, and show Standard week remaining-balance status with coloured text instead of coloured backgrounds."
+    ]
+  },
+  {
     "version": "0.0.40",
     "date": "2026-04-30",
     "changes": [
