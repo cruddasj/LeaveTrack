@@ -2,13 +2,9 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## 0.0.45 - 2026-04-30
+## [NEXT_VERSION] - [NEXT_DATE]
 
-- Keep the Standard week accrual toggle and related monthly accrual options saved after refreshing or reopening the app.
-
-## 0.0.44 - 2026-04-30
-
-- Clarify the Standard week remaining-balance message to say the annual entitlement remains after a request.
+- Add a Standard week accrual timing hint that suggests the earliest leave start date when a request would otherwise exceed accrued leave, keeps the selected leave period length, hides the accrued-start stat when accrual is disabled, keeps this hint out of printed PDFs, and left-aligns the standard-hours calculation line.
 
 ## 0.0.42 - 2026-04-30
 

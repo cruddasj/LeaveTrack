@@ -407,29 +407,48 @@ describe('app coverage interactions', () => {
     expect(message.classList.contains('font-medium')).toBe(true);
   });
 
-  test('persists standard-week accrual settings across reloads', async () => {
+  test('hides accrued stat card when accrual is disabled', async () => {
     require('../assets/js/app.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    const toggle = document.getElementById('standardAccrualToggle');
-    toggle.checked = true;
-    toggle.dispatchEvent(new Event('change', { bubbles: true }));
-    dispatchInput('standardAccrualRate', '2.25');
-    dispatchInput('standardAccrualMode', 'prorata');
+    dispatchInput('leaveYearStartInput', '2026-04-01');
+    dispatchInput('leaveYearEndInput', '2027-03-31');
+    dispatchInput('standardWeekCoreLeave', '25');
+    dispatchInput('standardWeekBankHolidays', '8');
+    dispatchInput('standardLeaveTaken', '0');
+    dispatchInput('standardLeaveStart', '2026-04-30');
+    dispatchInput('standardLeaveEnd', '2026-05-04');
 
-    expect(localStorage.getItem('standardAccrualEnabled')).toBe('1');
-    expect(localStorage.getItem('standardAccrualRate')).toBe('2.25');
-    expect(localStorage.getItem('standardAccrualMode')).toBe('prorata');
+    const accrualToggle = document.getElementById('standardAccrualToggle');
+    accrualToggle.checked = false;
+    accrualToggle.dispatchEvent(new Event('change', { bubbles: true }));
 
-    jest.resetModules();
-    document.body.innerHTML = loadIndexBody();
+    const accruedCard = document.querySelector('[data-standard-preview-accrued]');
+    expect(accruedCard.hidden).toBe(true);
+  });
+
+  test('shows accrual timing advice when request would overrun accrued entitlement', async () => {
     require('../assets/js/app.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(document.getElementById('standardAccrualToggle').checked).toBe(true);
-    expect(document.getElementById('standardAccrualRate').value).toBe('2.25');
-    expect(document.getElementById('standardAccrualMode').value).toBe('prorata');
+    dispatchInput('leaveYearStartInput', '2026-04-01');
+    dispatchInput('leaveYearEndInput', '2027-03-31');
+
+    const accrualToggle = document.getElementById('standardAccrualToggle');
+    accrualToggle.checked = true;
+    accrualToggle.dispatchEvent(new Event('change', { bubbles: true }));
+    dispatchInput('standardAccrualRate', '1.0');
+    dispatchInput('standardAccrualMode', 'days');
+
+    dispatchInput('standardLeaveTaken', '5');
+    dispatchInput('standardLeaveStart', '2026-05-01');
+    dispatchInput('standardLeaveEnd', '2026-05-15');
+
+    const advice = document.querySelector('[data-standard-preview-accrual-advice]');
+    const adviceText = document.querySelector('[data-standard-preview-accrual-advice-text]');
+    expect(advice.hidden).toBe(false);
+    expect(adviceText.textContent.length).toBeGreaterThan(20);
   });
 });

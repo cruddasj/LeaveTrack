@@ -1,16 +1,9 @@
 [
   {
-    "version": "0.0.45",
-    "date": "2026-04-30",
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
     "changes": [
-      "Keep the Standard week accrual toggle and related monthly accrual options saved after refreshing or reopening the app."
-    ]
-  },
-  {
-    "version": "0.0.44",
-    "date": "2026-04-30",
-    "changes": [
-      "Clarify the Standard week remaining-balance message to say the annual entitlement remains after a request."
+      "Add a Standard week accrual timing hint that suggests the earliest leave start date when a request would otherwise exceed accrued leave while keeping the selected leave period length, hide the accrued-start stat when accrual is disabled, keep this hint out of printed PDFs, and left-align the standard-hours calculation line."
     ]
   },
   {
