@@ -6,6 +6,10 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 
 - Move the Standard week accrual settings into Settings so organisations can manage one shared policy configuration.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Reorder Settings so the organisational working year appears before accrual settings, clarify that accrual settings are only used by the Standard week page, and show Standard week remaining-balance status with coloured text instead of coloured backgrounds.
+
 ## 0.0.39 - 2026-04-30
 
 - Make the Standard week leave date-order warning use an orange information style with an icon so it stands out more clearly.
