@@ -10,7 +10,7 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 
 - Move the Standard week accrual settings into Settings so organisations can manage one shared policy configuration.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.43 - 2026-04-30
 
 - Simplify the Standard week date-order warning by removing the information icon and using bold orange text only.
 
