@@ -1,7 +1,7 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.40",
+    "date": "2026-04-30",
     "changes": [
       "Move the Standard week accrual settings into Settings so organisations can manage one shared policy configuration."
     ]
