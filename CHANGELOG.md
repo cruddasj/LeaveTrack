@@ -2,7 +2,7 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.47 - 2026-05-01
 
 - Fix Standard week accrual timing suggestions so monthly-start accrual mode now recommends the first month-start date that can fund the same requested leave duration.
 

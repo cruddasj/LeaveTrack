@@ -1,7 +1,7 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.47",
+    "date": "2026-05-01",
     "changes": [
       "Fix Standard week accrual timing suggestions so monthly-start accrual mode now recommends the first month-start date that can fund the same requested leave duration."
     ]
