@@ -2,7 +2,7 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.48 - 2026-05-01
 
 - Clarify leave input wording by renaming bank-holiday fields to "Remaining Bank holidays (days)" and expand the Standard week accrual timing suggestion to state how many leave days are needed.
 

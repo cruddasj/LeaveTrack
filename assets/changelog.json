@@ -1,7 +1,7 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.48",
+    "date": "2026-05-01",
     "changes": [
       "Clarify leave input wording by renaming bank-holiday fields to \"Remaining Bank holidays (days)\" and expand the Standard week accrual timing suggestion to state how many leave days are needed."
     ]
