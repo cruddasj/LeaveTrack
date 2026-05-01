@@ -3738,7 +3738,7 @@
       if (accrualEnabled && accruedBalanceDays < 0) {
         if (firstAccrualSafeStartDate) {
           accrualAdviceText.textContent =
-            `To keep this request within accrued entitlement, the earliest suggested start date is ${formatHumanDate(firstAccrualSafeStartDate)}.`;
+            `To keep this request within accrued entitlement, this period needs ${formatDaysDisplay(leaveDaysNeeded)} of leave and the earliest suggested start date is ${formatHumanDate(firstAccrualSafeStartDate)}.`;
         } else {
           accrualAdviceText.textContent =
             'No start date within this organisational working year keeps this request within accrued entitlement. Reduce the request length or expect unpaid leave.';
