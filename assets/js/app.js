@@ -3522,28 +3522,16 @@
     const accruedBalanceDays = accrualEnabled ? accruedDaysByEnd - leaveTakenValue - leaveDaysNeeded : 0;
     let firstAccrualSafeStartDate = null;
     if (accrualEnabled && accruedBalanceDays < 0) {
-      const selectedRangeSpanDays = Math.floor((endDate.getTime() - startDate.getTime()) / MS_PER_DAY);
       for (
         let candidate = new Date(startDate.getTime());
         candidate.getTime() <= rangeEnd.getTime();
         candidate = new Date(candidate.getTime() + MS_PER_DAY)
       ) {
-        const candidateEndDate = new Date(candidate.getTime() + selectedRangeSpanDays * MS_PER_DAY);
-        if (candidateEndDate.getTime() > rangeEnd.getTime()) break;
-        const candidateWorkingDays = countWorkingDaysInclusive(candidate, candidateEndDate);
-        if (candidateWorkingDays <= 0) continue;
-        const candidateBankHolidayCount = hasBankHolidayData
-          ? weekdayBankHolidaysInYear.filter((event) => event.date >= candidate && event.date <= candidateEndDate).length
-          : 0;
-        let candidateLeaveDaysNeeded = Math.max(candidateWorkingDays - candidateBankHolidayCount, 0);
-        if (endIsHalfDay && candidateLeaveDaysNeeded > 0) {
-          candidateLeaveDaysNeeded = Math.max(candidateLeaveDaysNeeded - 0.5, 0);
-        }
         const candidateAccrualLimitStart = accrualMode === 'prorata'
           ? new Date(candidate.getTime() - MS_PER_DAY)
           : new Date(candidate.getTime());
         const candidateAccruedByStart = computeAccruedUpTo(candidateAccrualLimitStart);
-        const candidateAccruedBalance = candidateAccruedByStart - leaveTakenValue - candidateLeaveDaysNeeded;
+        const candidateAccruedBalance = candidateAccruedByStart - leaveTakenValue - leaveDaysNeeded;
         if (candidateAccruedBalance >= 0) {
           firstAccrualSafeStartDate = candidate;
           break;

@@ -428,6 +428,28 @@ describe('app coverage interactions', () => {
     expect(accruedCard.hidden).toBe(true);
   });
 
+
+  test('suggests month-boundary accrual dates when monthly accrual is credited at month start', async () => {
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    dispatchInput('leaveYearStartInput', '2026-04-01');
+    dispatchInput('leaveYearEndInput', '2027-03-31');
+
+    const accrualToggle = document.getElementById('standardAccrualToggle');
+    accrualToggle.checked = true;
+    accrualToggle.dispatchEvent(new Event('change', { bubbles: true }));
+    dispatchInput('standardAccrualRate', '1.0');
+    dispatchInput('standardAccrualMode', 'days');
+
+    dispatchInput('standardLeaveTaken', '0');
+    dispatchInput('standardLeaveStart', '2026-05-04');
+    dispatchInput('standardLeaveEnd', '2026-05-06');
+
+    const adviceText = document.querySelector('[data-standard-preview-accrual-advice-text]');
+    expect(adviceText.textContent).toContain('June 1, 2026');
+  });
   test('shows accrual timing advice when request would overrun accrued entitlement', async () => {
     require('../assets/js/app.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
