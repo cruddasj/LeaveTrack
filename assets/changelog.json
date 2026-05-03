@@ -1,5 +1,14 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Make the Standard week proposed leave period check include carried-over leave alongside accrual, and explain when leave spanning a calendar month end includes newly credited accrual.",
+      "Update npm dependencies to the latest available minor and patch releases.",
+      "Keep Markdown linting focused on project files by excluding Git's internal log files."
+    ]
+  },
+  {
     "version": "0.0.48",
     "date": "2026-05-01",
     "changes": [

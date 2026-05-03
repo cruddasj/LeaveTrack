@@ -1581,7 +1581,8 @@
   }
 
   function formatDaysDisplay(value) {
-    return `${formatNumberWithPrecision(value)} days`;
+    const unit = Math.abs(value) === 1 ? 'day' : 'days';
+    return `${formatNumberWithPrecision(value)} ${unit}`;
   }
 
   function formatHoursDisplay(value) {
@@ -3516,12 +3517,15 @@
     const hasAllowanceValues =
       allowanceComponents.some((component) => component.value) || (coreProrata && coreProrata.originalValue > 0);
     const totalAllowanceDays = allowanceComponents.reduce((sum, component) => sum + component.value, 0);
+    const carryOverComponent = allowanceComponents.find((component) => component.id === 'carryOver');
+    const carryOverDays = carryOverComponent ? Math.max(carryOverComponent.value, 0) : 0;
     const leaveTakenValue = getNumericInputValue(taken);
     const availableDays = totalAllowanceDays - leaveTakenValue;
     const remainingAfterRequest = availableDays - leaveDaysNeeded;
-    const accruedBalanceDays = accrualEnabled ? accruedDaysByEnd - leaveTakenValue - leaveDaysNeeded : 0;
+    const paidLeaveAvailableByEnd = accrualEnabled ? accruedDaysByEnd + carryOverDays : availableDays;
+    const paidLeaveBalanceAfterRequest = paidLeaveAvailableByEnd - leaveTakenValue - leaveDaysNeeded;
     let firstAccrualSafeStartDate = null;
-    if (accrualEnabled && accruedBalanceDays < 0) {
+    if (accrualEnabled && paidLeaveBalanceAfterRequest < 0) {
       for (
         let candidate = new Date(startDate.getTime());
         candidate.getTime() <= rangeEnd.getTime();
@@ -3531,7 +3535,7 @@
           ? new Date(candidate.getTime() - MS_PER_DAY)
           : new Date(candidate.getTime());
         const candidateAccruedByStart = computeAccruedUpTo(candidateAccrualLimitStart);
-        const candidateAccruedBalance = candidateAccruedByStart - leaveTakenValue - leaveDaysNeeded;
+        const candidateAccruedBalance = candidateAccruedByStart + carryOverDays - leaveTakenValue - leaveDaysNeeded;
         if (candidateAccruedBalance >= 0) {
           firstAccrualSafeStartDate = candidate;
           break;
@@ -3560,11 +3564,11 @@
     if (balance) {
       const labelEl = balance.querySelector('.stat-card__label');
       if (labelEl) {
-        labelEl.textContent = accrualEnabled ? 'Remaining accrued leave' : 'Remaining balance after request';
+        labelEl.textContent = accrualEnabled ? 'Paid leave left after request' : 'Remaining balance after request';
       }
 
       if (accrualEnabled) {
-        setStatCardValue(balance, formatDaysDisplay(accruedBalanceDays));
+        setStatCardValue(balance, formatDaysDisplay(paidLeaveBalanceAfterRequest));
       } else if (hasAllowanceValues) {
         setStatCardValue(balance, formatDaysDisplay(remainingAfterRequest));
       } else {
@@ -3581,6 +3585,23 @@
         ? 'Add your annual leave allowances above to compare against the leave already taken.'
         : 'Enter your annual leave allowances above to calculate your remaining balance.';
       coverageStatus = 'warning';
+    } else if (accrualEnabled) {
+      if (leaveDaysNeeded === 0) {
+        coverageMessage = 'No additional paid leave is required for this period.';
+        coverageStatus = paidLeaveBalanceAfterRequest >= 0 ? 'positive' : 'warning';
+      } else if (paidLeaveBalanceAfterRequest >= 0) {
+        const sourceMessage = carryOverDays > 0
+          ? 'accrued leave and carried-over leave'
+          : 'accrued leave';
+        coverageMessage =
+          paidLeaveBalanceAfterRequest === 0
+            ? `This request is covered by ${sourceMessage} and uses the paid leave available by the end date.`
+            : `This request is covered by ${sourceMessage}; ${formatDaysDisplay(paidLeaveBalanceAfterRequest)} paid leave will remain.`;
+        coverageStatus = 'positive';
+      } else {
+        coverageMessage = `You need ${formatDaysDisplay(Math.abs(paidLeaveBalanceAfterRequest))} more paid leave by ${endLabel} to cover this request.`;
+        coverageStatus = 'negative';
+      }
     } else if (leaveDaysNeeded === 0) {
       if (availableDays >= 0) {
         coverageMessage = 'No additional leave is required for this period.';
@@ -3614,9 +3635,9 @@
     }
 
     if (accrualEnabled) {
-      if (accruedBalanceDays > 0) {
+      if (paidLeaveBalanceAfterRequest > 0) {
         balanceStatus = 'positive';
-      } else if (accruedBalanceDays < 0) {
+      } else if (paidLeaveBalanceAfterRequest < 0) {
         balanceStatus = 'negative';
       } else {
         balanceStatus = 'warning';
@@ -3699,12 +3720,27 @@
         notes.push('Accrual enabled with a 0 day monthly rate.');
       }
 
-      if (accruedBalanceDays > 0) {
-        notes.push(`${formatDaysDisplay(accruedBalanceDays)} of accrued leave would remain after this request.`);
-      } else if (accruedBalanceDays < 0) {
-        notes.push(`Accrued leave would fall short by ${formatDaysDisplay(Math.abs(accruedBalanceDays))} for this request.`);
+      if (carryOverDays > 0) {
+        notes.push(`${formatDaysDisplay(carryOverDays)} of carried-over leave is included as paid leave available for this request.`);
+      }
+
+      const accrualAddedDuringPeriod = accruedDaysByEnd - accruedDaysByStart;
+      if (accrualMode === 'start' && accrualAddedDuringPeriod > 0) {
+        notes.push(
+          `Because this leave period spans a calendar month end, ${formatDaysDisplay(accrualAddedDuringPeriod)} of monthly accrual credited after the start date is included by the end date.`
+        );
+      } else if (accrualMode === 'prorata' && accrualAddedDuringPeriod > 0) {
+        notes.push(
+          `Because this leave period spans part of a later calendar month, ${formatDaysDisplay(accrualAddedDuringPeriod)} of pro-rata accrual between the start and end dates is included.`
+        );
+      }
+
+      if (paidLeaveBalanceAfterRequest > 0) {
+        notes.push(`${formatDaysDisplay(paidLeaveBalanceAfterRequest)} of paid leave would remain after this request.`);
+      } else if (paidLeaveBalanceAfterRequest < 0) {
+        notes.push(`Paid leave would fall short by ${formatDaysDisplay(Math.abs(paidLeaveBalanceAfterRequest))} for this request.`);
       } else {
-        notes.push('Accrued leave would be fully used by this request.');
+        notes.push('Paid leave available through accrual and carry-over would be fully used by this request.');
       }
     } else {
       notes.push('Enable accrual to compare the allowance against forecasted entitlement.');
@@ -3735,13 +3771,13 @@
     if (note) note.textContent = notes.join(' ');
 
     if (accrualAdvice && accrualAdviceText) {
-      if (accrualEnabled && accruedBalanceDays < 0) {
+      if (accrualEnabled && paidLeaveBalanceAfterRequest < 0) {
         if (firstAccrualSafeStartDate) {
           accrualAdviceText.textContent =
-            `To keep this request within accrued entitlement, this period needs ${formatDaysDisplay(leaveDaysNeeded)} of leave and the earliest suggested start date is ${formatHumanDate(firstAccrualSafeStartDate)}.`;
+            `To keep this request within paid leave from accrual and carry-over, this period needs ${formatDaysDisplay(leaveDaysNeeded)} of leave and the earliest suggested start date is ${formatHumanDate(firstAccrualSafeStartDate)}.`;
         } else {
           accrualAdviceText.textContent =
-            'No start date within this organisational working year keeps this request within accrued entitlement. Reduce the request length or expect unpaid leave.';
+            'No start date within this organisational working year keeps this request within paid leave from accrual and carry-over. Reduce the request length or expect unpaid leave.';
         }
         accrualAdvice.hidden = false;
       } else {

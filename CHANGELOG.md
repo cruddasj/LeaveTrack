@@ -2,6 +2,12 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Make the Standard week proposed leave period check include carried-over leave alongside accrual, and explain when leave spanning a calendar month end includes newly credited accrual.
+- Update npm dependencies to the latest available minor and patch releases.
+- Keep Markdown linting focused on project files by excluding Git's internal log files.
+
 ## 0.0.48 - 2026-05-01
 
 - Clarify leave input wording by renaming bank-holiday fields to "Remaining Bank holidays (days)" and expand the Standard week accrual timing suggestion to state how many leave days are needed.

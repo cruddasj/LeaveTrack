@@ -371,7 +371,7 @@ describe('app coverage interactions', () => {
     dispatchInput('bankHolidayBookerDay', 'monday');
 
     const message = document.querySelector('#bankHolidayBookerCard [data-booker-message]');
-    expect(message.textContent).toContain('between April 1, 2026 and March 31, 2027');
+    expect(message.textContent).toContain('between 1 April 2026 and 31 March 2027');
     expect(message.textContent).toContain('organisational working year');
   });
 
@@ -388,7 +388,7 @@ describe('app coverage interactions', () => {
     const nonMatchesLabel = document.querySelector('[data-existing-nine-day-booker-non-matches-label]');
     const nonMatchesList = document.querySelector('[data-existing-nine-day-booker-non-matches-list]');
 
-    expect(message.textContent).toContain('between April 1, 2025 and March 31, 2026');
+    expect(message.textContent).toContain('between 1 April 2025 and 31 March 2026');
     expect(nonMatchesLabel.textContent).toContain('(1)');
     expect(nonMatchesList.textContent).toContain("New Year's Day");
   });
@@ -448,8 +448,68 @@ describe('app coverage interactions', () => {
     dispatchInput('standardLeaveEnd', '2026-05-06');
 
     const adviceText = document.querySelector('[data-standard-preview-accrual-advice-text]');
-    expect(adviceText.textContent).toContain('June 1, 2026');
+    expect(adviceText.textContent).toContain('1 June 2026');
   });
+
+  test('counts carried-over leave as paid leave available with accrual', async () => {
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    dispatchInput('leaveYearStartInput', '2026-04-01');
+    dispatchInput('leaveYearEndInput', '2027-03-31');
+    dispatchInput('standardWeekCoreLeave', '25');
+    dispatchInput('standardWeekCarryOver', '2');
+
+    const accrualToggle = document.getElementById('standardAccrualToggle');
+    accrualToggle.checked = true;
+    accrualToggle.dispatchEvent(new Event('change', { bubbles: true }));
+    dispatchInput('standardAccrualRate', '1.0');
+    dispatchInput('standardAccrualMode', 'days');
+
+    dispatchInput('standardLeaveTaken', '0');
+    dispatchInput('standardLeaveStart', '2026-05-04');
+    dispatchInput('standardLeaveEnd', '2026-05-06');
+
+    const coverage = document.querySelector('[data-standard-preview-coverage]');
+    const balance = document.querySelector('[data-standard-preview-balance] .stat-card__value');
+    const note = document.querySelector('[data-standard-preview-note]');
+
+    expect(coverage.textContent).toContain('accrued leave and carried-over leave');
+    expect(coverage.textContent).toContain('1 day paid leave will remain');
+    expect(balance.textContent).toBe('1 day');
+    expect(note.textContent).toContain('2 days of carried-over leave is included');
+  });
+
+  test('explains accrual credited during leave that spans a calendar month end', async () => {
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    dispatchInput('leaveYearStartInput', '2026-04-01');
+    dispatchInput('leaveYearEndInput', '2027-03-31');
+    dispatchInput('standardWeekCoreLeave', '25');
+
+    const accrualToggle = document.getElementById('standardAccrualToggle');
+    accrualToggle.checked = true;
+    accrualToggle.dispatchEvent(new Event('change', { bubbles: true }));
+    dispatchInput('standardAccrualRate', '1.0');
+    dispatchInput('standardAccrualMode', 'days');
+
+    dispatchInput('standardLeaveTaken', '0');
+    dispatchInput('standardLeaveStart', '2026-04-30');
+    dispatchInput('standardLeaveEnd', '2026-05-01');
+
+    const coverage = document.querySelector('[data-standard-preview-coverage]');
+    const balance = document.querySelector('[data-standard-preview-balance] .stat-card__value');
+    const note = document.querySelector('[data-standard-preview-note]');
+
+    expect(coverage.textContent).toContain('covered by accrued leave');
+    expect(balance.textContent).toBe('0 days');
+    expect(note.textContent).toContain('spans a calendar month end');
+    expect(note.textContent).toContain('1 day of monthly accrual credited after the start date is included');
+  });
+
   test('shows accrual timing advice when request would overrun accrued entitlement', async () => {
     require('../assets/js/app.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
