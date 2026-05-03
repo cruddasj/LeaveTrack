@@ -4,6 +4,7 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 
 ## [NEXT_VERSION] - [NEXT_DATE]
 
+- Add a Standard week consecutive leave finder that suggests the earliest break and the next lowest-paid-leave period while accounting for weekends and bank holidays.
 - Make the Standard week proposed leave period check include carried-over leave alongside accrual, and explain when leave spanning a calendar month end includes newly credited accrual.
 - Update npm dependencies to the latest available minor and patch releases.
 - Keep Markdown linting focused on project files by excluding Git's internal log files.

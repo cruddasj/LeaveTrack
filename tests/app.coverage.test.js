@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const originalFetch = global.fetch;
+const originalDate = global.Date;
 
 function loadIndexBody() {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
@@ -125,6 +126,8 @@ describe('app coverage interactions', () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
+    global.Date = originalDate;
+    jest.useRealTimers();
   });
 
   test('exercises major leave-calculation flows and print/update actions', async () => {
@@ -409,6 +412,32 @@ describe('app coverage interactions', () => {
     expect(message.textContent).toContain('Leave end must be on or after the start date.');
     expect(message.classList.contains('text-amber-700')).toBe(true);
     expect(message.classList.contains('font-medium')).toBe(true);
+  });
+
+  test('suggests earliest and lowest-paid-day consecutive standard leave periods', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-04-01T12:00:00'));
+
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await jest.advanceTimersByTimeAsync(0);
+
+    dispatchInput('leaveYearStartInput', '2026-04-01');
+    dispatchInput('leaveYearEndInput', '2027-03-31');
+    dispatchInput('standardConsecutiveDays', '4');
+
+    const message = document.querySelector('[data-standard-consecutive-message]');
+    const earliest = document.querySelector('[data-standard-consecutive-earliest]');
+    const earliestDetail = document.querySelector('[data-standard-consecutive-earliest-detail]');
+    const best = document.querySelector('[data-standard-consecutive-best]');
+    const bestDetail = document.querySelector('[data-standard-consecutive-best-detail]');
+
+    expect(message.textContent).toContain('4 consecutive calendar days');
+    expect(earliest.textContent).toMatch(/(1 April 2026 to 4 April 2026|April 1, 2026 to April 4, 2026)/);
+    expect(earliestDetail.textContent).toContain('2 days paid leave needed');
+    expect(earliestDetail.textContent).toContain('Good Friday');
+    expect(best.textContent).toMatch(/(2 April 2026 to 5 April 2026|April 2, 2026 to April 5, 2026)/);
+    expect(bestDetail.textContent).toContain('1 day paid leave needed');
   });
 
   test('hides accrued stat card when accrual is disabled', async () => {

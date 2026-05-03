@@ -546,6 +546,90 @@
             </div>
           </div>
 
+          <div
+            class="card is-collapsible"
+            id="standardConsecutiveLeaveCard"
+            data-collapsible
+            data-collapsible-id="standard-week-consecutive"
+          >
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <button
+                type="button"
+                class="card-toggle"
+                data-collapsible-trigger
+                aria-expanded="true"
+                aria-controls="standard-week-consecutive-content"
+              >
+                <span>Consecutive leave finder</span>
+                <svg
+                  class="chev"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 8l4 4 4-4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </h3>
+            <div
+              id="standard-week-consecutive-content"
+              class="card-body space-y-6"
+              data-collapsible-content
+            >
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Enter the full calendar length of the break, including weekends and bank holidays, to
+                find the earliest period and the next period that uses the fewest paid leave days.
+              </p>
+              <form class="grid gap-6 md:grid-cols-2" novalidate>
+                <div class="space-y-2">
+                  <label for="standardConsecutiveDays" class="form-label">Consecutive days away</label>
+                  <input
+                    type="number"
+                    id="standardConsecutiveDays"
+                    class="input-field"
+                    inputmode="numeric"
+                    step="1"
+                    min="1"
+                  />
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Count every calendar day away, even when no paid leave would be deducted.
+                  </p>
+                </div>
+              </form>
+              <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4" data-standard-consecutive-summary>
+                <p
+                  class="text-sm text-gray-600 dark:text-gray-400"
+                  data-standard-consecutive-message
+                >
+                  Enter the number of consecutive days away to see suggested dates.
+                </p>
+                <div class="space-y-3" data-standard-consecutive-results hidden>
+                  <div class="grid gap-3 md:grid-cols-2">
+                    <div class="stat-card" data-standard-consecutive-earliest>
+                      <p class="stat-card__label">Earliest period</p>
+                      <p class="stat-card__value">-</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-consecutive-earliest-detail></p>
+                    </div>
+                    <div class="stat-card" data-standard-consecutive-best>
+                      <p class="stat-card__label">Best later period</p>
+                      <p class="stat-card__value">-</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-consecutive-best-detail></p>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-consecutive-note></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="card" data-print-controls>
             <div class="card-body flex flex-col gap-4 items-start">
               <div>

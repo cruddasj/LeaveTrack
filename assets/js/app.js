@@ -130,6 +130,7 @@
     elements: null,
     accrualElements: null,
     previewElements: null,
+    consecutiveElements: null,
     initialized: false,
     userOverriddenBankHolidays: false,
     userOverriddenAccrualRate: false,
@@ -1008,6 +1009,25 @@
       note: card.querySelector('[data-standard-preview-note]'),
     };
     standardWeekState.previewElements = elements;
+    return elements;
+  }
+
+  function getStandardWeekConsecutiveElements() {
+    if (standardWeekState.consecutiveElements) return standardWeekState.consecutiveElements;
+    const card = document.getElementById('standardConsecutiveLeaveCard');
+    if (!card) return null;
+    const elements = {
+      card,
+      days: card.querySelector('#standardConsecutiveDays'),
+      message: card.querySelector('[data-standard-consecutive-message]'),
+      results: card.querySelector('[data-standard-consecutive-results]'),
+      earliest: card.querySelector('[data-standard-consecutive-earliest]'),
+      earliestDetail: card.querySelector('[data-standard-consecutive-earliest-detail]'),
+      best: card.querySelector('[data-standard-consecutive-best]'),
+      bestDetail: card.querySelector('[data-standard-consecutive-best-detail]'),
+      note: card.querySelector('[data-standard-consecutive-note]'),
+    };
+    standardWeekState.consecutiveElements = elements;
     return elements;
   }
 
@@ -3301,6 +3321,246 @@
     return count;
   }
 
+  function addCalendarDays(date, days) {
+    const normalized = toStartOfDay(date);
+    if (!normalized || !Number.isFinite(days)) return null;
+    const result = new Date(normalized.getTime());
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  function getWeekdayBankHolidaysBetween(start, end) {
+    const startDate = toStartOfDay(start);
+    const endDate = toStartOfDay(end);
+    if (!startDate || !endDate || endDate < startDate || !bankHolidayState.events.length) return [];
+
+    return bankHolidayState.events
+      .map((event) => {
+        const date = toStartOfDay(event.date);
+        if (!date) return null;
+        const day = date.getDay();
+        if (day === 0 || day === 6 || date < startDate || date > endDate) return null;
+        return {
+          title: event.title || 'Bank holiday',
+          notes: event.notes || '',
+          date,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+  }
+
+  function computeStandardConsecutiveLeavePeriod(startDate, consecutiveDays) {
+    const start = toStartOfDay(startDate);
+    const days = Number.parseInt(consecutiveDays, 10);
+    if (!start || !Number.isFinite(days) || days < 1) return null;
+
+    const end = addCalendarDays(start, days - 1);
+    if (!end) return null;
+
+    const bankHolidays = getWeekdayBankHolidaysBetween(start, end);
+    const workingDays = countWorkingDaysInclusive(start, end);
+    const paidLeaveDays = Math.max(workingDays - bankHolidays.length, 0);
+
+    return {
+      start,
+      end,
+      consecutiveDays: days,
+      workingDays,
+      bankHolidays,
+      paidLeaveDays,
+      hasBankHolidayData: bankHolidayState.events.length > 0,
+    };
+  }
+
+  function findStandardConsecutiveLeaveSuggestions(consecutiveDays) {
+    const days = Number.parseInt(consecutiveDays, 10);
+    if (!Number.isFinite(days) || days < 1) return null;
+
+    const range = getCurrentLeaveYearRange();
+    if (!range || !(range.start instanceof Date) || !(range.end instanceof Date)) return null;
+
+    const today = toStartOfDay(new Date());
+    const rangeStart = toStartOfDay(range.start);
+    const rangeEnd = toStartOfDay(range.end);
+    if (!today || !rangeStart || !rangeEnd) return null;
+
+    const earliestStart = today > rangeStart ? today : rangeStart;
+    const latestStart = addCalendarDays(rangeEnd, -(days - 1));
+    if (!latestStart || earliestStart > latestStart) {
+      return {
+        range: { start: rangeStart, end: rangeEnd },
+        earliest: null,
+        bestLater: null,
+      };
+    }
+
+    const earliest = computeStandardConsecutiveLeavePeriod(earliestStart, days);
+    let bestLater = null;
+    for (
+      let candidate = addCalendarDays(earliestStart, 1);
+      candidate && candidate <= latestStart;
+      candidate = addCalendarDays(candidate, 1)
+    ) {
+      const period = computeStandardConsecutiveLeavePeriod(candidate, days);
+      if (!period) continue;
+      if (!bestLater || period.paidLeaveDays < bestLater.paidLeaveDays) {
+        bestLater = period;
+      }
+    }
+
+    return {
+      range: { start: rangeStart, end: rangeEnd },
+      earliest,
+      bestLater,
+    };
+  }
+
+  function formatPeriodDateRange(period) {
+    if (!period || !period.start || !period.end) return '';
+    const startLabel = formatHumanDate(period.start);
+    const endLabel = formatHumanDate(period.end);
+    if (!startLabel || !endLabel) return '';
+    return period.start.getTime() === period.end.getTime()
+      ? startLabel
+      : `${startLabel} to ${endLabel}`;
+  }
+
+  function formatConsecutivePeriodDetail(period) {
+    if (!period) return '';
+    const paidLeave = formatDaysDisplay(period.paidLeaveDays);
+    const bankHolidayCount = period.bankHolidays.length;
+    const bankHolidayText = period.hasBankHolidayData
+      ? `${bankHolidayCount} weekday bank holiday${bankHolidayCount === 1 ? '' : 's'}`
+      : 'bank holiday data unavailable';
+    const detail = [`${paidLeave} paid leave needed`, bankHolidayText];
+    if (bankHolidayCount > 0) {
+      const names = period.bankHolidays.map((event) => event.title).slice(0, 3);
+      const remaining = bankHolidayCount - names.length;
+      detail.push(
+        `Includes ${names.join(', ')}${remaining > 0 ? ` and ${remaining} more` : ''}`
+      );
+    }
+    return `${detail.join('; ')}.`;
+  }
+
+  function setStandardConsecutiveMessage(finder, text, tone = 'neutral') {
+    if (!finder || !finder.message) return;
+    finder.message.textContent = text;
+    finder.message.classList.remove(
+      'text-gray-600',
+      'dark:text-gray-400',
+      'text-amber-700',
+      'dark:text-amber-300',
+      'font-medium'
+    );
+    if (tone === 'warning') {
+      finder.message.classList.add('text-amber-700', 'dark:text-amber-300', 'font-medium');
+    } else {
+      finder.message.classList.add('text-gray-600', 'dark:text-gray-400');
+    }
+  }
+
+  function updateStandardWeekConsecutiveLeaveFinder() {
+    const finder = getStandardWeekConsecutiveElements();
+    if (!finder) return;
+    const { days, results, earliest, earliestDetail, best, bestDetail, note } = finder;
+
+    if (results) results.hidden = true;
+    setStatCardValue(earliest, '-');
+    setStatCardValue(best, '-');
+    if (earliestDetail) earliestDetail.textContent = '';
+    if (bestDetail) bestDetail.textContent = '';
+    if (note) note.textContent = '';
+
+    const rawValue = days ? String(days.value || '').trim() : '';
+    if (!rawValue) {
+      setStandardConsecutiveMessage(
+        finder,
+        'Enter the number of consecutive days away to see suggested dates.'
+      );
+      return;
+    }
+
+    const parsed = Number.parseInt(rawValue, 10);
+    if (!Number.isFinite(parsed) || parsed < 1) {
+      setStandardConsecutiveMessage(finder, 'Enter at least 1 consecutive day away.', 'warning');
+      return;
+    }
+
+    const searchDays = Math.min(parsed, MAX_LEAVE_YEAR_DURATION_DAYS);
+    const suggestions = findStandardConsecutiveLeaveSuggestions(searchDays);
+    if (!suggestions || !suggestions.range) {
+      setStandardConsecutiveMessage(
+        finder,
+        'Configure the organisational working year in Settings to suggest dates.',
+        'warning'
+      );
+      return;
+    }
+
+    if (!suggestions.earliest) {
+      const rangeLabel = formatLeaveYearRange(suggestions.range);
+      const requestedLabel = `${formatNumberWithPrecision(searchDays)} consecutive calendar day${
+        searchDays === 1 ? '' : 's'
+      }`;
+      setStandardConsecutiveMessage(
+        finder,
+        `${requestedLabel} will not fit in the remaining organisational working year.`,
+        'warning'
+      );
+      if (note) {
+        note.textContent = rangeLabel
+          ? `Current organisational working year: ${rangeLabel}.`
+          : '';
+      }
+      return;
+    }
+
+    if (results) results.hidden = false;
+    const requestedLabel = `${formatNumberWithPrecision(searchDays)} consecutive calendar day${
+      searchDays === 1 ? '' : 's'
+    }`;
+    setStandardConsecutiveMessage(
+      finder,
+      `Showing suggestions for ${requestedLabel} away.`
+    );
+
+    setStatCardValue(earliest, formatPeriodDateRange(suggestions.earliest));
+    if (earliestDetail) {
+      earliestDetail.textContent = formatConsecutivePeriodDetail(suggestions.earliest);
+    }
+
+    if (suggestions.bestLater) {
+      setStatCardValue(best, formatPeriodDateRange(suggestions.bestLater));
+      if (bestDetail) {
+        bestDetail.textContent = formatConsecutivePeriodDetail(suggestions.bestLater);
+      }
+    } else {
+      setStatCardValue(best, 'No later period');
+      if (bestDetail) {
+        bestDetail.textContent = 'There is no later start date in the current organisational working year.';
+      }
+    }
+
+    const notes = [];
+    if (parsed !== searchDays) {
+      notes.push(
+        `Search limited to ${formatDaysDisplay(searchDays)} to keep suggestions within the maximum organisational working year length.`
+      );
+    }
+    if (!suggestions.earliest.hasBankHolidayData) {
+      notes.push('Bank holiday data is unavailable; suggestions only exclude weekends.');
+    } else {
+      notes.push('Paid leave days count weekdays and exclude weekday bank holidays.');
+    }
+    const rangeLabel = formatLeaveYearRange(suggestions.range);
+    if (rangeLabel) {
+      notes.push(`Search runs from today through ${rangeLabel}.`);
+    }
+    if (note) note.textContent = notes.join(' ');
+  }
+
   function computeMonthlyAccrual(rangeStart, rangeEnd, accrualEnd, rate) {
     if (
       !(rangeStart instanceof Date) ||
@@ -4280,6 +4540,7 @@
     const elements = getStandardWeekElements();
     const accrual = getStandardWeekAccrualElements();
     const preview = getStandardWeekPreviewElements();
+    const consecutive = getStandardWeekConsecutiveElements();
 
     if (elements) {
       const { start, core, longService, carryOver, purchased, bankHolidays } = elements;
@@ -4410,12 +4671,22 @@
       }
     }
 
+    if (consecutive && consecutive.days) {
+      consecutive.days.addEventListener('input', () => {
+        updateStandardWeekConsecutiveLeaveFinder();
+      });
+      consecutive.days.addEventListener('change', () => {
+        updateStandardWeekConsecutiveLeaveFinder();
+      });
+    }
+
     standardWeekState.initialized = true;
     updateStandardWeekBankHolidayDefault({ force: true });
     updateStandardWeekAccrualDefault({ force: !standardWeekState.userOverriddenAccrualRate });
     updateStandardWeekSummary();
     updateStandardWeekAccrualUI();
     updateStandardWeekLeavePreview();
+    updateStandardWeekConsecutiveLeaveFinder();
   }
 
   function initializeFourDayWeek() {
@@ -4763,6 +5034,7 @@
         updateStandardWeekBankHolidayDefault({ force: true });
         updateStandardWeekSummary();
         updateStandardWeekLeavePreview();
+        updateStandardWeekConsecutiveLeaveFinder();
         updateFourDayWeekBankHolidayDefault({ force: true });
         updateFourDayWeekSummary();
         updateBankHolidayBooker();
@@ -4800,6 +5072,7 @@
         updateStandardWeekBankHolidayDefault({ force: true });
         updateStandardWeekSummary();
         updateStandardWeekLeavePreview();
+        updateStandardWeekConsecutiveLeaveFinder();
         updateFourDayWeekBankHolidayDefault({ force: true });
         updateFourDayWeekSummary();
         updateBankHolidayBooker();
@@ -4995,6 +5268,7 @@
       updateStandardWeekBankHolidayDefault();
       updateStandardWeekSummary();
       updateStandardWeekLeavePreview();
+      updateStandardWeekConsecutiveLeaveFinder();
       updateFourDayWeekBankHolidayDefault();
       updateFourDayWeekSummary();
       updateBankHolidayBooker();
@@ -5036,6 +5310,7 @@
     updateStandardWeekBankHolidayDefault();
     updateStandardWeekSummary();
     updateStandardWeekLeavePreview();
+    updateStandardWeekConsecutiveLeaveFinder();
     updateFourDayWeekBankHolidayDefault();
     updateFourDayWeekSummary();
     updateBankHolidayBooker();
