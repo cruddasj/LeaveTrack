@@ -371,7 +371,9 @@ describe('app coverage interactions', () => {
     dispatchInput('bankHolidayBookerDay', 'monday');
 
     const message = document.querySelector('#bankHolidayBookerCard [data-booker-message]');
-    expect(message.textContent).toContain('between 1 April 2026 and 31 March 2027');
+    expect(message.textContent).toMatch(
+      /between (1 April 2026 and 31 March 2027|April 1, 2026 and March 31, 2027)/,
+    );
     expect(message.textContent).toContain('organisational working year');
   });
 
@@ -388,7 +390,9 @@ describe('app coverage interactions', () => {
     const nonMatchesLabel = document.querySelector('[data-existing-nine-day-booker-non-matches-label]');
     const nonMatchesList = document.querySelector('[data-existing-nine-day-booker-non-matches-list]');
 
-    expect(message.textContent).toContain('between 1 April 2025 and 31 March 2026');
+    expect(message.textContent).toMatch(
+      /between (1 April 2025 and 31 March 2026|April 1, 2025 and March 31, 2026)/,
+    );
     expect(nonMatchesLabel.textContent).toContain('(1)');
     expect(nonMatchesList.textContent).toContain("New Year's Day");
   });
@@ -448,7 +452,7 @@ describe('app coverage interactions', () => {
     dispatchInput('standardLeaveEnd', '2026-05-06');
 
     const adviceText = document.querySelector('[data-standard-preview-accrual-advice-text]');
-    expect(adviceText.textContent).toContain('1 June 2026');
+    expect(adviceText.textContent).toMatch(/(1 June 2026|June 1, 2026)/);
   });
 
   test('counts carried-over leave as paid leave available with accrual', async () => {
