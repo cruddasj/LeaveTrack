@@ -1,5 +1,12 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Update application software dependencies"
+    ]
+  },
+  {
     "version": "0.0.50",
     "date": "2026-05-03",
     "changes": [
