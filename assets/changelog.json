@@ -1,7 +1,7 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.52",
+    "date": "2026-05-13",
     "changes": [
       "Update application software dependencies to the latest available minor and patch releases.",
       "Make Standard week consecutive leave finder suggestions only show periods where enough leave has accrued by the proposed start date when accrual forecasting is enabled."

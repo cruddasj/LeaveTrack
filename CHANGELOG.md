@@ -2,7 +2,7 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.52 - 2026-05-13
 
 - Update application software dependencies to the latest available minor and patch releases.
 - Make Standard week consecutive leave finder suggestions only show periods where enough leave has accrued by the proposed start date when accrual forecasting is enabled.
