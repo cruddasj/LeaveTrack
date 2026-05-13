@@ -444,6 +444,36 @@ describe('app coverage interactions', () => {
     expect(cheapestDetail.textContent).toContain('1 day paid leave needed');
   });
 
+  test('filters consecutive leave finder suggestions until accrued leave can cover the period', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-04-01T12:00:00'));
+
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await jest.advanceTimersByTimeAsync(0);
+
+    dispatchInput('leaveYearStartInput', '2026-04-01');
+    dispatchInput('leaveYearEndInput', '2027-03-31');
+    dispatchInput('standardWeekCarryOver', '0');
+    dispatchInput('standardLeaveTaken', '0');
+
+    const accrualToggle = document.getElementById('standardAccrualToggle');
+    accrualToggle.checked = true;
+    accrualToggle.dispatchEvent(new Event('change', { bubbles: true }));
+    dispatchInput('standardAccrualRate', '1.0');
+    dispatchInput('standardAccrualMode', 'days');
+
+    dispatchInput('standardConsecutiveDays', '4');
+
+    const earliest = document.querySelector('[data-standard-consecutive-earliest]');
+    const earliestDetail = document.querySelector('[data-standard-consecutive-earliest-detail]');
+    const note = document.querySelector('[data-standard-consecutive-note]');
+
+    expect(earliest.textContent).toContain('Awaiting accrual');
+    expect(earliestDetail.textContent).toContain('excluded');
+    expect(note.textContent).toContain('accrued leave and carry-over');
+  });
+
   test('hides accrued stat card when accrual is disabled', async () => {
     require('../assets/js/app.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
