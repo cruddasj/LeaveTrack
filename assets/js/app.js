@@ -954,6 +954,7 @@
       carryOver: card.querySelector('#standardWeekCarryOver'),
       purchased: card.querySelector('#standardWeekPurchased'),
       bankHolidays: card.querySelector('#standardWeekBankHolidays'),
+      taken: card.querySelector('#standardLeaveTaken'),
       summary: card.querySelector('[data-standard-summary]'),
       summaryIntro: card.querySelector('[data-standard-summary-intro]'),
       breakdown: card.querySelector('[data-standard-breakdown]'),
@@ -3879,7 +3880,7 @@
     const totalAllowanceDays = allowanceComponents.reduce((sum, component) => sum + component.value, 0);
     const carryOverComponent = allowanceComponents.find((component) => component.id === 'carryOver');
     const carryOverDays = carryOverComponent ? Math.max(carryOverComponent.value, 0) : 0;
-    const leaveTakenValue = getNumericInputValue(taken);
+    const leaveTakenValue = leaveElements ? getNumericInputValue(leaveElements.taken) : getNumericInputValue(taken);
     const availableDays = totalAllowanceDays - leaveTakenValue;
     const remainingAfterRequest = availableDays - leaveDaysNeeded;
     const paidLeaveAvailableByEnd = accrualEnabled ? accruedDaysByEnd + carryOverDays : availableDays;

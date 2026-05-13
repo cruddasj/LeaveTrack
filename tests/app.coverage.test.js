@@ -577,6 +577,35 @@ describe('app coverage interactions', () => {
     expect(note.textContent).toContain('1 day of monthly accrual credited after the start date is included');
   });
 
+
+  test('uses leave already taken from annual inputs when calculating accrual-paid balance', async () => {
+    require('../assets/js/app.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    dispatchInput('leaveYearStartInput', '2026-04-01');
+    dispatchInput('leaveYearEndInput', '2027-03-31');
+    dispatchInput('standardWeekCoreLeave', '20');
+    dispatchInput('standardWeekCarryOver', '4');
+    dispatchInput('standardWeekBankHolidays', '4');
+
+    const accrualToggle = document.getElementById('standardAccrualToggle');
+    accrualToggle.checked = true;
+    accrualToggle.dispatchEvent(new Event('change', { bubbles: true }));
+    dispatchInput('standardAccrualRate', '1.6667');
+    dispatchInput('standardAccrualMode', 'days');
+
+    dispatchInput('standardLeaveTaken', '30');
+    dispatchInput('standardLeaveStart', '2026-06-01');
+    dispatchInput('standardLeaveEnd', '2026-06-05');
+
+    const balance = document.querySelector('[data-standard-preview-balance] .stat-card__value');
+    const coverage = document.querySelector('[data-standard-preview-coverage]');
+
+    expect(balance.textContent).toContain('-');
+    expect(coverage.textContent).toContain('more paid leave');
+  });
+
   test('shows accrual timing advice when request would overrun accrued entitlement', async () => {
     require('../assets/js/app.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));

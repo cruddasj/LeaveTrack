@@ -1,5 +1,12 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Fix Standard week leave-planning cards so \"Leave already taken this year\" is always included in proposed-period and consecutive-finder accrual checks."
+    ]
+  },
+  {
     "version": "0.0.53",
     "date": "2026-05-13",
     "changes": [
