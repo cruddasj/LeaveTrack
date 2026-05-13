@@ -2,6 +2,11 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
+## [NEXT_VERSION] - [NEXT_DATE]
+
+- Update application software dependencies to the latest available minor and patch releases.
+- Improve the Standard week consecutive leave finder with separate "Best next period" and "Cheapest period" suggestions that prioritise upcoming bank holidays, weekends, and paid-leave efficiency.
+
 ## 0.0.50 - 2026-05-03
 
 - Add a Standard week consecutive leave finder that suggests the earliest break and the next lowest-paid-leave period while accounting for weekends and bank holidays.
@@ -110,9 +115,6 @@ All notable changes to LeaveTrack will be documented in this file. This project 
 - Align GitHub workflows with the AppTemplate repository structure and automation flow.
 - Sync AGENTS.md with the upstream LeaveTrack instructions and contribution workflow.
 - Sync GitHub CI and automation metadata with the upstream template, including Dependabot configuration.
-
-## [[NEXT_VERSION]] - [NEXT_DATE]
-- Update application software dependencies
 
 ## [0.0.22] - 2026-03-18
 

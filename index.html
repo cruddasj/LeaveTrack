@@ -586,7 +586,7 @@
             >
               <p class="text-sm text-gray-600 dark:text-gray-400">
                 Enter the full calendar length of the break, including weekends and bank holidays, to
-                find the earliest period and the next period that uses the fewest paid leave days.
+                find the earliest period, the best next period around the next bank holiday, and the cheapest period overall using weekends and bank holidays.
               </p>
               <form class="grid gap-6 md:grid-cols-2" novalidate>
                 <div class="space-y-2">
@@ -612,16 +612,22 @@
                   Enter the number of consecutive days away to see suggested dates.
                 </p>
                 <div class="space-y-3" data-standard-consecutive-results hidden>
-                  <div class="grid gap-3 md:grid-cols-2">
+                  <div class="grid gap-3 md:grid-cols-3">
                     <div class="stat-card" data-standard-consecutive-earliest>
                       <p class="stat-card__label">Earliest period</p>
                       <p class="stat-card__value">-</p>
                       <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-consecutive-earliest-detail></p>
                     </div>
-                    <div class="stat-card" data-standard-consecutive-best>
-                      <p class="stat-card__label">Best later period</p>
+                    <div class="stat-card" data-standard-consecutive-next>
+                      <p class="stat-card__label">Best next period</p>
                       <p class="stat-card__value">-</p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-consecutive-best-detail></p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-consecutive-next-detail></p>
+                    </div>
+                  
+                    <div class="stat-card" data-standard-consecutive-cheapest>
+                      <p class="stat-card__label">Cheapest period</p>
+                      <p class="stat-card__value">-</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-consecutive-cheapest-detail></p>
                     </div>
                   </div>
                   <p class="text-xs text-gray-500 dark:text-gray-400" data-standard-consecutive-note></p>

@@ -3,7 +3,8 @@
     "version": "[NEXT_VERSION]",
     "date": "[NEXT_DATE]",
     "changes": [
-      "Update application software dependencies"
+      "Update application software dependencies to the latest available minor and patch releases.",
+      "Improve the Standard week consecutive leave finder with separate \"Best next period\" and \"Cheapest period\" suggestions that prioritise upcoming bank holidays, weekends, and paid-leave efficiency."
     ]
   },
   {
