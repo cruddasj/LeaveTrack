@@ -2,7 +2,7 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.51 - 2026-05-13
 
 - Update application software dependencies to the latest available minor and patch releases.
 - Improve the Standard week consecutive leave finder with separate "Best next period" and "Cheapest period" suggestions that prioritise upcoming bank holidays, weekends, and paid-leave efficiency.
