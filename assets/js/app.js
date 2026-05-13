@@ -3406,7 +3406,48 @@
       };
     }
 
-    const earliest = computeStandardConsecutiveLeavePeriod(earliestStart, days);
+    const leaveElements = getStandardWeekElements();
+    const { components: allowanceComponents } = getStandardWeekAllowanceComponents(leaveElements);
+    const carryOverComponent = allowanceComponents.find((component) => component.id === 'carryOver');
+    const carryOverDays = carryOverComponent ? Math.max(carryOverComponent.value, 0) : 0;
+    const leaveTakenValue = leaveElements ? getNumericInputValue(leaveElements.taken) : 0;
+
+    const accrualElements = getStandardWeekAccrualElements();
+    const accrualEnabled = !!(accrualElements && accrualElements.toggle && accrualElements.toggle.checked);
+    const rateValue = accrualElements && accrualElements.rate ? Number.parseFloat(accrualElements.rate.value) : NaN;
+    const accrualRate = Number.isFinite(rateValue) && rateValue > 0 ? rateValue : 0;
+    const accrualMode =
+      accrualElements && accrualElements.mode && String(accrualElements.mode.value).toLowerCase() === 'prorata'
+        ? 'prorata'
+        : 'start';
+
+    const computeAccruedUpTo = (limitCandidate) => {
+      if (!accrualEnabled || !(accrualRate > 0)) return 0;
+      if (!(limitCandidate instanceof Date)) return 0;
+      const limitTime = limitCandidate.getTime();
+      if (Number.isNaN(limitTime)) return 0;
+      const boundedLimit = limitTime < rangeEnd.getTime() ? limitCandidate : rangeEnd;
+      if (boundedLimit.getTime() < rangeStart.getTime()) return 0;
+      return accrualMode === 'prorata'
+        ? computeProrataAccrual(rangeStart, rangeEnd, boundedLimit, accrualRate)
+        : computeMonthlyAccrual(rangeStart, rangeEnd, boundedLimit, accrualRate);
+    };
+
+    const applyAccrualAvailability = (period) => {
+      if (!period) return null;
+      if (!accrualEnabled) return { ...period, accrualSafe: true };
+      const accrualLimitStart = accrualMode === 'prorata'
+        ? new Date(period.start.getTime() - MS_PER_DAY)
+        : new Date(period.start.getTime());
+      const accruedByStart = computeAccruedUpTo(accrualLimitStart);
+      const paidLeaveBalanceAtStart = accruedByStart + carryOverDays - leaveTakenValue - period.paidLeaveDays;
+      return {
+        ...period,
+        accrualSafe: paidLeaveBalanceAtStart >= 0,
+      };
+    };
+
+    const earliest = applyAccrualAvailability(computeStandardConsecutiveLeavePeriod(earliestStart, days));
     const nextBankHoliday = findNextBankHolidayOnOrAfter(earliestStart, rangeEnd);
     let bestNext = null;
     let cheapest = earliest;
@@ -3416,8 +3457,9 @@
       candidate && candidate <= latestStart;
       candidate = addCalendarDays(candidate, 1)
     ) {
-      const period = computeStandardConsecutiveLeavePeriod(candidate, days);
+      const period = applyAccrualAvailability(computeStandardConsecutiveLeavePeriod(candidate, days));
       if (!period) continue;
+      if (!period.accrualSafe) continue;
 
       if (
         !cheapest ||
@@ -3439,12 +3481,17 @@
       }
     }
 
+    const earliestAccrualSafe = earliest && earliest.accrualSafe ? earliest : null;
+    if (!cheapest && earliestAccrualSafe) cheapest = earliestAccrualSafe;
+
     return {
       range: { start: rangeStart, end: rangeEnd },
       earliest,
+      earliestAccrualSafe,
       bestNext,
       cheapest,
       nextBankHoliday,
+      accrualFiltered: accrualEnabled,
     };
   }
 
@@ -3598,6 +3645,13 @@
       notes.push('Paid leave days count weekdays and exclude weekday bank holidays.');
       if (suggestions.nextBankHoliday) {
         notes.push(`Best next period targets ${suggestions.nextBankHoliday.title} on ${formatHumanDate(suggestions.nextBankHoliday.date)}.`);
+      }
+    }
+    if (suggestions.accrualFiltered && suggestions.earliest && !suggestions.earliestAccrualSafe) {
+      notes.push('Suggestions only include periods that can be covered by accrued leave and carry-over by the start date.');
+      setStatCardValue(earliest, 'Awaiting accrual');
+      if (earliestDetail) {
+        earliestDetail.textContent = 'The earliest calendar period is excluded because accrued leave by its start date would not fully cover the paid leave needed.';
       }
     }
     const rangeLabel = formatLeaveYearRange(suggestions.range);
