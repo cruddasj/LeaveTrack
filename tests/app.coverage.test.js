@@ -414,7 +414,7 @@ describe('app coverage interactions', () => {
     expect(message.classList.contains('font-medium')).toBe(true);
   });
 
-  test('suggests earliest and lowest-paid-day consecutive standard leave periods', async () => {
+  test('suggests earliest, best next, and cheapest consecutive standard leave periods', async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-04-01T12:00:00'));
 
@@ -429,15 +429,19 @@ describe('app coverage interactions', () => {
     const message = document.querySelector('[data-standard-consecutive-message]');
     const earliest = document.querySelector('[data-standard-consecutive-earliest]');
     const earliestDetail = document.querySelector('[data-standard-consecutive-earliest-detail]');
-    const best = document.querySelector('[data-standard-consecutive-best]');
-    const bestDetail = document.querySelector('[data-standard-consecutive-best-detail]');
+    const next = document.querySelector('[data-standard-consecutive-next]');
+    const nextDetail = document.querySelector('[data-standard-consecutive-next-detail]');
+    const cheapest = document.querySelector('[data-standard-consecutive-cheapest]');
+    const cheapestDetail = document.querySelector('[data-standard-consecutive-cheapest-detail]');
 
     expect(message.textContent).toContain('4 consecutive calendar days');
     expect(earliest.textContent).toMatch(/(1 April 2026 to 4 April 2026|April 1, 2026 to April 4, 2026)/);
     expect(earliestDetail.textContent).toContain('2 days paid leave needed');
     expect(earliestDetail.textContent).toContain('Good Friday');
-    expect(best.textContent).toMatch(/(2 April 2026 to 5 April 2026|April 2, 2026 to April 5, 2026)/);
-    expect(bestDetail.textContent).toContain('1 day paid leave needed');
+    expect(next.textContent).toMatch(/(2 April 2026 to 5 April 2026|April 2, 2026 to April 5, 2026)/);
+    expect(nextDetail.textContent).toContain('1 day paid leave needed');
+    expect(cheapest.textContent).toMatch(/(2 April 2026 to 5 April 2026|April 2, 2026 to April 5, 2026)/);
+    expect(cheapestDetail.textContent).toContain('1 day paid leave needed');
   });
 
   test('hides accrued stat card when accrual is disabled', async () => {

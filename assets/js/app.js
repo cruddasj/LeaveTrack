@@ -1023,8 +1023,10 @@
       results: card.querySelector('[data-standard-consecutive-results]'),
       earliest: card.querySelector('[data-standard-consecutive-earliest]'),
       earliestDetail: card.querySelector('[data-standard-consecutive-earliest-detail]'),
-      best: card.querySelector('[data-standard-consecutive-best]'),
-      bestDetail: card.querySelector('[data-standard-consecutive-best-detail]'),
+      next: card.querySelector('[data-standard-consecutive-next]'),
+      nextDetail: card.querySelector('[data-standard-consecutive-next-detail]'),
+      cheapest: card.querySelector('[data-standard-consecutive-cheapest]'),
+      cheapestDetail: card.querySelector('[data-standard-consecutive-cheapest-detail]'),
       note: card.querySelector('[data-standard-consecutive-note]'),
     };
     standardWeekState.consecutiveElements = elements;
@@ -3373,6 +3375,14 @@
     };
   }
 
+  function findNextBankHolidayOnOrAfter(startDate, endDate) {
+    const start = toStartOfDay(startDate);
+    const end = toStartOfDay(endDate);
+    if (!start || !end || start > end) return null;
+    const holidays = getWeekdayBankHolidaysBetween(start, end);
+    return holidays.length > 0 ? holidays[0] : null;
+  }
+
   function findStandardConsecutiveLeaveSuggestions(consecutiveDays) {
     const days = Number.parseInt(consecutiveDays, 10);
     if (!Number.isFinite(days) || days < 1) return null;
@@ -3391,12 +3401,16 @@
       return {
         range: { start: rangeStart, end: rangeEnd },
         earliest: null,
-        bestLater: null,
+        bestNext: null,
+        cheapest: null,
       };
     }
 
     const earliest = computeStandardConsecutiveLeavePeriod(earliestStart, days);
-    let bestLater = null;
+    const nextBankHoliday = findNextBankHolidayOnOrAfter(earliestStart, rangeEnd);
+    let bestNext = null;
+    let cheapest = earliest;
+
     for (
       let candidate = addCalendarDays(earliestStart, 1);
       candidate && candidate <= latestStart;
@@ -3404,15 +3418,33 @@
     ) {
       const period = computeStandardConsecutiveLeavePeriod(candidate, days);
       if (!period) continue;
-      if (!bestLater || period.paidLeaveDays < bestLater.paidLeaveDays) {
-        bestLater = period;
+
+      if (
+        !cheapest ||
+        period.paidLeaveDays < cheapest.paidLeaveDays ||
+        (period.paidLeaveDays === cheapest.paidLeaveDays && period.start < cheapest.start)
+      ) {
+        cheapest = period;
+      }
+
+      if (
+        nextBankHoliday &&
+        nextBankHoliday.date >= period.start &&
+        nextBankHoliday.date <= period.end &&
+        (!bestNext ||
+          period.paidLeaveDays < bestNext.paidLeaveDays ||
+          (period.paidLeaveDays === bestNext.paidLeaveDays && period.start < bestNext.start))
+      ) {
+        bestNext = period;
       }
     }
 
     return {
       range: { start: rangeStart, end: rangeEnd },
       earliest,
-      bestLater,
+      bestNext,
+      cheapest,
+      nextBankHoliday,
     };
   }
 
@@ -3464,13 +3496,15 @@
   function updateStandardWeekConsecutiveLeaveFinder() {
     const finder = getStandardWeekConsecutiveElements();
     if (!finder) return;
-    const { days, results, earliest, earliestDetail, best, bestDetail, note } = finder;
+    const { days, results, earliest, earliestDetail, next, nextDetail, cheapest, cheapestDetail, note } = finder;
 
     if (results) results.hidden = true;
     setStatCardValue(earliest, '-');
-    setStatCardValue(best, '-');
+    setStatCardValue(next, '-');
+    setStatCardValue(cheapest, '-');
     if (earliestDetail) earliestDetail.textContent = '';
-    if (bestDetail) bestDetail.textContent = '';
+    if (nextDetail) nextDetail.textContent = '';
+    if (cheapestDetail) cheapestDetail.textContent = '';
     if (note) note.textContent = '';
 
     const rawValue = days ? String(days.value || '').trim() : '';
@@ -3531,15 +3565,24 @@
       earliestDetail.textContent = formatConsecutivePeriodDetail(suggestions.earliest);
     }
 
-    if (suggestions.bestLater) {
-      setStatCardValue(best, formatPeriodDateRange(suggestions.bestLater));
-      if (bestDetail) {
-        bestDetail.textContent = formatConsecutivePeriodDetail(suggestions.bestLater);
+    if (suggestions.bestNext) {
+      setStatCardValue(next, formatPeriodDateRange(suggestions.bestNext));
+      if (nextDetail) {
+        nextDetail.textContent = formatConsecutivePeriodDetail(suggestions.bestNext);
       }
     } else {
-      setStatCardValue(best, 'No later period');
-      if (bestDetail) {
-        bestDetail.textContent = 'There is no later start date in the current organisational working year.';
+      setStatCardValue(next, suggestions.nextBankHoliday ? 'No matching period' : 'No upcoming bank holiday');
+      if (nextDetail) {
+        nextDetail.textContent = suggestions.nextBankHoliday
+          ? 'No leave period of this length can include the next upcoming weekday bank holiday.'
+          : 'No upcoming weekday bank holidays were found in the current organisational working year.';
+      }
+    }
+
+    if (suggestions.cheapest) {
+      setStatCardValue(cheapest, formatPeriodDateRange(suggestions.cheapest));
+      if (cheapestDetail) {
+        cheapestDetail.textContent = formatConsecutivePeriodDetail(suggestions.cheapest);
       }
     }
 
@@ -3553,6 +3596,9 @@
       notes.push('Bank holiday data is unavailable; suggestions only exclude weekends.');
     } else {
       notes.push('Paid leave days count weekdays and exclude weekday bank holidays.');
+      if (suggestions.nextBankHoliday) {
+        notes.push(`Best next period targets ${suggestions.nextBankHoliday.title} on ${formatHumanDate(suggestions.nextBankHoliday.date)}.`);
+      }
     }
     const rangeLabel = formatLeaveYearRange(suggestions.range);
     if (rangeLabel) {
