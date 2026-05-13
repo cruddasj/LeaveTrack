@@ -1,7 +1,7 @@
 [
   {
-    "version": "[NEXT_VERSION]",
-    "date": "[NEXT_DATE]",
+    "version": "0.0.53",
+    "date": "2026-05-13",
     "changes": [
       "Update application software dependencies to the latest available minor and patch releases.",
       "Move the Standard week \"Leave already taken this year\" input into the annual leave inputs card for a more logical layout."
