@@ -2,7 +2,7 @@
 
 All notable changes to LeaveTrack will be documented in this file. This project adheres to a manual release process; update both this file and `assets/changelog.json` when shipping new versions so the in-app update summary stays accurate.
 
-## [NEXT_VERSION] - [NEXT_DATE]
+## 0.0.54 - 2026-05-13
 
 - Fix Standard week leave-planning cards so "Leave already taken this year" is always included in proposed-period and consecutive-finder accrual checks.
 
