@@ -1,5 +1,13 @@
 [
   {
+    "version": "[NEXT_VERSION]",
+    "date": "[NEXT_DATE]",
+    "changes": [
+      "Increase automated test coverage by adding a confirmation-path test for clearing saved app preferences.",
+      "Update development dependencies to the latest available minor and patch releases."
+    ]
+  },
+  {
     "version": "0.0.54",
     "date": "2026-05-13",
     "changes": [
