@@ -27,7 +27,7 @@
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "@tailwindcss/cli": "^4.3.3",
-    "@types/node": "^25.9.5",
+    "@types/node": "^25.9.6",
     "eslint": "^10.10.0",
     "eslint-plugin-unused-imports": "^4.4.1",
     "eslint-plugin-yml": "^3.8.1",
