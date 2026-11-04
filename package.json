@@ -28,7 +28,7 @@
     "@playwright/test": "^1.64.1",
     "@tailwindcss/cli": "^4.3.3",
     "@types/node": "^25.9.9",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "eslint-plugin-unused-imports": "^4.4.1",
     "eslint-plugin-yml": "^3.9.0",
     "jest": "^30.5.2",
