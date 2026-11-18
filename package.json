@@ -25,15 +25,15 @@
   },
   "homepage": "https://github.com/cruddasj/LeaveTrack#readme",
   "devDependencies": {
-    "@playwright/test": "^1.65.0",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/cli": "^4.3.5",
     "@types/node": "^25.9.9",
-    "eslint": "^10.14.0",
+    "eslint": "^10.15.0",
     "eslint-plugin-unused-imports": "^4.4.1",
     "eslint-plugin-yml": "^3.10.0",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
-    "markdownlint-cli2": "^0.24.0",
+    "markdownlint-cli2": "^0.24.1",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.2.1",
     "yaml-eslint-parser": "^2.1.0"
